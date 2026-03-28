@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>diary</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='80'>📓</text></svg>">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg: #1a1816;
+  --bg-card: #222019;
+  --bg-raised: #2a2723;
+  --bg-input: #1e1c19;
+  --border: #33302a;
+  --border-light: #443f37;
+  --text: #e8e0d4;
+  --text-secondary: #b5aa98;
+  --text-muted: #7d7468;
+  --accent: #c9956b;
+  --accent-dim: rgba(201,149,107,0.12);
+  --accent-glow: rgba(201,149,107,0.25);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 20px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+  --transition: 0.2s ease;
+  --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* emotion/urge intensity colors */
+  --c0: #4a4640;
+  --c1: #5b7a8a;
+  --c2: #6a9aaa;
+  --c3: #b8a455;
+  --c4: #c4845a;
+  --c5: #b85a5a;
+
+  /* skill colors */
+  --s0: #4a4640;
+  --s1: #4a5e4a;
+  --s2: #4d6d4d;
+  --s3: #507d50;
+  --s4: #558d55;
+  --s5: #5a9d5a;
+  --s6: #5fad5f;
+  --s7: #64bd64;
+}
+
+body.light-mode {
+  --bg: #f5f0ea;
+  --bg-card: #ffffff;
+  --bg-raised: #faf7f3;
+  --bg-input: #f0ebe4;
+  --border: #e0d8cc;
+  --border-light: #cfc5b5;
+  --text: #2c2622;
+  --text-secondary: #6b5f52;
+  --text-muted: #9a8e7f;
+  --accent: #a07040;
+  --accent-dim: rgba(160,112,64,0.1);
+  --accent-glow: rgba(160,112,64,0.2);
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --c0: #d5d0ca;
+  --c1: #95baca;
+  --c2: #6a9aaa;
+  --c3: #b8a455;
+  --c4: #c4845a;
+  --c5: #b85a5a;
+  --s0: #d5d0ca;
+  --s1: #8ab08a;
+  --s2: #72a072;
+  --s3: #5a905a;
+  --s4: #4a804a;
+  --s5: #3a703a;
+  --s6: #2a602a;
+  --s7: #1a501a;
+}
+
+html { font-size: 15px; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── Layout ─── */
+.app {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 1rem 1rem 4rem;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 0 1rem;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  font-size: 0.85rem;
+}
+.icon-btn:hover { border-color: var(--border-light); color: var(--text-secondary); }
+.icon-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* ─── Date Navigation ─── */
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 0 1.25rem;
+}
+.date-nav button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.25rem;
+  transition: color var(--transition);
+  line-height: 1;
+}
+.date-nav button:hover { color: var(--text); }
+.date-display {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  min-width: 160px;
+  text-align: center;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.date-display:hover { color: var(--accent); }
+.today-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-left: 0.5rem;
+  font-family: var(--font-body);
+}
+
+/* ─── Sections ─── */
+.section {
+  margin-bottom: 1.5rem;
+}
+.section-header {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  padding: 0 0 0.6rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.75rem;
+}
+
+/* ─── Rating Rows ─── */
+.rating-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  gap: 0.5rem;
+}
+.rating-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  min-width: 90px;
+}
+.rating-pills {
+  display: flex;
+  gap: 4px;
+}
+.pill {
+  width: 32px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pill:hover { border-color: var(--border-light); }
+.pill.selected {
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+}
+.pill.selected.intensity-0 { background: var(--c0); color: var(--text-secondary); }
+.pill.selected.intensity-1 { background: var(--c1); }
+.pill.selected.intensity-2 { background: var(--c2); }
+.pill.selected.intensity-3 { background: var(--c3); color: #1a1a1a; }
+.pill.selected.intensity-4 { background: var(--c4); }
+.pill.selected.intensity-5 { background: var(--c5); }
+.pill.selected.skill-0 { background: var(--s0); color: var(--text-secondary); }
+.pill.selected.skill-1 { background: var(--s1); }
+.pill.selected.skill-2 { background: var(--s2); }
+.pill.selected.skill-3 { background: var(--s3); }
+.pill.selected.skill-4 { background: var(--s4); }
+.pill.selected.skill-5 { background: var(--s5); }
+.pill.selected.skill-6 { background: var(--s6); }
+.pill.selected.skill-7 { background: var(--s7); }
+
+.pill.selected {
+  box-shadow: 0 0 8px var(--pill-glow, rgba(201,149,107,0.3));
+  animation: pillBreath 3s ease-in-out infinite;
+}
+
+@keyframes pillBreath {
+  0%, 100% { box-shadow: 0 0 6px var(--pill-glow, rgba(201,149,107,0.2)); }
+  50% { box-shadow: 0 0 14px var(--pill-glow, rgba(201,149,107,0.4)); }
+}
+
+/* ─── Toggle Rows (Actions) ─── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0;
+}
+.toggle-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: all var(--transition);
+}
+.toggle.on {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.toggle.on::after {
+  transform: translateX(20px);
+  background: var(--accent);
+}
+
+/* ─── Notes ─── */
+.notes-area {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: 0.75rem;
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+  transition: border-color var(--transition);
+}
+.notes-area:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.notes-area::placeholder {
+  color: var(--text-muted);
+}
+
+/* ─── Scale Legend ─── */
+.scale-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  padding: 0 0 0.5rem;
+  margin-top: -0.25rem;
+}
+
+/* ─── Calendar ─── */
+.calendar-view { display: none; }
+.calendar-view.active { display: block; }
+.entry-view.active { display: block; }
+.entry-view { display: none; }
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.75rem 0 1rem;
+}
+.cal-nav button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.25rem;
+  transition: color var(--transition);
+}
+.cal-nav button:hover { color: var(--text); }
+.cal-month {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  min-width: 160px;
+  text-align: center;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.cal-weekday {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 0.5rem 0 0.4rem;
+}
+.cal-day {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  gap: 3px;
+}
+.cal-day:hover { background: var(--bg-raised); }
+.cal-day.empty { cursor: default; }
+.cal-day.empty:hover { background: none; }
+.cal-day.today {
+  color: var(--accent);
+  font-weight: 600;
+}
+.cal-day.today::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  opacity: 0.3;
+}
+.cal-day.selected {
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+}
+.cal-day.has-entry {
+  color: var(--text);
+  background: var(--bg-raised);
+}
+.cal-day.has-entry.selected {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.cal-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.75rem 0 0.25rem;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+.cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cal-legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.cal-dots {
+  display: flex;
+  gap: 2px;
+}
+.cal-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+/* ─── Footer ─── */
+.footer {
+  text-align: center;
+  padding: 2rem 0 1rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+.footer svg {
+  vertical-align: -2px;
+  margin-right: 4px;
+  opacity: 0.5;
+}
+
+/* ─── Emotion Row Extras ─── */
+.emotion-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.emotion-row .rating-row { flex: 1; min-width: 0; }
+.emotion-hide {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 2px;
+  opacity: 0;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.emotion-row:hover .emotion-hide { opacity: 0.6; }
+.emotion-hide:hover { opacity: 1 !important; color: var(--accent); }
+.emotion-avg {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  min-width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.emotion-avg.has-data { color: var(--text-secondary); }
+.emotion-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0 0.25rem;
+}
+.emotion-add-btn, .emotion-show-hidden-btn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.65rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-body);
+}
+.emotion-add-btn:hover, .emotion-show-hidden-btn:hover { border-color: var(--accent); color: var(--accent); }
+.emotion-show-hidden-btn.active { border-color: var(--accent); color: var(--accent); border-style: solid; }
+.emotion-row.hidden-visible {
+  opacity: 0.5;
+}
+.emotion-row.hidden-visible:hover { opacity: 0.75; }
+
+/* ─── Lock Screen ─── */
+.lock-screen {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.lock-panel {
+  text-align: center;
+  max-width: 320px;
+  width: 100%;
+}
+.lock-icon {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+.lock-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+.lock-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+.lock-input {
+  display: block;
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  transition: border-color var(--transition);
+}
+.lock-input:focus { outline: none; border-color: var(--accent); }
+.lock-input::placeholder { color: var(--text-muted); }
+.lock-error {
+  font-size: 0.75rem;
+  color: var(--c5);
+  min-height: 1.2em;
+  margin-bottom: 0.5rem;
+}
+.lock-btn {
+  display: block;
+  width: 100%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.6rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.lock-btn:hover { background: var(--accent-glow); }
+
+/* ─── Transitions ─── */
+.view-fade {
+  animation: fadeUp 0.25s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 400px) {
+  .pill { width: 28px; height: 26px; font-size: 0.7rem; }
+  .rating-label { min-width: 75px; font-size: 0.8rem; }
+  html { font-size: 14px; }
+}
+
+/* ─── Tracking (Body) ─── */
+.tracking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  gap: 0.5rem;
+}
+.tracking-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  min-width: 65px;
+}
+.tracking-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+.tracking-input {
+  width: 52px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.tracking-input::-webkit-inner-spin-button,
+.tracking-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.tracking-input:focus { outline: none; border-color: var(--accent); }
+.tracking-text {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.5rem;
+}
+.tracking-text:focus { outline: none; border-color: var(--accent); }
+.tracking-text::placeholder, .tracking-input::placeholder { color: var(--text-muted); }
+.tracking-hint {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.sleep-quality-pills { gap: 3px; }
+.sleep-quality-pills .pill { width: 26px; height: 24px; font-size: 0.7rem; }
+
+.add-meal-btn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-body);
+}
+.add-meal-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.meal-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+}
+.meal-entry input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  padding: 0.4rem 0.5rem;
+}
+.meal-entry input:focus { outline: none; border-color: var(--accent); }
+.meal-entry input::placeholder { color: var(--text-muted); }
+.meal-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0 0.25rem;
+  line-height: 1;
+  transition: color var(--transition);
+}
+.meal-remove:hover { color: var(--c5); }
+
+/* ─── Share / Session ─── */
+.session-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  font-size: 0.8rem;
+}
+.session-bar-label {
+  color: var(--text-secondary);
+}
+.session-bar-date {
+  color: var(--text);
+  font-weight: 500;
+}
+.session-bar-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+.session-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-family: var(--font-body);
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.session-btn:hover { border-color: var(--accent); color: var(--accent); }
+.share-btn {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.share-btn:hover { background: var(--accent-glow); }
+.share-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-raised);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8rem;
+  color: var(--accent);
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 100;
+}
+.share-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─── Share (read-only) View ─── */
+.share-view { display: none; }
+.share-view.active { display: block; }
+.share-header {
+  text-align: center;
+  padding: 0.5rem 0 1rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+.share-header strong { color: var(--text); }
+.share-day-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: var(--bg-raised);
+}
+.share-day-date {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.share-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.2rem 0;
+  font-size: 0.8rem;
+}
+.share-row-label { color: var(--text-muted); }
+.share-row-value { color: var(--text); font-weight: 500; }
+.share-row-value.on { color: var(--accent); }
+.share-section-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  padding: 0.5rem 0 0.2rem;
+}
+.share-notes {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding: 0.4rem 0;
+  font-style: italic;
+}
+.share-meals {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  padding: 0.2rem 0;
+}
+
+/* ─── Info Button & Overlay ─── */
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  vertical-align: middle;
+  margin-left: 0.3rem;
+  transition: all var(--transition);
+}
+.info-btn:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
+.info-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.info-overlay.visible { display: flex; }
+body.light-mode .info-overlay { background: rgba(0,0,0,0.3); }
+.info-panel {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  max-width: 440px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  animation: fadeUp 0.2s ease;
+}
+body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+.info-panel h2 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+.info-panel h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin: 1rem 0 0.4rem;
+}
+.info-panel p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+.info-panel .caveat {
+  color: var(--c4);
+}
+.info-close {
+  display: block;
+  margin: 1.25rem auto 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  padding: 0.4rem 1.5rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.info-close:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ─── Skill tooltip ─── */
+.skill-hint {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-align: right;
+  flex-shrink: 0;
+  min-width: 0;
+  opacity: 0;
+  transition: opacity var(--transition);
+  margin-left: -4px;
+}
+.rating-row:has(.pill.selected) .skill-hint {
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+<script>try{var t=localStorage.getItem('thisminute_theme');if(t==='light'||(!t&&matchMedia('(prefers-color-scheme:light)').matches))document.body.classList.add('light-mode')}catch(e){}</script>
+
+<div class="lock-screen" id="lock-screen" style="display:none">
+  <div class="lock-panel">
+    <div class="lock-icon">
+      <svg width="28" height="28" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2 2 0 012 2v4H6V3a2 2 0 012-2zm3 6V3a3 3 0 00-6 0v4a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
+    </div>
+    <h1 class="lock-title" id="lock-title">diary</h1>
+    <p class="lock-subtitle" id="lock-subtitle"></p>
+    <form id="lock-form" autocomplete="off">
+      <input type="password" id="lock-pass" class="lock-input" placeholder="passphrase" autocomplete="new-password">
+      <div id="lock-new" style="display:none">
+        <input type="password" id="lock-confirm" class="lock-input" placeholder="confirm passphrase" autocomplete="new-password">
+      </div>
+      <div class="lock-error" id="lock-error"></div>
+      <button type="submit" class="lock-btn">unlock</button>
+    </form>
+  </div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="logo">diary <button class="info-btn" id="info-btn" aria-label="Privacy info">?</button></div>
+    <div class="header-actions">
+      <button class="icon-btn" id="cal-btn" title="Calendar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 1a.5.5 0 01.5.5V2h6v-.5a.5.5 0 011 0V2h1.5A1.5 1.5 0 0115 3.5v10a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 13.5v-10A1.5 1.5 0 012.5 2H4v-.5a.5.5 0 01.5-.5zM2 5v8.5a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V5H2z"/></svg>
+      </button>
+      <button class="icon-btn" id="theme-btn" title="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 13V2a6 6 0 010 12z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="session-bar" id="session-bar">
+    <div><span class="session-bar-label">Last session: </span><span class="session-bar-date" id="session-date">not set</span></div>
+    <div class="session-bar-actions">
+      <button class="session-btn" id="set-session">mark today</button>
+      <button class="session-btn share-btn" id="share-btn">share since session</button>
+    </div>
+  </div>
+
+  <!-- ─── Entry View ─── -->
+  <div class="entry-view active" id="entry-view">
+    <div class="date-nav">
+      <button id="prev-day">&#9664;</button>
+      <div class="date-display" id="date-display" title="Jump to calendar"></div>
+      <button id="next-day">&#9654;</button>
+    </div>
+
+    <div class="section" id="emotions-section">
+      <div class="section-header">Emotions <span style="float:right;font-size:0.6rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:0.6">7d avg</span></div>
+      <div class="scale-legend"><span>0 none</span><span>5 extreme</span></div>
+      <div id="emotion-rows"></div>
+      <div class="emotion-controls">
+        <button class="emotion-add-btn" id="add-emotion">+ add</button>
+        <button class="emotion-show-hidden-btn" id="show-hidden">show hidden (<span id="hidden-count">0</span>)</button>
+      </div>
+    </div>
+
+    <div class="section" id="urges-section">
+      <div class="section-header">Urges</div>
+      <div class="scale-legend"><span>0 none</span><span>5 extreme</span></div>
+    </div>
+
+    <div class="section" id="actions-section">
+      <div class="section-header">Actions</div>
+    </div>
+
+    <div class="section" id="body-section">
+      <div class="section-header">Body</div>
+      <div class="tracking-row">
+        <div class="tracking-label">Sleep</div>
+        <div class="tracking-input-group">
+          <input type="number" class="tracking-input" id="sleep-hours" min="0" max="24" step="0.5" placeholder="hrs">
+          <div class="rating-pills sleep-quality-pills" data-field="sleepQuality" data-type="intensity">
+            <div class="pill" data-value="0">0</div>
+            <div class="pill" data-value="1">1</div>
+            <div class="pill" data-value="2">2</div>
+            <div class="pill" data-value="3">3</div>
+            <div class="pill" data-value="4">4</div>
+            <div class="pill" data-value="5">5</div>
+          </div>
+          <span class="tracking-hint">quality</span>
+        </div>
+      </div>
+      <div class="tracking-row">
+        <div class="tracking-label">Exercise</div>
+        <div class="tracking-input-group">
+          <input type="number" class="tracking-input" id="exercise-mins" min="0" max="999" step="5" placeholder="min">
+          <input type="text" class="tracking-text" id="exercise-type" placeholder="what'd you do?">
+        </div>
+      </div>
+      <div class="meals-section">
+        <div class="tracking-row">
+          <div class="tracking-label">Meals</div>
+          <button class="add-meal-btn" id="add-meal">+ add</button>
+        </div>
+        <div id="meals-list"></div>
+      </div>
+    </div>
+
+    <div class="section" id="skills-section">
+      <div class="section-header">Skills Used</div>
+      <div class="scale-legend"><span>0 not thought about</span><span>7 automatic &amp; helped</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">Notes</div>
+      <textarea class="notes-area" id="notes" placeholder="What happened today? What skills did you practice?"></textarea>
+    </div>
+  </div>
+
+  <!-- ─── Calendar View ─── -->
+  <div class="calendar-view" id="calendar-view">
+    <div class="cal-nav">
+      <button id="prev-month">&#9664;</button>
+      <div class="cal-month" id="cal-month"></div>
+      <button id="next-month">&#9654;</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#b8a455"></div> emotions/urges</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#5a9d5a"></div> skill use</div>
+    </div>
+  </div>
+
+  <!-- ─── Share (read-only) View ─── -->
+  <div class="share-view" id="share-view"></div>
+
+  <div class="share-toast" id="share-toast">Link copied to clipboard</div>
+
+  <div class="info-overlay" id="info-overlay">
+    <div class="info-panel">
+      <h2>How your privacy works</h2>
+
+      <h3>Your data is encrypted and stays on your device</h3>
+      <p>Your passphrase scrambles your diary entries before they're saved. Without it, no one can read them — not someone borrowing your computer, not your browser, not us. There is no server, no account, and no data ever sent over the internet.</p>
+
+      <h3>Sharing with your therapist</h3>
+      <p>When you share, you pick a share passphrase. Give it to your therapist separately (in person, text, etc.). The link you send them is scrambled — it only becomes readable when they enter the passphrase. No one in between can read it.</p>
+
+      <h3>If you forget your passphrase</h3>
+      <p>Your data is gone. There is no "forgot password" option and no way to recover it. This is the price of not trusting a server with your information. Write it down somewhere safe.</p>
+
+      <h3>If you clear your browser data</h3>
+      <p>Your diary is deleted permanently. Same reason — there's no backup anywhere.</p>
+
+      <h3 class="caveat">What this doesn't protect against</h3>
+      <p class="caveat">Someone looking at your screen while the diary is open. A weak passphrase that's easy to guess. Malware on your device. Your browser history will show that you visited this site (though the diary content itself is encrypted).</p>
+      <p class="caveat">If your browser syncs data across devices, the encrypted diary may appear on other devices signed into the same profile. The contents are still encrypted.</p>
+
+      <h3>Technical details</h3>
+      <p style="font-size:0.75rem">AES-256-GCM encryption. Key derived via PBKDF2 with 200,000 iterations and a random 128-bit salt. Each save uses a fresh 96-bit IV. Share links are self-contained: salt + IV + ciphertext in base64url. No cookies, no analytics, no network requests. All cryptography uses the browser's native Web Crypto API.</p>
+
+      <button class="info-close" id="info-close">got it</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2 2 0 012 2v4H6V3a2 2 0 012-2zm3 6V3a3 3 0 00-6 0v4a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
+    Encrypted on your device &mdash; never sent anywhere
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ─── Crypto ───
+  const SALT_KEY = 'dbt_salt';
+  const CHECK_KEY = 'dbt_check';
+  const STORAGE_KEY = 'dbt_diary_enc';
+  const SESSION_ENC_KEY = 'dbt_session_enc';
+  const MAGIC = 'dbt_ok'; // plaintext check to verify passphrase
+
+  let cryptoKey = null; // AES-GCM key derived from passphrase
+
+  function b64ToBytes(b64) {
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
+  function bytesToB64(bytes) {
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+
+  function b64urlToBytes(b64url) {
+    return b64ToBytes(b64url.replace(/-/g, '+').replace(/_/g, '/') + '=='.slice(0, (4 - b64url.length % 4) % 4));
+  }
+
+  function bytesToB64url(bytes) {
+    return bytesToB64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  async function deriveKey(passphrase, salt) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt, iterations: 200000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  async function encryptString(plaintext) {
+    const enc = new TextEncoder();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, enc.encode(plaintext));
+    // Prepend IV to ciphertext
+    const combined = new Uint8Array(iv.length + ciphertext.byteLength);
+    combined.set(iv);
+    combined.set(new Uint8Array(ciphertext), iv.length);
+    return bytesToB64(combined);
+  }
+
+  async function decryptString(b64) {
+    const combined = b64ToBytes(b64);
+    const iv = combined.slice(0, 12);
+    const ciphertext = combined.slice(12);
+    const dec = new TextDecoder();
+    const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, ciphertext);
+    return dec.decode(plaintext);
+  }
+
+  // Encrypt with a passphrase directly (for share URLs — self-contained, no stored salt)
+  async function encryptWithPassphrase(plaintext, passphrase) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const key = await deriveKey(passphrase, salt);
+    const enc = new TextEncoder();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
+    // salt(16) + iv(12) + ciphertext
+    const combined = new Uint8Array(16 + 12 + ciphertext.byteLength);
+    combined.set(salt);
+    combined.set(iv, 16);
+    combined.set(new Uint8Array(ciphertext), 28);
+    return bytesToB64url(combined);
+  }
+
+  async function decryptWithPassphrase(b64url, passphrase) {
+    const combined = b64urlToBytes(b64url);
+    const salt = combined.slice(0, 16);
+    const iv = combined.slice(16, 28);
+    const ciphertext = combined.slice(28);
+    const key = await deriveKey(passphrase, salt);
+    const dec = new TextDecoder();
+    const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+    return dec.decode(plaintext);
+  }
+
+  async function setupPassphrase(passphrase) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    cryptoKey = await deriveKey(passphrase, salt);
+    const check = await encryptString(MAGIC);
+    try {
+      localStorage.setItem(SALT_KEY, bytesToB64(salt));
+      localStorage.setItem(CHECK_KEY, check);
+    } catch {}
+  }
+
+  async function unlockWithPassphrase(passphrase) {
+    const saltB64 = localStorage.getItem(SALT_KEY);
+    const checkB64 = localStorage.getItem(CHECK_KEY);
+    if (!saltB64 || !checkB64) return false;
+    const salt = b64ToBytes(saltB64);
+    cryptoKey = await deriveKey(passphrase, salt);
+    try {
+      const result = await decryptString(checkB64);
+      return result === MAGIC;
+    } catch {
+      cryptoKey = null;
+      return false;
+    }
+  }
+
+  function hasExistingVault() {
+    return !!(localStorage.getItem(SALT_KEY) && localStorage.getItem(CHECK_KEY));
+  }
+
+  // ─── Data ───
+  const PREFS_KEY = 'dbt_prefs_enc';
+  const DEFAULT_EMOTIONS = ['Sadness','Anger','Shame','Fear / Anxiety','Joy','Guilt','Loneliness','Jealousy','Disgust','Numbness','Overwhelm','Hopelessness','Love / Connection'];
+  let prefs = { emotions: [...DEFAULT_EMOTIONS], hiddenEmotions: [], showHidden: false };
+
+  async function loadPrefs() {
+    try {
+      const enc = localStorage.getItem(PREFS_KEY);
+      if (enc) {
+        const json = await decryptString(enc);
+        const saved = JSON.parse(json);
+        prefs = { emotions: saved.emotions || [...DEFAULT_EMOTIONS], hiddenEmotions: saved.hiddenEmotions || [], showHidden: false };
+      }
+    } catch {}
+  }
+
+  async function savePrefs() {
+    try {
+      const enc = await encryptString(JSON.stringify({ emotions: prefs.emotions, hiddenEmotions: prefs.hiddenEmotions }));
+      localStorage.setItem(PREFS_KEY, enc);
+    } catch {}
+  }
+
+  const EMOTIONS = DEFAULT_EMOTIONS; // reference for share view
+  const URGES = ['Self-harm','Suicide','Weed','Other substances','Quit therapy'];
+  const ACTIONS = [
+    { id: 'selfHarmed', label: 'Self-harmed' },
+    { id: 'suicidalAction', label: 'Suicidal action' },
+    { id: 'usedWeed', label: 'Used weed' },
+    { id: 'usedOtherSubstances', label: 'Used other substances' },
+    { id: 'tookMedications', label: 'Took medications' }
+  ];
+  const SKILLS = ['Mindfulness','Distress Tolerance','Emotion Regulation','Interpersonal Effectiveness'];
+  const SKILL_HINTS = {
+    0:'not thought about',1:'thought about, didn\'t want to',2:'thought about, wanted to',
+    3:'tried, couldn\'t use',4:'tried, didn\'t help',5:'used, helped',6:'automatic, didn\'t help',7:'automatic, helped'
+  };
+
+  const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  // ─── State ───
+  let currentDate = new Date();
+  let calYear, calMonth;
+  let entries = {};
+
+  function dateKey(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  async function loadEntries() {
+    try {
+      const enc = localStorage.getItem(STORAGE_KEY);
+      if (enc) {
+        const json = await decryptString(enc);
+        entries = JSON.parse(json);
+      } else {
+        entries = {};
+      }
+    } catch { entries = {}; }
+  }
+
+  async function saveEntries() {
+    try {
+      const enc = await encryptString(JSON.stringify(entries));
+      localStorage.setItem(STORAGE_KEY, enc);
+    } catch {}
+  }
+
+  function getEntry(key) {
+    return entries[key] || {};
+  }
+
+  function setField(key, field, value) {
+    if (!entries[key]) entries[key] = {};
+    entries[key][field] = value;
+    // Clean empty entries
+    const e = entries[key];
+    const hasData = Object.values(e).some(v => v !== null && v !== undefined && v !== '');
+    if (!hasData) delete entries[key];
+    saveEntries(); // async, fire-and-forget for UI responsiveness
+  }
+
+  // ─── Build UI ───
+  function buildRatingRow(container, label, fieldPrefix, max, type) {
+    const row = document.createElement('div');
+    row.className = 'rating-row';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'rating-label';
+    lbl.textContent = label;
+    row.appendChild(lbl);
+
+    const pills = document.createElement('div');
+    pills.className = 'rating-pills';
+    pills.dataset.field = fieldPrefix;
+    pills.dataset.type = type;
+
+    for (let i = 0; i <= max; i++) {
+      const p = document.createElement('div');
+      p.className = 'pill';
+      p.textContent = i;
+      p.dataset.value = i;
+      p.addEventListener('click', () => {
+        const key = dateKey(currentDate);
+        const current = getEntry(key)[fieldPrefix];
+        if (current === i) {
+          // Deselect
+          setField(key, fieldPrefix, null);
+        } else {
+          setField(key, fieldPrefix, i);
+        }
+        renderEntry();
+      });
+      pills.appendChild(p);
+    }
+    row.appendChild(pills);
+
+    if (type === 'skill') {
+      const hint = document.createElement('div');
+      hint.className = 'skill-hint';
+      hint.dataset.hintFor = fieldPrefix;
+      row.appendChild(hint);
+    }
+
+    container.appendChild(row);
+  }
+
+  function buildToggleRow(container, action) {
+    const row = document.createElement('div');
+    row.className = 'toggle-row';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'toggle-label';
+    lbl.textContent = action.label;
+    row.appendChild(lbl);
+
+    const toggle = document.createElement('div');
+    toggle.className = 'toggle';
+    toggle.dataset.field = action.id;
+    toggle.addEventListener('click', () => {
+      const key = dateKey(currentDate);
+      const current = !!getEntry(key)[action.id];
+      setField(key, action.id, !current);
+      renderEntry();
+    });
+    row.appendChild(toggle);
+
+    container.appendChild(row);
+  }
+
+  function get7DayAvg(emotionIndex) {
+    let sum = 0, count = 0;
+    const d = new Date(currentDate);
+    for (let i = 0; i < 7; i++) {
+      const k = dateKey(d);
+      const v = (entries[k] || {})['emotion_' + emotionIndex];
+      if (v != null) { sum += v; count++; }
+      d.setDate(d.getDate() - 1);
+    }
+    return count > 0 ? (sum / count).toFixed(1) : null;
+  }
+
+  function renderEmotions() {
+    const container = document.getElementById('emotion-rows');
+    container.innerHTML = '';
+    prefs.emotions.forEach((em, i) => {
+      const isHidden = prefs.hiddenEmotions.includes(em);
+      if (isHidden && !prefs.showHidden) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'emotion-row' + (isHidden ? ' hidden-visible' : '');
+
+      // Build the rating row inside the wrapper
+      const row = document.createElement('div');
+      row.className = 'rating-row';
+      const lbl = document.createElement('div');
+      lbl.className = 'rating-label';
+      lbl.textContent = em;
+      row.appendChild(lbl);
+
+      const pills = document.createElement('div');
+      pills.className = 'rating-pills';
+      pills.dataset.field = 'emotion_' + i;
+      pills.dataset.type = 'intensity';
+      for (let v = 0; v <= 5; v++) {
+        const p = document.createElement('div');
+        p.className = 'pill';
+        p.textContent = v;
+        p.dataset.value = v;
+        p.addEventListener('click', () => {
+          const key = dateKey(currentDate);
+          const current = getEntry(key)['emotion_' + i];
+          setField(key, 'emotion_' + i, current === v ? null : v);
+          renderEntry();
+        });
+        pills.appendChild(p);
+      }
+      row.appendChild(pills);
+      wrapper.appendChild(row);
+
+      // 7-day average
+      const avg = document.createElement('div');
+      avg.className = 'emotion-avg';
+      avg.dataset.emotionIndex = i;
+      wrapper.appendChild(avg);
+
+      // Hide button
+      const hideBtn = document.createElement('button');
+      hideBtn.className = 'emotion-hide';
+      hideBtn.textContent = isHidden ? '◉' : '○';
+      hideBtn.title = isHidden ? 'Show this emotion' : 'Hide this emotion';
+      hideBtn.addEventListener('click', () => {
+        if (isHidden) {
+          prefs.hiddenEmotions = prefs.hiddenEmotions.filter(e => e !== em);
+        } else {
+          prefs.hiddenEmotions.push(em);
+        }
+        savePrefs();
+        renderEmotions();
+        renderEntry();
+      });
+      wrapper.appendChild(hideBtn);
+
+      container.appendChild(wrapper);
+    });
+
+    // Update hidden count
+    document.getElementById('hidden-count').textContent = prefs.hiddenEmotions.length;
+    const showBtn = document.getElementById('show-hidden');
+    showBtn.style.display = prefs.hiddenEmotions.length ? '' : 'none';
+    showBtn.classList.toggle('active', prefs.showHidden);
+  }
+
+  function initSections() {
+
+    const urgesSec = document.getElementById('urges-section');
+    URGES.forEach((u, i) => {
+      buildRatingRow(urgesSec, u, 'urge_'+i, 5, 'intensity');
+    });
+
+    const actionsSec = document.getElementById('actions-section');
+    ACTIONS.forEach(a => buildToggleRow(actionsSec, a));
+
+    const skillsSec = document.getElementById('skills-section');
+    SKILLS.forEach((s, i) => {
+      buildRatingRow(skillsSec, s, 'skill_'+i, 7, 'skill');
+    });
+
+    // Sleep quality pills
+    document.querySelectorAll('.sleep-quality-pills .pill').forEach(p => {
+      p.addEventListener('click', () => {
+        const key = dateKey(currentDate);
+        const v = parseInt(p.dataset.value);
+        const current = getEntry(key).sleepQuality;
+        setField(key, 'sleepQuality', current === v ? null : v);
+        renderEntry();
+      });
+    });
+
+    // Sleep hours
+    document.getElementById('sleep-hours').addEventListener('input', function() {
+      const key = dateKey(currentDate);
+      const v = this.value === '' ? null : parseFloat(this.value);
+      setField(key, 'sleepHours', v);
+    });
+
+    // Exercise
+    document.getElementById('exercise-mins').addEventListener('input', function() {
+      const key = dateKey(currentDate);
+      const v = this.value === '' ? null : parseInt(this.value);
+      setField(key, 'exerciseMins', v);
+    });
+    document.getElementById('exercise-type').addEventListener('input', function() {
+      const key = dateKey(currentDate);
+      setField(key, 'exerciseType', this.value || null);
+    });
+
+    // Meals
+    document.getElementById('add-meal').addEventListener('click', () => {
+      const key = dateKey(currentDate);
+      const entry = getEntry(key);
+      const meals = entry.meals || [];
+      meals.push('');
+      setField(key, 'meals', meals);
+      renderEntry();
+      // Focus the new input
+      const inputs = document.querySelectorAll('#meals-list input');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    });
+
+    // Emotion controls
+    document.getElementById('add-emotion').addEventListener('click', () => {
+      const name = prompt('New emotion name:');
+      if (!name || !name.trim()) return;
+      const trimmed = name.trim();
+      if (prefs.emotions.includes(trimmed)) { alert('Already exists.'); return; }
+      prefs.emotions.push(trimmed);
+      savePrefs();
+      renderEmotions();
+    });
+
+    document.getElementById('show-hidden').addEventListener('click', () => {
+      prefs.showHidden = !prefs.showHidden;
+      renderEmotions();
+      renderEntry();
+    });
+
+    renderEmotions();
+  }
+
+  // ─── Render ───
+  function isToday(d) {
+    const now = new Date();
+    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }
+
+  function renderEntry() {
+    const key = dateKey(currentDate);
+    const entry = getEntry(key);
+
+    // Date display
+    const dd = document.getElementById('date-display');
+    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    dd.innerHTML = dayNames[currentDate.getDay()] + ', ' +
+      MONTHS[currentDate.getMonth()] + ' ' + currentDate.getDate() +
+      (isToday(currentDate) ? '<span class="today-badge">today</span>' : '');
+
+    // Pills
+    document.querySelectorAll('.rating-pills').forEach(pills => {
+      const field = pills.dataset.field;
+      const type = pills.dataset.type;
+      const val = entry[field];
+      pills.querySelectorAll('.pill').forEach(p => {
+        const v = parseInt(p.dataset.value);
+        p.classList.remove('selected');
+        // Remove all state classes
+        for (let c = 0; c <= 7; c++) {
+          p.classList.remove('intensity-'+c, 'skill-'+c);
+        }
+        p.style.removeProperty('--pill-glow');
+        if (val === v) {
+          p.classList.add('selected');
+          if (type === 'intensity') {
+            p.classList.add('intensity-'+v);
+            const glows = ['rgba(74,70,64,0.3)','rgba(91,122,138,0.4)','rgba(106,154,170,0.4)','rgba(184,164,85,0.4)','rgba(196,132,90,0.4)','rgba(184,90,90,0.4)'];
+            p.style.setProperty('--pill-glow', glows[v] || glows[0]);
+          } else {
+            p.classList.add('skill-'+v);
+            const glows = ['rgba(74,70,64,0.3)','rgba(74,94,74,0.4)','rgba(77,109,77,0.4)','rgba(80,125,80,0.4)','rgba(85,141,85,0.4)','rgba(90,157,90,0.5)','rgba(95,173,95,0.5)','rgba(100,189,100,0.5)'];
+            p.style.setProperty('--pill-glow', glows[v] || glows[0]);
+          }
+        }
+      });
+
+      // Skill hints
+      if (type === 'skill') {
+        const hint = document.querySelector('[data-hint-for="'+field+'"]');
+        if (hint) {
+          hint.textContent = val !== null && val !== undefined ? SKILL_HINTS[val] || '' : '';
+        }
+      }
+    });
+
+    // 7-day averages
+    document.querySelectorAll('.emotion-avg').forEach(el => {
+      const i = parseInt(el.dataset.emotionIndex);
+      const avg = get7DayAvg(i);
+      el.textContent = avg !== null ? avg : '';
+      el.classList.toggle('has-data', avg !== null);
+    });
+
+    // Toggles
+    document.querySelectorAll('.toggle').forEach(t => {
+      const field = t.dataset.field;
+      t.classList.toggle('on', !!entry[field]);
+    });
+
+    // Sleep
+    document.getElementById('sleep-hours').value = entry.sleepHours != null ? entry.sleepHours : '';
+    document.querySelectorAll('.sleep-quality-pills .pill').forEach(p => {
+      const v = parseInt(p.dataset.value);
+      p.classList.remove('selected');
+      for (let c = 0; c <= 5; c++) p.classList.remove('intensity-'+c);
+      p.style.removeProperty('--pill-glow');
+      if (entry.sleepQuality === v) {
+        p.classList.add('selected', 'intensity-'+v);
+        const glows = ['rgba(74,70,64,0.3)','rgba(91,122,138,0.4)','rgba(106,154,170,0.4)','rgba(184,164,85,0.4)','rgba(196,132,90,0.4)','rgba(184,90,90,0.4)'];
+        p.style.setProperty('--pill-glow', glows[v]);
+      }
+    });
+
+    // Exercise
+    document.getElementById('exercise-mins').value = entry.exerciseMins != null ? entry.exerciseMins : '';
+    document.getElementById('exercise-type').value = entry.exerciseType || '';
+
+    // Meals
+    const mealsList = document.getElementById('meals-list');
+    mealsList.innerHTML = '';
+    const meals = entry.meals || [];
+    meals.forEach((meal, i) => {
+      const row = document.createElement('div');
+      row.className = 'meal-entry';
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.value = meal;
+      inp.placeholder = 'what did you eat?';
+      inp.addEventListener('input', function() {
+        const key = dateKey(currentDate);
+        const m = getEntry(key).meals || [];
+        m[i] = this.value;
+        setField(key, 'meals', m);
+      });
+      row.appendChild(inp);
+      const rm = document.createElement('button');
+      rm.className = 'meal-remove';
+      rm.textContent = '×';
+      rm.addEventListener('click', () => {
+        const key = dateKey(currentDate);
+        const m = getEntry(key).meals || [];
+        m.splice(i, 1);
+        setField(key, 'meals', m.length ? m : null);
+        renderEntry();
+      });
+      row.appendChild(rm);
+      mealsList.appendChild(row);
+    });
+
+    // Notes
+    const notes = document.getElementById('notes');
+    notes.value = entry.notes || '';
+  }
+
+  // ─── Calendar ───
+  function avgIntensity(entry) {
+    if (!entry) return null;
+    let sum = 0, count = 0;
+    for (let i = 0; i < (prefs.emotions || DEFAULT_EMOTIONS).length; i++) {
+      const v = entry['emotion_'+i];
+      if (v !== null && v !== undefined) { sum += v; count++; }
+    }
+    for (let i = 0; i < 5; i++) {
+      const v = entry['urge_'+i];
+      if (v !== null && v !== undefined) { sum += v; count++; }
+    }
+    return count > 0 ? sum / count : null;
+  }
+
+  function avgSkills(entry) {
+    if (!entry) return null;
+    let sum = 0, count = 0;
+    for (let i = 0; i < 4; i++) {
+      const v = entry['skill_'+i];
+      if (v !== null && v !== undefined) { sum += v; count++; }
+    }
+    return count > 0 ? sum / count : null;
+  }
+
+  function intensityColor(avg) {
+    if (avg === null) return 'var(--text-muted)';
+    const colors = ['#4a4640','#5b7a8a','#6a9aaa','#b8a455','#c4845a','#b85a5a'];
+    const i = Math.min(5, Math.round(avg));
+    return colors[i];
+  }
+
+  function skillColor(avg) {
+    if (avg === null) return 'var(--text-muted)';
+    const colors = ['#4a4640','#4a5e4a','#4d6d4d','#507d50','#558d55','#5a9d5a','#5fad5f','#64bd64'];
+    const i = Math.min(7, Math.round(avg));
+    return colors[i];
+  }
+
+  function renderCalendar() {
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    document.getElementById('cal-month').textContent = MONTHS[calMonth] + ' ' + calYear;
+
+    // Weekday headers
+    WEEKDAYS.forEach(w => {
+      const el = document.createElement('div');
+      el.className = 'cal-weekday';
+      el.textContent = w;
+      grid.appendChild(el);
+    });
+
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const now = new Date();
+
+    // Empty cells
+    for (let i = 0; i < firstDay; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day empty';
+      grid.appendChild(el);
+    }
+
+    // Day cells
+    for (let d = 1; d <= daysInMonth; d++) {
+      const el = document.createElement('div');
+      el.className = 'cal-day';
+
+      const dayDate = new Date(calYear, calMonth, d);
+      const key = dateKey(dayDate);
+      const entry = entries[key];
+
+      if (dayDate.getDate() === now.getDate() && dayDate.getMonth() === now.getMonth() && dayDate.getFullYear() === now.getFullYear()) {
+        el.classList.add('today');
+      }
+      if (dayDate.getDate() === currentDate.getDate() && dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear()) {
+        el.classList.add('selected');
+      }
+
+      const num = document.createElement('div');
+      num.textContent = d;
+      el.appendChild(num);
+
+      if (entry && Object.keys(entry).length > 0) {
+        el.classList.add('has-entry');
+        const dots = document.createElement('div');
+        dots.className = 'cal-dots';
+
+        const ai = avgIntensity(entry);
+        if (ai !== null) {
+          const dot = document.createElement('div');
+          dot.className = 'cal-dot';
+          dot.style.background = intensityColor(ai);
+          dots.appendChild(dot);
+        }
+
+        const as = avgSkills(entry);
+        if (as !== null) {
+          const dot = document.createElement('div');
+          dot.className = 'cal-dot';
+          dot.style.background = skillColor(as);
+          dots.appendChild(dot);
+        }
+
+        el.appendChild(dots);
+      }
+
+      el.addEventListener('click', () => {
+        currentDate = new Date(calYear, calMonth, d);
+        showEntry();
+      });
+
+      grid.appendChild(el);
+    }
+  }
+
+  // ─── View Switching ───
+  function showCalendar() {
+    calYear = currentDate.getFullYear();
+    calMonth = currentDate.getMonth();
+    document.getElementById('entry-view').classList.remove('active');
+    document.getElementById('calendar-view').classList.add('active', 'view-fade');
+    document.getElementById('cal-btn').classList.add('active');
+    renderCalendar();
+  }
+
+  function showEntry() {
+    document.getElementById('calendar-view').classList.remove('active', 'view-fade');
+    document.getElementById('entry-view').classList.add('active', 'view-fade');
+    document.getElementById('cal-btn').classList.remove('active');
+    renderEntry();
+  }
+
+  // ─── Events ───
+  document.getElementById('cal-btn').addEventListener('click', () => {
+    if (document.getElementById('calendar-view').classList.contains('active')) {
+      showEntry();
+    } else {
+      showCalendar();
+    }
+  });
+
+  document.getElementById('date-display').addEventListener('click', showCalendar);
+
+  document.getElementById('prev-day').addEventListener('click', () => {
+    currentDate.setDate(currentDate.getDate() - 1);
+    renderEntry();
+  });
+  document.getElementById('next-day').addEventListener('click', () => {
+    currentDate.setDate(currentDate.getDate() + 1);
+    renderEntry();
+  });
+
+  document.getElementById('prev-month').addEventListener('click', () => {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  });
+  document.getElementById('next-month').addEventListener('click', () => {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  });
+
+  document.getElementById('notes').addEventListener('input', function() {
+    const key = dateKey(currentDate);
+    setField(key, 'notes', this.value);
+  });
+
+  document.getElementById('theme-btn').addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    try { localStorage.setItem('thisminute_theme', isLight ? 'light' : 'dark'); } catch {}
+  });
+
+  // Keyboard nav
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowLeft') { currentDate.setDate(currentDate.getDate() - 1); renderEntry(); }
+    if (e.key === 'ArrowRight') { currentDate.setDate(currentDate.getDate() + 1); renderEntry(); }
+    if (e.key === 'c') {
+      if (document.getElementById('calendar-view').classList.contains('active')) showEntry();
+      else showCalendar();
+    }
+    if (e.key === 't') document.getElementById('theme-btn').click();
+  });
+
+  // ─── Session & Share ───
+  let sessionDate = null;
+
+  async function loadSessionDate() {
+    try {
+      const enc = localStorage.getItem(SESSION_ENC_KEY);
+      if (enc) sessionDate = await decryptString(enc);
+      else sessionDate = null;
+    } catch { sessionDate = null; }
+  }
+
+  async function saveSessionDate(val) {
+    sessionDate = val;
+    try {
+      if (val) localStorage.setItem(SESSION_ENC_KEY, await encryptString(val));
+      else localStorage.removeItem(SESSION_ENC_KEY);
+    } catch {}
+  }
+
+  function renderSessionBar() {
+    const el = document.getElementById('session-date');
+    if (sessionDate) {
+      const d = new Date(sessionDate + 'T00:00:00');
+      el.textContent = MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+    } else {
+      el.textContent = 'not set';
+    }
+  }
+
+  document.getElementById('set-session').addEventListener('click', async () => {
+    await saveSessionDate(dateKey(new Date()));
+    renderSessionBar();
+  });
+
+  document.getElementById('share-btn').addEventListener('click', async () => {
+    if (!sessionDate) {
+      alert('Set your last session date first.');
+      return;
+    }
+    const sharePass = prompt('Enter a passphrase to encrypt this share link.\nYour therapist will need this passphrase to open it.');
+    if (!sharePass) return;
+    // Collect entries from session date to today
+    const today = dateKey(new Date());
+    const shareEntries = {};
+    const d = new Date(sessionDate + 'T00:00:00');
+    const end = new Date(today + 'T00:00:00');
+    while (d <= end) {
+      const k = dateKey(d);
+      if (entries[k]) shareEntries[k] = entries[k];
+      d.setDate(d.getDate() + 1);
+    }
+    if (Object.keys(shareEntries).length === 0) {
+      alert('No entries between session date and today.');
+      return;
+    }
+    const json = JSON.stringify(shareEntries);
+    const encrypted = await encryptWithPassphrase(json, sharePass);
+    const url = location.origin + location.pathname + '#share=' + encrypted;
+    try {
+      await navigator.clipboard.writeText(url);
+      const toast = document.getElementById('share-toast');
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 2000);
+    } catch {
+      prompt('Copy this link:', url);
+    }
+  });
+
+  // Render share view (read-only)
+  function renderShareView(shareEntries) {
+    const view = document.getElementById('share-view');
+    const dates = Object.keys(shareEntries).sort();
+    const from = new Date(dates[0] + 'T00:00:00');
+    const to = new Date(dates[dates.length - 1] + 'T00:00:00');
+    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    let html = '<div class="share-header"><strong>' + dates.length + ' days</strong> &mdash; ' +
+      MONTHS[from.getMonth()] + ' ' + from.getDate() + ' to ' + MONTHS[to.getMonth()] + ' ' + to.getDate() + ', ' + to.getFullYear() + '</div>';
+
+    dates.forEach(key => {
+      const entry = shareEntries[key];
+      const d = new Date(key + 'T00:00:00');
+      html += '<div class="share-day-card">';
+      html += '<div class="share-day-date">' + dayNames[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '</div>';
+
+      // Emotions
+      let hasEmotions = false;
+      for (let i = 0; i < EMOTIONS.length; i++) {
+        if (entry['emotion_'+i] != null) { hasEmotions = true; break; }
+      }
+      if (hasEmotions) {
+        html += '<div class="share-section-label">Emotions</div>';
+        EMOTIONS.forEach((em, i) => {
+          const v = entry['emotion_'+i];
+          if (v != null) html += '<div class="share-row"><span class="share-row-label">' + em + '</span><span class="share-row-value">' + v + '/5</span></div>';
+        });
+      }
+
+      // Urges
+      let hasUrges = false;
+      for (let i = 0; i < URGES.length; i++) {
+        if (entry['urge_'+i] != null) { hasUrges = true; break; }
+      }
+      if (hasUrges) {
+        html += '<div class="share-section-label">Urges</div>';
+        URGES.forEach((u, i) => {
+          const v = entry['urge_'+i];
+          if (v != null) html += '<div class="share-row"><span class="share-row-label">' + u + '</span><span class="share-row-value">' + v + '/5</span></div>';
+        });
+      }
+
+      // Actions
+      let hasActions = false;
+      ACTIONS.forEach(a => { if (entry[a.id]) hasActions = true; });
+      if (hasActions) {
+        html += '<div class="share-section-label">Actions</div>';
+        ACTIONS.forEach(a => {
+          if (entry[a.id]) html += '<div class="share-row"><span class="share-row-label">' + a.label + '</span><span class="share-row-value on">yes</span></div>';
+        });
+      }
+
+      // Body
+      const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length);
+      if (hasBody) {
+        html += '<div class="share-section-label">Body</div>';
+        if (entry.sleepHours != null) html += '<div class="share-row"><span class="share-row-label">Sleep</span><span class="share-row-value">' + entry.sleepHours + ' hrs' + (entry.sleepQuality != null ? ' (quality ' + entry.sleepQuality + '/5)' : '') + '</span></div>';
+        if (entry.exerciseMins != null) html += '<div class="share-row"><span class="share-row-label">Exercise</span><span class="share-row-value">' + entry.exerciseMins + ' min' + (entry.exerciseType ? ' — ' + entry.exerciseType : '') + '</span></div>';
+        if (entry.meals && entry.meals.length) {
+          html += '<div class="share-row"><span class="share-row-label">Meals</span><span class="share-row-value">' + entry.meals.filter(m => m).length + '</span></div>';
+          entry.meals.filter(m => m).forEach(m => { html += '<div class="share-meals">&bull; ' + m.replace(/</g,'&lt;') + '</div>'; });
+        }
+      }
+
+      // Skills
+      let hasSkills = false;
+      for (let i = 0; i < SKILLS.length; i++) {
+        if (entry['skill_'+i] != null) { hasSkills = true; break; }
+      }
+      if (hasSkills) {
+        html += '<div class="share-section-label">Skills</div>';
+        SKILLS.forEach((s, i) => {
+          const v = entry['skill_'+i];
+          if (v != null) html += '<div class="share-row"><span class="share-row-label">' + s + '</span><span class="share-row-value">' + v + '/7 — ' + (SKILL_HINTS[v] || '') + '</span></div>';
+        });
+      }
+
+      // Notes
+      if (entry.notes) {
+        html += '<div class="share-section-label">Notes</div>';
+        html += '<div class="share-notes">' + entry.notes.replace(/</g,'&lt;').replace(/\n/g,'<br>') + '</div>';
+      }
+
+      html += '</div>';
+    });
+
+    view.innerHTML = html;
+  }
+
+  // ─── Info overlay ───
+  document.getElementById('info-btn').addEventListener('click', () => {
+    document.getElementById('info-overlay').classList.add('visible');
+  });
+  document.getElementById('info-close').addEventListener('click', () => {
+    document.getElementById('info-overlay').classList.remove('visible');
+  });
+  document.getElementById('info-overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
+  });
+
+  // ─── Passphrase Gate ───
+  function showApp() {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.querySelector('.app').style.display = 'block';
+  }
+
+  async function initApp() {
+    await loadPrefs();
+    initSections();
+    await loadEntries();
+    await loadSessionDate();
+    renderSessionBar();
+    renderEmotions();
+    renderEntry();
+  }
+
+  // ─── Init ───
+  // Hide app until unlocked
+  document.querySelector('.app').style.display = 'none';
+
+  // Check for share URL first — separate flow
+  if (location.hash.startsWith('#share=')) {
+    const encrypted = location.hash.slice(7);
+    document.getElementById('lock-title').textContent = 'Enter the share passphrase';
+    document.getElementById('lock-subtitle').textContent = 'This link contains encrypted diary entries.';
+    document.getElementById('lock-new').style.display = 'none';
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.getElementById('lock-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const pass = document.getElementById('lock-pass').value;
+      if (!pass) return;
+      try {
+        const json = await decryptWithPassphrase(encrypted, pass);
+        const shareEntries = JSON.parse(json);
+        document.getElementById('lock-screen').style.display = 'none';
+        document.querySelector('.app').style.display = 'block';
+        document.getElementById('entry-view').classList.remove('active');
+        document.getElementById('session-bar').style.display = 'none';
+        document.getElementById('share-view').classList.add('active', 'view-fade');
+        renderShareView(shareEntries);
+      } catch {
+        document.getElementById('lock-error').textContent = 'Wrong passphrase.';
+        document.getElementById('lock-pass').value = '';
+        document.getElementById('lock-pass').focus();
+      }
+    });
+  } else if (hasExistingVault()) {
+    // Returning user — unlock
+    document.getElementById('lock-title').textContent = 'Welcome back';
+    document.getElementById('lock-subtitle').textContent = 'Enter your passphrase to unlock your diary.';
+    document.getElementById('lock-new').style.display = 'none';
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.getElementById('lock-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const pass = document.getElementById('lock-pass').value;
+      if (!pass) return;
+      const ok = await unlockWithPassphrase(pass);
+      if (ok) {
+        showApp();
+        await initApp();
+      } else {
+        document.getElementById('lock-error').textContent = 'Wrong passphrase.';
+        document.getElementById('lock-pass').value = '';
+        document.getElementById('lock-pass').focus();
+      }
+    });
+  } else {
+    // New user — set passphrase
+    document.getElementById('lock-title').textContent = 'Create a passphrase';
+    document.getElementById('lock-subtitle').textContent = 'Your diary will be encrypted with this passphrase. There is no recovery if you forget it.';
+    document.getElementById('lock-new').style.display = 'block';
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.getElementById('lock-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const pass = document.getElementById('lock-pass').value;
+      const confirm = document.getElementById('lock-confirm').value;
+      if (!pass) return;
+      if (pass !== confirm) {
+        document.getElementById('lock-error').textContent = 'Passphrases don\'t match.';
+        return;
+      }
+      if (pass.length < 4) {
+        document.getElementById('lock-error').textContent = 'Use at least 4 characters.';
+        return;
+      }
+      await setupPassphrase(pass);
+      showApp();
+      await initApp();
+    });
+  }
+
+  document.getElementById('lock-pass').focus();
+
+})();
+</script>
+</body>
+</html>
