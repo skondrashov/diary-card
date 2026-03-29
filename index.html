@@ -954,7 +954,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   <div class="session-bar" id="session-bar">
     <div><span class="session-bar-label">Last session: </span><span class="session-bar-date" id="session-date">not set</span></div>
     <div class="session-bar-actions">
-      <button class="session-btn" id="set-session">mark today</button>
+      <button class="session-btn" id="set-session">mark current day</button>
       <button class="session-btn share-btn" id="share-btn">share since session</button>
     </div>
   </div>
@@ -1854,7 +1854,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   }
 
   document.getElementById('set-session').addEventListener('click', async () => {
-    await saveSessionDate(dateKey(new Date()));
+    await saveSessionDate(dateKey(currentDate));
     renderSessionBar();
   });
 
