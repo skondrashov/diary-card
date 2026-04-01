@@ -788,13 +788,26 @@ header {
 }
 .share-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.2rem 0;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
   font-size: 0.8rem;
 }
-.share-row-label { color: var(--text-muted); }
-.share-row-value { color: var(--text); font-weight: 500; }
+.share-row-label { color: var(--text-muted); min-width: 0; flex-shrink: 1; }
+.share-row-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 40px;
+}
+.share-row-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.share-row-value { color: var(--text); font-weight: 500; white-space: nowrap; flex-shrink: 0; }
 .share-row-value.on { color: var(--accent); }
 .share-section-label {
   font-size: 0.65rem;
@@ -816,6 +829,95 @@ header {
   color: var(--text-secondary);
   padding: 0.2rem 0;
 }
+.share-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0 0.75rem;
+}
+.share-toolbar button {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.share-toolbar button.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.share-toolbar button:hover { color: var(--text); }
+.share-cal {
+  padding-bottom: 0.75rem;
+}
+.share-cal-month-label {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 0.25rem 0 0.4rem;
+}
+.share-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.share-cal-weekday {
+  text-align: center;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 0.4rem 0 0.3rem;
+}
+.share-cal-day {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: default;
+  transition: all var(--transition);
+  opacity: 0.3;
+}
+.share-cal-day.in-range {
+  opacity: 0.6;
+}
+.share-cal-day.has-data {
+  opacity: 1;
+  color: var(--text);
+  background: var(--bg-raised);
+  cursor: pointer;
+}
+.share-cal-day.has-data:hover {
+  background: var(--accent-dim);
+}
+.share-cal-day.selected {
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+}
+.share-emotion-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.6rem;
+  padding: 0 0.25rem;
+  opacity: 0.5;
+  transition: opacity var(--transition);
+  vertical-align: middle;
+}
+.share-emotion-toggle:hover { opacity: 1; }
+.share-emotion-toggle.hidden { opacity: 0.25; }
+.share-detail { padding-top: 0.25rem; }
 
 /* ─── Info Button & Overlay ─── */
 .info-btn {
@@ -1054,10 +1156,10 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <h2>How your privacy works</h2>
 
       <h3>Your data is encrypted and stays on your device</h3>
-      <p>Your passphrase scrambles your diary entries before they're saved. Without it, no one can read them — not someone borrowing your computer, not your browser, not us. There is no server, no account, and no data ever sent over the internet.</p>
+      <p>Your passphrase scrambles your diary entries before they're saved. Without it, no one can read them — not someone borrowing your computer, not your browser, not us. There is no server, no account, no name, no email, and no data ever sent over the internet.</p>
 
       <h3>Sharing with your therapist</h3>
-      <p>When you share, you pick a share passphrase. Give it to your therapist separately (in person, text, etc.). The link you send them is scrambled — it only becomes readable when they enter the passphrase. No one in between can read it.</p>
+      <p>When you share, you pick a share passphrase — it doesn't have to be the same as your diary passphrase. Give it to your therapist separately (in person, text, etc.). The link you send them is scrambled — it only becomes readable when they enter the passphrase. No one in between can read it.</p>
 
       <h3>If you forget your passphrase</h3>
       <p>Your data is gone. There is no "forgot password" option and no way to recover it. This is the price of not trusting a server with your information. Write it down somewhere safe.</p>
@@ -1148,30 +1250,53 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     return dec.decode(plaintext);
   }
 
+  async function deflate(data) {
+    const stream = new Blob([data]).stream().pipeThrough(new CompressionStream('deflate'));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+
+  async function inflate(compressed) {
+    const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate'));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+
   // Encrypt with a passphrase directly (for share URLs — self-contained, no stored salt)
+  // Format: version(1) + salt(16) + iv(12) + ciphertext(deflated)
   async function encryptWithPassphrase(plaintext, passphrase) {
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveKey(passphrase, salt);
-    const enc = new TextEncoder();
+    const compressed = await deflate(new TextEncoder().encode(plaintext));
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
-    // salt(16) + iv(12) + ciphertext
-    const combined = new Uint8Array(16 + 12 + ciphertext.byteLength);
-    combined.set(salt);
-    combined.set(iv, 16);
-    combined.set(new Uint8Array(ciphertext), 28);
+    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, compressed);
+    // version(1) + salt(16) + iv(12) + ciphertext
+    const combined = new Uint8Array(1 + 16 + 12 + ciphertext.byteLength);
+    combined[0] = 2; // v2 = compressed
+    combined.set(salt, 1);
+    combined.set(iv, 17);
+    combined.set(new Uint8Array(ciphertext), 29);
     return bytesToB64url(combined);
   }
 
   async function decryptWithPassphrase(b64url, passphrase) {
     const combined = b64urlToBytes(b64url);
+    const version = combined[0];
+    if (version === 2) {
+      // v2: compressed
+      const salt = combined.slice(1, 17);
+      const iv = combined.slice(17, 29);
+      const ciphertext = combined.slice(29);
+      const key = await deriveKey(passphrase, salt);
+      const compressed = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext));
+      const plainBytes = await inflate(compressed);
+      return new TextDecoder().decode(plainBytes);
+    }
+    // v1 (legacy, uncompressed): salt(16) + iv(12) + ciphertext
     const salt = combined.slice(0, 16);
     const iv = combined.slice(16, 28);
     const ciphertext = combined.slice(28);
     const key = await deriveKey(passphrase, salt);
-    const dec = new TextDecoder();
     const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
-    return dec.decode(plaintext);
+    return new TextDecoder().decode(plaintext);
   }
 
   async function setupPassphrase(passphrase) {
@@ -1892,94 +2017,210 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     }
   });
 
-  // Render share view (read-only)
-  function renderShareView(shareEntries) {
-    const view = document.getElementById('share-view');
-    const dates = Object.keys(shareEntries).sort();
+  function ratingBar(value, max, colorVar) {
+    const pct = (value / max) * 100;
+    return '<div class="share-row-bar"><div class="share-row-bar-fill" style="width:' + pct + '%;background:var(' + colorVar + ')"></div></div>';
+  }
+
+  // ─── Share View (read-only) ───
+  let _shareEntries = null;
+  let _shareHiddenEmotions = new Set();
+  let _shareMode = 'calendar'; // 'calendar' | 'list'
+  let _shareSelectedDay = null;
+
+  function renderShareDayCard(entry, key) {
+    const d = new Date(key + 'T00:00:00');
+    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    let html = '<div class="share-day-card">';
+    html += '<div class="share-day-date">' + dayNames[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '</div>';
+
+    // Emotions
+    let hasEmotions = false;
+    for (let i = 0; i < EMOTIONS.length; i++) {
+      if (entry['emotion_'+i] != null && !_shareHiddenEmotions.has(EMOTIONS[i])) { hasEmotions = true; break; }
+    }
+    if (hasEmotions) {
+      html += '<div class="share-section-label">Emotions</div>';
+      EMOTIONS.forEach((em, i) => {
+        if (_shareHiddenEmotions.has(em)) return;
+        const v = entry['emotion_'+i];
+        if (v != null) html += '<div class="share-row"><span class="share-row-label">' + em + '</span>' + ratingBar(v, 5, '--c' + v) + '<span class="share-row-value">' + v + '/5</span></div>';
+      });
+    }
+
+    // Urges
+    let hasUrges = false;
+    for (let i = 0; i < URGES.length; i++) {
+      if (entry['urge_'+i] != null) { hasUrges = true; break; }
+    }
+    if (hasUrges) {
+      html += '<div class="share-section-label">Urges</div>';
+      URGES.forEach((u, i) => {
+        const v = entry['urge_'+i];
+        if (v != null) html += '<div class="share-row"><span class="share-row-label">' + u + '</span>' + ratingBar(v, 5, '--c' + v) + '<span class="share-row-value">' + v + '/5</span></div>';
+      });
+    }
+
+    // Actions
+    let hasActions = false;
+    ACTIONS.forEach(a => { if (entry[a.id]) hasActions = true; });
+    if (hasActions) {
+      html += '<div class="share-section-label">Actions</div>';
+      ACTIONS.forEach(a => {
+        if (entry[a.id]) html += '<div class="share-row"><span class="share-row-label">' + a.label + '</span><span class="share-row-value on">yes</span></div>';
+      });
+    }
+
+    // Body
+    const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length);
+    if (hasBody) {
+      html += '<div class="share-section-label">Body</div>';
+      if (entry.sleepHours != null) html += '<div class="share-row"><span class="share-row-label">Sleep</span><span class="share-row-value">' + entry.sleepHours + ' hrs' + (entry.sleepQuality != null ? ' (quality ' + entry.sleepQuality + '/5)' : '') + '</span></div>';
+      if (entry.exerciseMins != null) html += '<div class="share-row"><span class="share-row-label">Exercise</span><span class="share-row-value">' + entry.exerciseMins + ' min' + (entry.exerciseType ? ' — ' + entry.exerciseType : '') + '</span></div>';
+      if (entry.meals && entry.meals.length) {
+        html += '<div class="share-row"><span class="share-row-label">Meals</span><span class="share-row-value">' + entry.meals.filter(m => m).length + '</span></div>';
+        entry.meals.filter(m => m).forEach(m => { html += '<div class="share-meals">&bull; ' + m.replace(/</g,'&lt;') + '</div>'; });
+      }
+    }
+
+    // Skills
+    let hasSkills = false;
+    for (let i = 0; i < SKILLS.length; i++) {
+      if (entry['skill_'+i] != null) { hasSkills = true; break; }
+    }
+    if (hasSkills) {
+      html += '<div class="share-section-label">Skills</div>';
+      SKILLS.forEach((s, i) => {
+        const v = entry['skill_'+i];
+        if (v != null) html += '<div class="share-row"><span class="share-row-label">' + s + '</span>' + ratingBar(v, 7, '--s' + v) + '<span class="share-row-value">' + v + '/7</span></div>';
+      });
+    }
+
+    // Notes
+    if (entry.notes) {
+      html += '<div class="share-section-label">Notes</div>';
+      html += '<div class="share-notes">' + entry.notes.replace(/</g,'&lt;').replace(/\n/g,'<br>') + '</div>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function renderShareCalendar() {
+    const dates = Object.keys(_shareEntries).sort();
+    const dataSet = new Set(dates);
     const from = new Date(dates[0] + 'T00:00:00');
     const to = new Date(dates[dates.length - 1] + 'T00:00:00');
-    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    // Collect months to render
+    const months = [];
+    let cur = new Date(from.getFullYear(), from.getMonth(), 1);
+    while (cur <= to) {
+      months.push({ year: cur.getFullYear(), month: cur.getMonth() });
+      cur.setMonth(cur.getMonth() + 1);
+    }
+
+    let html = '';
+    months.forEach(m => {
+      html += '<div class="share-cal"><div class="share-cal-month-label">' + MONTHS[m.month] + ' ' + m.year + '</div>';
+      html += '<div class="share-cal-grid">';
+      WEEKDAYS.forEach(w => { html += '<div class="share-cal-weekday">' + w + '</div>'; });
+
+      const firstDay = new Date(m.year, m.month, 1).getDay();
+      const daysInMonth = new Date(m.year, m.month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) html += '<div class="share-cal-day"></div>';
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = m.year + '-' + String(m.month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        const hasData = dataSet.has(key);
+        const inRange = new Date(key + 'T00:00:00') >= from && new Date(key + 'T00:00:00') <= to;
+        const selected = key === _shareSelectedDay;
+        const cls = ['share-cal-day'];
+        if (hasData) cls.push('has-data');
+        if (inRange) cls.push('in-range');
+        if (selected) cls.push('selected');
+        html += '<div class="' + cls.join(' ') + '" data-share-day="' + key + '">' + d + '</div>';
+      }
+      html += '</div></div>';
+    });
+
+    return html;
+  }
+
+  function renderShareEmotionToggles() {
+    let html = '<div style="padding:0.25rem 0 0.5rem;display:flex;flex-wrap:wrap;gap:0.25rem 0.5rem;align-items:center">';
+    html += '<span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600">Filter emotions:</span>';
+    EMOTIONS.forEach(em => {
+      const hidden = _shareHiddenEmotions.has(em);
+      html += '<button class="share-emotion-toggle' + (hidden ? ' hidden' : '') + '" data-share-emotion="' + em + '">' +
+        (hidden ? '○' : '●') + ' ' + em + '</button>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function renderShareView(shareEntries) {
+    _shareEntries = shareEntries;
+    const view = document.getElementById('share-view');
+    const dates = Object.keys(shareEntries).sort();
+    if (!_shareSelectedDay && dates.length) _shareSelectedDay = dates[0];
+    const from = new Date(dates[0] + 'T00:00:00');
+    const to = new Date(dates[dates.length - 1] + 'T00:00:00');
 
     let html = '<div class="share-header"><strong>' + dates.length + ' days</strong> &mdash; ' +
       MONTHS[from.getMonth()] + ' ' + from.getDate() + ' to ' + MONTHS[to.getMonth()] + ' ' + to.getDate() + ', ' + to.getFullYear() + '</div>';
 
-    dates.forEach(key => {
-      const entry = shareEntries[key];
-      const d = new Date(key + 'T00:00:00');
-      html += '<div class="share-day-card">';
-      html += '<div class="share-day-date">' + dayNames[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '</div>';
+    // Toolbar
+    html += '<div class="share-toolbar">';
+    html += '<button data-share-mode="calendar"' + (_shareMode === 'calendar' ? ' class="active"' : '') + '>calendar</button>';
+    html += '<button data-share-mode="list"' + (_shareMode === 'list' ? ' class="active"' : '') + '>all days</button>';
+    html += '</div>';
 
-      // Emotions
-      let hasEmotions = false;
-      for (let i = 0; i < EMOTIONS.length; i++) {
-        if (entry['emotion_'+i] != null) { hasEmotions = true; break; }
-      }
-      if (hasEmotions) {
-        html += '<div class="share-section-label">Emotions</div>';
-        EMOTIONS.forEach((em, i) => {
-          const v = entry['emotion_'+i];
-          if (v != null) html += '<div class="share-row"><span class="share-row-label">' + em + '</span><span class="share-row-value">' + v + '/5</span></div>';
-        });
-      }
+    // Emotion toggles
+    html += renderShareEmotionToggles();
 
-      // Urges
-      let hasUrges = false;
-      for (let i = 0; i < URGES.length; i++) {
-        if (entry['urge_'+i] != null) { hasUrges = true; break; }
+    // Calendar or list
+    html += '<div class="share-detail">';
+    if (_shareMode === 'calendar') {
+      html += renderShareCalendar();
+      if (_shareSelectedDay && shareEntries[_shareSelectedDay]) {
+        html += renderShareDayCard(shareEntries[_shareSelectedDay], _shareSelectedDay);
       }
-      if (hasUrges) {
-        html += '<div class="share-section-label">Urges</div>';
-        URGES.forEach((u, i) => {
-          const v = entry['urge_'+i];
-          if (v != null) html += '<div class="share-row"><span class="share-row-label">' + u + '</span><span class="share-row-value">' + v + '/5</span></div>';
-        });
-      }
-
-      // Actions
-      let hasActions = false;
-      ACTIONS.forEach(a => { if (entry[a.id]) hasActions = true; });
-      if (hasActions) {
-        html += '<div class="share-section-label">Actions</div>';
-        ACTIONS.forEach(a => {
-          if (entry[a.id]) html += '<div class="share-row"><span class="share-row-label">' + a.label + '</span><span class="share-row-value on">yes</span></div>';
-        });
-      }
-
-      // Body
-      const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length);
-      if (hasBody) {
-        html += '<div class="share-section-label">Body</div>';
-        if (entry.sleepHours != null) html += '<div class="share-row"><span class="share-row-label">Sleep</span><span class="share-row-value">' + entry.sleepHours + ' hrs' + (entry.sleepQuality != null ? ' (quality ' + entry.sleepQuality + '/5)' : '') + '</span></div>';
-        if (entry.exerciseMins != null) html += '<div class="share-row"><span class="share-row-label">Exercise</span><span class="share-row-value">' + entry.exerciseMins + ' min' + (entry.exerciseType ? ' — ' + entry.exerciseType : '') + '</span></div>';
-        if (entry.meals && entry.meals.length) {
-          html += '<div class="share-row"><span class="share-row-label">Meals</span><span class="share-row-value">' + entry.meals.filter(m => m).length + '</span></div>';
-          entry.meals.filter(m => m).forEach(m => { html += '<div class="share-meals">&bull; ' + m.replace(/</g,'&lt;') + '</div>'; });
-        }
-      }
-
-      // Skills
-      let hasSkills = false;
-      for (let i = 0; i < SKILLS.length; i++) {
-        if (entry['skill_'+i] != null) { hasSkills = true; break; }
-      }
-      if (hasSkills) {
-        html += '<div class="share-section-label">Skills</div>';
-        SKILLS.forEach((s, i) => {
-          const v = entry['skill_'+i];
-          if (v != null) html += '<div class="share-row"><span class="share-row-label">' + s + '</span><span class="share-row-value">' + v + '/7 — ' + (SKILL_HINTS[v] || '') + '</span></div>';
-        });
-      }
-
-      // Notes
-      if (entry.notes) {
-        html += '<div class="share-section-label">Notes</div>';
-        html += '<div class="share-notes">' + entry.notes.replace(/</g,'&lt;').replace(/\n/g,'<br>') + '</div>';
-      }
-
-      html += '</div>';
-    });
+    } else {
+      dates.forEach(key => {
+        html += renderShareDayCard(shareEntries[key], key);
+      });
+    }
+    html += '</div>';
 
     view.innerHTML = html;
+
+    // Event listeners — mode toggle
+    view.querySelectorAll('[data-share-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        _shareMode = btn.dataset.shareMode;
+        renderShareView(_shareEntries);
+      });
+    });
+
+    // Event listeners — calendar day click
+    view.querySelectorAll('.share-cal-day.has-data').forEach(el => {
+      el.addEventListener('click', () => {
+        _shareSelectedDay = el.dataset.shareDay;
+        renderShareView(_shareEntries);
+      });
+    });
+
+    // Event listeners — emotion toggles
+    view.querySelectorAll('.share-emotion-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const em = btn.dataset.shareEmotion;
+        if (_shareHiddenEmotions.has(em)) _shareHiddenEmotions.delete(em);
+        else _shareHiddenEmotions.add(em);
+        renderShareView(_shareEntries);
+      });
+    });
   }
 
   // ─── Info overlay ───
@@ -2031,6 +2272,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
         document.querySelector('.app').style.display = 'block';
         document.getElementById('entry-view').classList.remove('active');
         document.getElementById('session-bar').style.display = 'none';
+        document.getElementById('cal-btn').style.display = 'none';
         document.getElementById('share-view').classList.add('active', 'view-fade');
         renderShareView(shareEntries);
       } catch {
