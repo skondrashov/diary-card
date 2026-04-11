@@ -1007,6 +1007,310 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 }
 .info-close:hover { border-color: var(--accent); color: var(--accent); }
 
+/* ─── Wizard Overlay ─── */
+.wizard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.wizard-overlay.visible { display: flex; }
+body.light-mode .wizard-overlay { background: rgba(0,0,0,0.35); }
+.wizard-panel {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  max-width: 480px;
+  width: 100%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  animation: fadeUp 0.2s ease;
+}
+body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+.wizard-header {
+  padding: 1.25rem 1.5rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.wizard-steps {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+.wizard-step-dot {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background var(--transition);
+}
+.wizard-step-dot.active { background: var(--accent); }
+.wizard-step-dot.done { background: var(--accent); opacity: 0.5; }
+.wizard-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 0.3rem;
+}
+.wizard-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+}
+.wizard-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1rem 1.5rem;
+}
+.wizard-group { margin-bottom: 1.2rem; }
+.wizard-group-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+.wizard-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.wizard-item:hover { background: var(--bg-input); }
+.wizard-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-input);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.wizard-item.checked .wizard-check {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.wizard-item.checked .wizard-check::after {
+  content: '✓';
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.wizard-item-label { flex: 1; min-width: 0; }
+.wizard-item-title { font-size: 0.85rem; color: var(--text); }
+.wizard-item-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+  line-height: 1.4;
+}
+.wizard-welcome-body p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0.8rem;
+}
+.wizard-welcome-body .wizard-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.wizard-quick-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+.wizard-quick-btn {
+  background: none;
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-body);
+}
+.wizard-quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+.wizard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem 1.1rem;
+  border-top: 1px solid var(--border);
+}
+.wizard-btn {
+  background: none;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 0.45rem 1.1rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.wizard-btn:hover { border-color: var(--text); color: var(--text); }
+.wizard-btn.primary {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.wizard-btn.primary:hover { background: var(--accent-glow); }
+.wizard-btn:disabled { opacity: 0.35; cursor: default; }
+.wizard-btn.ghost { border: none; color: var(--text-muted); }
+.wizard-btn.ghost:hover { color: var(--text-secondary); }
+
+/* ─── Lock Screen extras ─── */
+.lock-secondary {
+  display: block;
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+  font-family: var(--font-body);
+  width: 100%;
+  transition: color var(--transition);
+}
+.lock-secondary:hover { color: var(--accent); text-decoration-color: var(--accent); }
+
+/* ─── URL Budget Indicator ─── */
+.url-budget {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  margin-bottom: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: border-color var(--transition);
+  font-size: 0.72rem;
+}
+.url-budget:hover { border-color: var(--border-light); }
+.url-budget-label {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  font-size: 0.6rem;
+  flex-shrink: 0;
+}
+.url-budget-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.url-budget-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+.url-budget-fill.warn { background: var(--c3); }
+.url-budget-fill.alert { background: var(--c5); }
+.url-budget-text {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.url-budget-pct {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.url-budget-popover-body { font-size: 0.8rem; }
+.url-budget-popover-body .budget-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  color: var(--text-secondary);
+}
+.url-budget-popover-body .budget-stat strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.url-budget-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--bg-input);
+  border-radius: 2px;
+  outline: none;
+  margin: 0.6rem 0 0.25rem;
+}
+.url-budget-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg-raised);
+}
+.url-budget-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg-raised);
+}
+.url-budget-marks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+/* ─── Info panel customize button ─── */
+.info-panel .customize-btn {
+  display: block;
+  margin: 0.75rem auto 0;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  padding: 0.4rem 1.25rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.info-panel .customize-btn:hover { background: var(--accent-glow); }
+
 /* ─── Skill tooltip ─── */
 .skill-hint {
   font-size: 0.6rem;
@@ -1041,6 +1345,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <div class="lock-error" id="lock-error"></div>
       <button type="submit" class="lock-btn">unlock</button>
     </form>
+    <button type="button" class="lock-secondary" id="lock-start-over" style="display:none">or — start a new diary (deletes the existing one)</button>
   </div>
 </div>
 
@@ -1067,6 +1372,12 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   <!-- ─── Entry View ─── -->
   <div class="entry-view active" id="entry-view">
+    <div class="url-budget" id="url-budget" title="Share link size — click to adjust budget">
+      <span class="url-budget-label">share</span>
+      <div class="url-budget-bar"><div class="url-budget-fill" id="url-budget-fill"></div></div>
+      <span class="url-budget-text"><span id="url-budget-chars">—</span>/<span id="url-budget-max">2,000</span></span>
+      <span class="url-budget-pct" id="url-budget-pct">0%</span>
+    </div>
     <div class="date-nav">
       <button id="prev-day">&#9664;</button>
       <div class="date-display" id="date-display" title="Jump to calendar"></div>
@@ -1093,36 +1404,44 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     </div>
 
     <div class="section" id="body-section">
-      <div class="section-header">Body</div>
-      <div class="tracking-row">
-        <div class="tracking-label">Sleep</div>
-        <div class="tracking-input-group">
-          <input type="number" class="tracking-input" id="sleep-hours" min="0" max="24" step="0.5" placeholder="hrs">
-          <div class="rating-pills sleep-quality-pills" data-field="sleepQuality" data-type="intensity">
-            <div class="pill" data-value="0">0</div>
-            <div class="pill" data-value="1">1</div>
-            <div class="pill" data-value="2">2</div>
-            <div class="pill" data-value="3">3</div>
-            <div class="pill" data-value="4">4</div>
-            <div class="pill" data-value="5">5</div>
-          </div>
-          <span class="tracking-hint">quality</span>
-        </div>
-      </div>
-      <div class="tracking-row">
-        <div class="tracking-label">Exercise</div>
-        <div class="tracking-input-group">
-          <input type="number" class="tracking-input" id="exercise-mins" min="0" max="999" step="5" placeholder="min">
-          <input type="text" class="tracking-text" id="exercise-type" placeholder="what'd you do?">
-        </div>
-      </div>
-      <div class="meals-section">
+      <div class="section-header">Daily</div>
+      <div class="category-section" id="cat-sleep">
         <div class="tracking-row">
-          <div class="tracking-label">Meals</div>
-          <button class="add-meal-btn" id="add-meal">+ add</button>
+          <div class="tracking-label">Sleep</div>
+          <div class="tracking-input-group">
+            <input type="number" class="tracking-input" id="sleep-hours" min="0" max="24" step="0.5" placeholder="hrs">
+            <div class="rating-pills sleep-quality-pills" data-field="sleepQuality" data-type="intensity">
+              <div class="pill" data-value="0">0</div>
+              <div class="pill" data-value="1">1</div>
+              <div class="pill" data-value="2">2</div>
+              <div class="pill" data-value="3">3</div>
+              <div class="pill" data-value="4">4</div>
+              <div class="pill" data-value="5">5</div>
+            </div>
+            <span class="tracking-hint">quality</span>
+          </div>
         </div>
-        <div id="meals-list"></div>
       </div>
+      <div class="category-section" id="cat-exercise">
+        <div class="tracking-row">
+          <div class="tracking-label">Exercise</div>
+          <div class="tracking-input-group">
+            <input type="number" class="tracking-input" id="exercise-mins" min="0" max="999" step="5" placeholder="min">
+            <input type="text" class="tracking-text" id="exercise-type" placeholder="what'd you do?">
+          </div>
+        </div>
+      </div>
+      <div class="category-section" id="cat-meals">
+        <div class="meals-section">
+          <div class="tracking-row">
+            <div class="tracking-label">Meals</div>
+            <button class="add-meal-btn" id="add-meal">+ add</button>
+          </div>
+          <div id="meals-list"></div>
+        </div>
+      </div>
+      <!-- Toggle-style categories (medications, nap, shower, etc.) are built dynamically in buildDynamicSections(). -->
+      <div id="toggle-categories"></div>
     </div>
 
     <div class="section" id="skills-section">
@@ -1178,6 +1497,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <h3>Technical details</h3>
       <p style="font-size:0.75rem">AES-256-GCM encryption. Key derived via PBKDF2 with 200,000 iterations and a random 128-bit salt. Each save uses a fresh 96-bit IV. Share links are self-contained: salt + IV + ciphertext in base64url. No cookies, no analytics, no network requests. All cryptography uses the browser's native Web Crypto API.</p>
 
+      <button class="customize-btn" id="info-customize">Customize fields</button>
       <button class="info-close" id="info-close">got it</button>
     </div>
   </div>
@@ -1185,6 +1505,43 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   <div class="footer">
     <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2 2 0 012 2v4H6V3a2 2 0 012-2zm3 6V3a3 3 0 00-6 0v4a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
     Encrypted on your device &mdash; never sent anywhere
+  </div>
+</div>
+
+<!-- Overlays live outside .app so they render even while the app shell is hidden (e.g., during the new-user wizard flow). -->
+<div class="wizard-overlay" id="wizard-overlay">
+  <div class="wizard-panel">
+    <div class="wizard-header">
+      <div class="wizard-steps" id="wizard-steps"></div>
+      <div class="wizard-title" id="wizard-title"></div>
+      <div class="wizard-subtitle" id="wizard-subtitle"></div>
+    </div>
+    <div class="wizard-body" id="wizard-body"></div>
+    <div class="wizard-footer">
+      <button class="wizard-btn ghost" id="wizard-back">Back</button>
+      <div style="flex:1"></div>
+      <button class="wizard-btn" id="wizard-skip">Skip all</button>
+      <button class="wizard-btn primary" id="wizard-next">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="info-overlay" id="budget-overlay">
+  <div class="info-panel">
+    <h2>Share link budget</h2>
+    <p>This is how many characters your share link would take right now, if you shared everything from your last session marker to today. The budget is your own soft limit — some messaging apps truncate long URLs, so set it to whatever's safe for where you usually send links.</p>
+    <div class="url-budget-popover-body">
+      <div class="budget-stat"><span>Current link</span><strong id="budget-current">—</strong></div>
+      <div class="budget-stat"><span>Per day average</span><strong id="budget-per-day">—</strong></div>
+      <div class="budget-stat"><span>Days included</span><strong id="budget-days">—</strong></div>
+    </div>
+    <h3>Your budget</h3>
+    <input type="range" class="url-budget-slider" id="budget-slider" min="500" max="30000" step="100">
+    <div class="url-budget-marks">
+      <span>500</span><span>2k</span><span>8k</span><span>30k</span>
+    </div>
+    <p style="font-size:0.72rem"><strong id="budget-slider-value">2000</strong> chars — <span id="budget-slider-note"></span></p>
+    <button class="info-close" id="budget-close">done</button>
   </div>
 </div>
 
@@ -1335,7 +1692,118 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   // ─── Data ───
   const PREFS_KEY = 'dbt_prefs_enc';
   const DEFAULT_EMOTIONS = ['Sadness','Anger','Shame','Fear / Anxiety','Joy','Guilt','Loneliness','Jealousy','Disgust','Numbness','Overwhelm','Hopelessness','Love / Connection'];
-  let prefs = { emotions: [...DEFAULT_EMOTIONS], hiddenEmotions: [], showHidden: false };
+  const CURRENT_SCHEMA_VERSION = 2;
+
+  const EMOTIONS = DEFAULT_EMOTIONS; // reference for share view
+  // Append-only: new urges must go at the end so stored indices remain stable forever.
+  const URGES = ['Self-harm','Suicide','Weed','Other substances','Quit therapy','Alcohol','Nicotine','Binge','Restrict','Purge','Isolate','Lash out'];
+  const URGE_GROUPS = [
+    { label: 'Self-harm', indices: [0, 1] },
+    { label: 'Substance use', indices: [2, 3, 5, 6] },
+    { label: 'Behavioral', indices: [4, 7, 8, 9, 10, 11] }
+  ];
+  // Append-only: new actions must go at the end. tookMedications was moved to CATEGORIES,
+  // but we leave existing stored boolean data alone — the field id is unchanged.
+  const ACTIONS = [
+    { id: 'selfHarmed', label: 'Self-harmed' },
+    { id: 'suicidalAction', label: 'Suicidal action' },
+    { id: 'usedWeed', label: 'Used weed' },
+    { id: 'usedOtherSubstances', label: 'Used other substances' },
+    { id: 'drankAlcohol', label: 'Drank alcohol' },
+    { id: 'usedNicotine', label: 'Used nicotine' },
+    { id: 'binged', label: 'Binged' },
+    { id: 'restricted', label: 'Restricted' },
+    { id: 'purged', label: 'Purged' },
+    { id: 'isolated', label: 'Isolated' },
+    { id: 'lashedOut', label: 'Lashed out' }
+  ];
+  const ACTION_GROUPS = [
+    { label: 'Self-harm', ids: ['selfHarmed', 'suicidalAction'] },
+    { label: 'Substance use', ids: ['usedWeed', 'usedOtherSubstances', 'drankAlcohol', 'usedNicotine'] },
+    { label: 'Behavioral', ids: ['binged', 'restricted', 'purged', 'isolated', 'lashedOut'] }
+  ];
+  // Schema v2: individual DBT skills (was 4 modules). Migration in migrateEntriesV1toV2() moves
+  // old skill_0..3 into entry.legacySkills so they're not misinterpreted as individual skills.
+  const SKILLS = [
+    // Mindfulness (0-6)
+    'Wise Mind','Observe','Describe','Participate','Non-judgmental stance','One-mindfully','Effectiveness',
+    // Distress Tolerance (7-13)
+    'TIPP','Self-soothe','IMPROVE the moment','Pros and cons','Radical acceptance','Half-smile','Turning the mind',
+    // Emotion Regulation (14-20)
+    'PLEASE','Opposite action','Check the facts','Problem solving','Accumulate positives','Build mastery','Cope ahead',
+    // Interpersonal Effectiveness (21-25)
+    'DEAR MAN','GIVE','FAST','Validate','Repair'
+  ];
+  const SKILL_GROUPS = [
+    { label: 'Mindfulness', indices: [0, 1, 2, 3, 4, 5, 6] },
+    { label: 'Distress Tolerance', indices: [7, 8, 9, 10, 11, 12, 13] },
+    { label: 'Emotion Regulation', indices: [14, 15, 16, 17, 18, 19, 20] },
+    { label: 'Interpersonal Effectiveness', indices: [21, 22, 23, 24, 25] }
+  ];
+  const SKILL_HINTS = {
+    0:'not thought about',1:'thought about, didn\'t want to',2:'thought about, wanted to',
+    3:'tried, couldn\'t use',4:'tried, didn\'t help',5:'used, helped',6:'automatic, didn\'t help',7:'automatic, helped'
+  };
+
+  // Daily categories. 'complex' categories have their own hand-built HTML (sleep/exercise/meals);
+  // 'toggle' categories are simple booleans that we build dynamically in buildDynamicSections().
+  // Append-only: new category ids go at the end so share-link field names stay stable.
+  const CATEGORIES = [
+    { id: 'sleep', label: 'Sleep', desc: 'Hours slept and quality rating', type: 'complex' },
+    { id: 'exercise', label: 'Exercise', desc: 'Minutes and what you did', type: 'complex' },
+    { id: 'meals', label: 'Meals', desc: 'List what you ate', type: 'complex' },
+    { id: 'medications', label: 'Took medications', desc: 'Did you take your meds today?', type: 'toggle', field: 'tookMedications' },
+    { id: 'nap', label: 'Napped', desc: 'Did you nap?', type: 'toggle', field: 'napped' },
+    { id: 'shower', label: 'Showered', desc: 'Did you shower?', type: 'toggle', field: 'showered' },
+    { id: 'teeth', label: 'Brushed teeth', desc: 'Did you brush your teeth?', type: 'toggle', field: 'brushedTeeth' },
+    { id: 'meditate', label: 'Meditated', desc: 'Did you meditate?', type: 'toggle', field: 'meditated' },
+    { id: 'water', label: 'Drank water', desc: 'Stayed hydrated?', type: 'toggle', field: 'drankWater' },
+    { id: 'outside', label: 'Went outside', desc: 'Got some fresh air?', type: 'toggle', field: 'wentOutside' },
+    { id: 'social', label: 'Social contact', desc: 'Interacted with someone?', type: 'toggle', field: 'socialContact' }
+  ];
+
+  const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  // ─── Prefs (declared after the vocabulary constants so defaults can reference SKILLS.length etc) ───
+  // Conservative defaults: hide everything that's new in this release so that "Skip all" in the
+  // wizard yields the same experience the pre-feature version had (plus the skills migration).
+  // New users will explicitly opt-in to new items by walking through the wizard.
+  //
+  // Pre-feature urges were indices 0-4. New urges (5-11) default hidden.
+  // Pre-feature actions kept all 5 ids except tookMedications moved to Categories; new ones default hidden.
+  // Pre-feature categories: sleep/exercise/meals were always shown; tookMedications existed as an action
+  //   and is now a category — keep it visible so existing data stays reachable. New categories default hidden.
+  // Pre-feature skills were 4 modules. Post-migration those slots are gone; show the 4 "module proxy"
+  //   skills (Wise Mind / TIPP / Opposite Action / DEAR MAN — indices 0, 7, 14, 21).
+  const DEFAULT_HIDDEN_URGES = [5, 6, 7, 8, 9, 10, 11];
+  const DEFAULT_HIDDEN_ACTIONS = ['drankAlcohol', 'usedNicotine', 'binged', 'restricted', 'purged', 'isolated', 'lashedOut'];
+  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'shower', 'teeth', 'meditate', 'water', 'outside', 'social'];
+  const MODULE_PROXY_SKILL_INDICES = [0, 7, 14, 21];
+  const DEFAULT_HIDDEN_SKILLS = (function() {
+    const hidden = [];
+    for (let i = 0; i < SKILLS.length; i++) {
+      if (!MODULE_PROXY_SKILL_INDICES.includes(i)) hidden.push(i);
+    }
+    return hidden;
+  })();
+
+  function makeDefaultPrefs() {
+    return {
+      emotions: [...DEFAULT_EMOTIONS],
+      hiddenEmotions: [],
+      hiddenUrges: [...DEFAULT_HIDDEN_URGES],
+      hiddenActions: [...DEFAULT_HIDDEN_ACTIONS],
+      hiddenCategories: [...DEFAULT_HIDDEN_CATEGORIES],
+      hiddenSkills: [...DEFAULT_HIDDEN_SKILLS],
+      showHidden: false,
+      onboarded: false,        // true after the user completes/skips the wizard
+      urlBudget: 2000,         // user-tuned target URL size in chars
+      schemaVersion: CURRENT_SCHEMA_VERSION
+    };
+  }
+
+  let prefs = makeDefaultPrefs();
 
   async function loadPrefs() {
     try {
@@ -1343,35 +1811,41 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       if (enc) {
         const json = await decryptString(enc);
         const saved = JSON.parse(json);
-        prefs = { emotions: saved.emotions || [...DEFAULT_EMOTIONS], hiddenEmotions: saved.hiddenEmotions || [], showHidden: false };
+        // Merge saved over defaults so any newly-added field has a sane default.
+        const defaults = makeDefaultPrefs();
+        prefs = {
+          emotions: saved.emotions || defaults.emotions,
+          hiddenEmotions: saved.hiddenEmotions || defaults.hiddenEmotions,
+          hiddenUrges: saved.hiddenUrges || defaults.hiddenUrges,
+          hiddenActions: saved.hiddenActions || defaults.hiddenActions,
+          hiddenCategories: saved.hiddenCategories || defaults.hiddenCategories,
+          hiddenSkills: saved.hiddenSkills || defaults.hiddenSkills,
+          showHidden: false, // always reset — transient UI state
+          onboarded: !!saved.onboarded,
+          urlBudget: typeof saved.urlBudget === 'number' ? saved.urlBudget : defaults.urlBudget,
+          // schemaVersion missing from old prefs → treat as v1 so migration runs.
+          schemaVersion: typeof saved.schemaVersion === 'number' ? saved.schemaVersion : 1
+        };
       }
     } catch {}
   }
 
   async function savePrefs() {
     try {
-      const enc = await encryptString(JSON.stringify({ emotions: prefs.emotions, hiddenEmotions: prefs.hiddenEmotions }));
+      const enc = await encryptString(JSON.stringify({
+        emotions: prefs.emotions,
+        hiddenEmotions: prefs.hiddenEmotions,
+        hiddenUrges: prefs.hiddenUrges,
+        hiddenActions: prefs.hiddenActions,
+        hiddenCategories: prefs.hiddenCategories,
+        hiddenSkills: prefs.hiddenSkills,
+        onboarded: prefs.onboarded,
+        urlBudget: prefs.urlBudget,
+        schemaVersion: prefs.schemaVersion
+      }));
       localStorage.setItem(PREFS_KEY, enc);
     } catch {}
   }
-
-  const EMOTIONS = DEFAULT_EMOTIONS; // reference for share view
-  const URGES = ['Self-harm','Suicide','Weed','Other substances','Quit therapy'];
-  const ACTIONS = [
-    { id: 'selfHarmed', label: 'Self-harmed' },
-    { id: 'suicidalAction', label: 'Suicidal action' },
-    { id: 'usedWeed', label: 'Used weed' },
-    { id: 'usedOtherSubstances', label: 'Used other substances' },
-    { id: 'tookMedications', label: 'Took medications' }
-  ];
-  const SKILLS = ['Mindfulness','Distress Tolerance','Emotion Regulation','Interpersonal Effectiveness'];
-  const SKILL_HINTS = {
-    0:'not thought about',1:'thought about, didn\'t want to',2:'thought about, wanted to',
-    3:'tried, couldn\'t use',4:'tried, didn\'t help',5:'used, helped',6:'automatic, didn\'t help',7:'automatic, helped'
-  };
-
-  const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   // ─── State ───
   let currentDate = new Date();
@@ -1401,6 +1875,32 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     } catch {}
   }
 
+  // Migrate pre-feature entries where skill_0..3 meant the four DBT modules (not individual skills
+  // at those indices). Moves old values into entry.legacySkills so nothing is lost, and bumps
+  // prefs.schemaVersion to CURRENT_SCHEMA_VERSION. Idempotent — skipped once schemaVersion reaches 2.
+  async function migrateEntriesV1toV2() {
+    if (prefs.schemaVersion >= CURRENT_SCHEMA_VERSION) return;
+    let changed = false;
+    for (const [, entry] of Object.entries(entries)) {
+      const legacy = {};
+      let hadOld = false;
+      for (const i of [0, 1, 2, 3]) {
+        if (entry['skill_' + i] != null) {
+          legacy['module_' + i] = entry['skill_' + i];
+          delete entry['skill_' + i];
+          hadOld = true;
+        }
+      }
+      if (hadOld) {
+        entry.legacySkills = Object.assign(entry.legacySkills || {}, legacy);
+        changed = true;
+      }
+    }
+    if (changed) await saveEntries();
+    prefs.schemaVersion = CURRENT_SCHEMA_VERSION;
+    await savePrefs();
+  }
+
   function getEntry(key) {
     return entries[key] || {};
   }
@@ -1416,9 +1916,12 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   }
 
   // ─── Build UI ───
-  function buildRatingRow(container, label, fieldPrefix, max, type) {
+  // dynKey is a stable identifier used by buildDynamicSections() to find and remove this row
+  // when rebuilding (e.g., after the wizard changes visibility).
+  function buildRatingRow(container, label, fieldPrefix, max, type, dynKey) {
     const row = document.createElement('div');
     row.className = 'rating-row';
+    if (dynKey) row.dataset.dyn = dynKey;
 
     const lbl = document.createElement('div');
     lbl.className = 'rating-label';
@@ -1445,6 +1948,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
           setField(key, fieldPrefix, i);
         }
         renderEntry();
+        scheduleUrlBudgetUpdate();
       });
       pills.appendChild(p);
     }
@@ -1460,9 +1964,10 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     container.appendChild(row);
   }
 
-  function buildToggleRow(container, action) {
+  function buildToggleRow(container, action, dynKey) {
     const row = document.createElement('div');
     row.className = 'toggle-row';
+    if (dynKey) row.dataset.dyn = dynKey;
 
     const lbl = document.createElement('div');
     lbl.className = 'toggle-label';
@@ -1477,6 +1982,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       const current = !!getEntry(key)[action.id];
       setField(key, action.id, !current);
       renderEntry();
+      scheduleUrlBudgetUpdate();
     });
     row.appendChild(toggle);
 
@@ -1527,6 +2033,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
           const current = getEntry(key)['emotion_' + i];
           setField(key, 'emotion_' + i, current === v ? null : v);
           renderEntry();
+          scheduleUrlBudgetUpdate();
         });
         pills.appendChild(p);
       }
@@ -1566,20 +2073,71 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     showBtn.classList.toggle('active', prefs.showHidden);
   }
 
-  function initSections() {
+  // Section headers for urges/actions/skills live in HTML; we only rebuild the rows below them.
+  // Container used to parent dynamically-built rows for each section, per build cycle.
+  const DYNAMIC_KEYS = {
+    urges: 'urges-section',
+    actions: 'actions-section',
+    skills: 'skills-section',
+    toggleCategories: 'toggle-categories'
+  };
 
-    const urgesSec = document.getElementById('urges-section');
+  // Build (or rebuild) the dynamically-rendered rows. Safe to call repeatedly —
+  // clears existing children tagged as dynamic first, then rebuilds from the current vocabulary
+  // minus whatever's hidden in prefs. Skips items in prefs.hiddenUrges / hiddenActions / hiddenSkills
+  // so hidden fields are never even in the DOM, which is what makes hidden items shrink share links.
+  function buildDynamicSections() {
+    // Urges
+    const urgesSec = document.getElementById(DYNAMIC_KEYS.urges);
+    urgesSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
     URGES.forEach((u, i) => {
-      buildRatingRow(urgesSec, u, 'urge_'+i, 5, 'intensity');
+      if (prefs.hiddenUrges.includes(i)) return;
+      buildRatingRow(urgesSec, u, 'urge_'+i, 5, 'intensity', 'urge_'+i);
     });
 
-    const actionsSec = document.getElementById('actions-section');
-    ACTIONS.forEach(a => buildToggleRow(actionsSec, a));
+    // Actions
+    const actionsSec = document.getElementById(DYNAMIC_KEYS.actions);
+    actionsSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
+    ACTIONS.forEach(a => {
+      if (prefs.hiddenActions.includes(a.id)) return;
+      buildToggleRow(actionsSec, a, 'action_'+a.id);
+    });
 
-    const skillsSec = document.getElementById('skills-section');
+    // Skills
+    const skillsSec = document.getElementById(DYNAMIC_KEYS.skills);
+    skillsSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
     SKILLS.forEach((s, i) => {
-      buildRatingRow(skillsSec, s, 'skill_'+i, 7, 'skill');
+      if (prefs.hiddenSkills.includes(i)) return;
+      buildRatingRow(skillsSec, s, 'skill_'+i, 7, 'skill', 'skill_'+i);
     });
+
+    // Toggle categories (dynamic — built here instead of in HTML because they're optional)
+    const toggleCatSec = document.getElementById(DYNAMIC_KEYS.toggleCategories);
+    toggleCatSec.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+      if (cat.type !== 'toggle') return;
+      if (prefs.hiddenCategories.includes(cat.id)) return;
+      buildToggleRow(toggleCatSec, { id: cat.field, label: cat.label }, 'cat_'+cat.id);
+    });
+  }
+
+  // Toggle display on the "complex" category wrappers (sleep/exercise/meals).
+  // Must run after buildDynamicSections so any toggle-categories have been rebuilt.
+  function applyCategoryVisibility() {
+    CATEGORIES.forEach(cat => {
+      if (cat.type !== 'complex') return;
+      const el = document.getElementById('cat-'+cat.id);
+      if (el) el.style.display = prefs.hiddenCategories.includes(cat.id) ? 'none' : '';
+    });
+  }
+
+  // Static input handlers — attach once per app load. If called a second time, handlers
+  // would stack up, so the init flow calls this once and buildDynamicSections+applyCategoryVisibility
+  // for subsequent re-renders (e.g., after wizard save).
+  let _staticHandlersAttached = false;
+  function initStaticHandlers() {
+    if (_staticHandlersAttached) return;
+    _staticHandlersAttached = true;
 
     // Sleep quality pills
     document.querySelectorAll('.sleep-quality-pills .pill').forEach(p => {
@@ -1589,6 +2147,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
         const current = getEntry(key).sleepQuality;
         setField(key, 'sleepQuality', current === v ? null : v);
         renderEntry();
+        scheduleUrlBudgetUpdate();
       });
     });
 
@@ -1597,6 +2156,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       const key = dateKey(currentDate);
       const v = this.value === '' ? null : parseFloat(this.value);
       setField(key, 'sleepHours', v);
+      scheduleUrlBudgetUpdate();
     });
 
     // Exercise
@@ -1604,10 +2164,12 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       const key = dateKey(currentDate);
       const v = this.value === '' ? null : parseInt(this.value);
       setField(key, 'exerciseMins', v);
+      scheduleUrlBudgetUpdate();
     });
     document.getElementById('exercise-type').addEventListener('input', function() {
       const key = dateKey(currentDate);
       setField(key, 'exerciseType', this.value || null);
+      scheduleUrlBudgetUpdate();
     });
 
     // Meals
@@ -1618,6 +2180,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       meals.push('');
       setField(key, 'meals', meals);
       renderEntry();
+      scheduleUrlBudgetUpdate();
       // Focus the new input
       const inputs = document.querySelectorAll('#meals-list input');
       if (inputs.length) inputs[inputs.length - 1].focus();
@@ -1639,7 +2202,12 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       renderEmotions();
       renderEntry();
     });
+  }
 
+  function initSections() {
+    initStaticHandlers();
+    buildDynamicSections();
+    applyCategoryVisibility();
     renderEmotions();
   }
 
@@ -1744,6 +2312,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
         const m = getEntry(key).meals || [];
         m[i] = this.value;
         setField(key, 'meals', m);
+        scheduleUrlBudgetUpdate();
       });
       row.appendChild(inp);
       const rm = document.createElement('button');
@@ -1755,6 +2324,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
         m.splice(i, 1);
         setField(key, 'meals', m.length ? m : null);
         renderEntry();
+        scheduleUrlBudgetUpdate();
       });
       row.appendChild(rm);
       mealsList.appendChild(row);
@@ -1773,7 +2343,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       const v = entry['emotion_'+i];
       if (v !== null && v !== undefined) { sum += v; count++; }
     }
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < URGES.length; i++) {
       const v = entry['urge_'+i];
       if (v !== null && v !== undefined) { sum += v; count++; }
     }
@@ -1783,7 +2353,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   function avgSkills(entry) {
     if (!entry) return null;
     let sum = 0, count = 0;
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < SKILLS.length; i++) {
       const v = entry['skill_'+i];
       if (v !== null && v !== undefined) { sum += v; count++; }
     }
@@ -1933,6 +2503,7 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   document.getElementById('notes').addEventListener('input', function() {
     const key = dateKey(currentDate);
     setField(key, 'notes', this.value);
+    scheduleUrlBudgetUpdate();
   });
 
   document.getElementById('theme-btn').addEventListener('click', () => {
@@ -2075,16 +2646,20 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       });
     }
 
-    // Body
-    const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length);
+    // Body / Daily check-ins
+    const toggleCats = CATEGORIES.filter(c => c.type === 'toggle' && entry[c.field]);
+    const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length) || toggleCats.length > 0;
     if (hasBody) {
-      html += '<div class="share-section-label">Body</div>';
+      html += '<div class="share-section-label">Daily</div>';
       if (entry.sleepHours != null) html += '<div class="share-row"><span class="share-row-label">Sleep</span><span class="share-row-value">' + entry.sleepHours + ' hrs' + (entry.sleepQuality != null ? ' (quality ' + entry.sleepQuality + '/5)' : '') + '</span></div>';
       if (entry.exerciseMins != null) html += '<div class="share-row"><span class="share-row-label">Exercise</span><span class="share-row-value">' + entry.exerciseMins + ' min' + (entry.exerciseType ? ' — ' + entry.exerciseType : '') + '</span></div>';
       if (entry.meals && entry.meals.length) {
         html += '<div class="share-row"><span class="share-row-label">Meals</span><span class="share-row-value">' + entry.meals.filter(m => m).length + '</span></div>';
         entry.meals.filter(m => m).forEach(m => { html += '<div class="share-meals">&bull; ' + m.replace(/</g,'&lt;') + '</div>'; });
       }
+      toggleCats.forEach(cat => {
+        html += '<div class="share-row"><span class="share-row-label">' + cat.label + '</span><span class="share-row-value on">yes</span></div>';
+      });
     }
 
     // Skills
@@ -2237,6 +2812,429 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   document.getElementById('info-overlay').addEventListener('click', e => {
     if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
   });
+  document.getElementById('info-customize').addEventListener('click', () => {
+    document.getElementById('info-overlay').classList.remove('visible');
+    openWizard('edit');
+  });
+
+  // ─── Wizard ───
+  // wizardMode: 'newUser' (no vault yet, draft held in memory until passphrase is set)
+  //           | 'firstRun' (vault exists but prefs.onboarded is false — e.g., migrating existing user)
+  //           | 'edit' (user reopened from info panel to tweak visibility)
+  let wizardMode = 'firstRun';
+  let wizardStepIdx = 0;
+  // A draft of the "hidden*" sets, mutated as the user clicks. Applied to prefs on Done.
+  let wizardDraft = null;
+
+  const WIZARD_STEPS = [
+    { id: 'welcome', title: 'Welcome', subtitle: null, render: renderWizardWelcome, showInEdit: false },
+    { id: 'emotions', title: 'Emotions', subtitle: 'Check the ones you want to track. You can change this any time from the info menu.', render: renderWizardEmotions, showInEdit: true },
+    { id: 'urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
+    { id: 'actions', title: 'Actions', subtitle: 'Actions track whether you acted on an urge. "Quit therapy" isn\'t here because it isn\'t a daily thing.', render: renderWizardActions, showInEdit: true },
+    { id: 'categories', title: 'Daily check-ins', subtitle: 'Everything you might want to log about your day outside of feelings.', render: renderWizardCategories, showInEdit: true },
+    { id: 'skills', title: 'DBT skills', subtitle: 'Which skills are you actively working on? You can start with just the four modules if you prefer.', render: renderWizardSkills, showInEdit: true },
+    { id: 'done', title: 'All set', subtitle: null, render: renderWizardDone, showInEdit: true }
+  ];
+
+  function activeWizardSteps() {
+    return WIZARD_STEPS.filter(s => wizardMode === 'edit' ? s.showInEdit : true);
+  }
+
+  function openWizard(mode) {
+    wizardMode = mode;
+    wizardStepIdx = 0;
+    // Snapshot current prefs into a draft so cancel-by-closing doesn't mutate prefs mid-edit.
+    wizardDraft = {
+      hiddenEmotions: [...prefs.hiddenEmotions],
+      hiddenUrges: [...prefs.hiddenUrges],
+      hiddenActions: [...prefs.hiddenActions],
+      hiddenCategories: [...prefs.hiddenCategories],
+      hiddenSkills: [...prefs.hiddenSkills]
+    };
+    document.getElementById('wizard-overlay').classList.add('visible');
+    renderWizardStep();
+  }
+
+  function closeWizard() {
+    document.getElementById('wizard-overlay').classList.remove('visible');
+  }
+
+  function renderWizardStep() {
+    const steps = activeWizardSteps();
+    const step = steps[wizardStepIdx];
+
+    // Step indicator dots
+    const dotsEl = document.getElementById('wizard-steps');
+    dotsEl.innerHTML = '';
+    steps.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'wizard-step-dot' + (i === wizardStepIdx ? ' active' : (i < wizardStepIdx ? ' done' : ''));
+      dotsEl.appendChild(d);
+    });
+
+    document.getElementById('wizard-title').textContent = step.title;
+    document.getElementById('wizard-subtitle').textContent = step.subtitle || '';
+    document.getElementById('wizard-subtitle').style.display = step.subtitle ? '' : 'none';
+
+    const body = document.getElementById('wizard-body');
+    body.innerHTML = '';
+    step.render(body);
+
+    // Back button: hidden on first step
+    document.getElementById('wizard-back').style.visibility = wizardStepIdx > 0 ? 'visible' : 'hidden';
+    // Skip button: shown except in 'edit' mode (where the user is deliberately tweaking).
+    document.getElementById('wizard-skip').style.display = wizardMode === 'edit' ? 'none' : '';
+    // Next button text
+    const isLast = wizardStepIdx === steps.length - 1;
+    document.getElementById('wizard-next').textContent = isLast ? 'Done' : 'Next';
+  }
+
+  function wizardMakeItem(labelText, descText, checked, onToggle) {
+    const item = document.createElement('div');
+    item.className = 'wizard-item' + (checked ? ' checked' : '');
+    const check = document.createElement('div');
+    check.className = 'wizard-check';
+    item.appendChild(check);
+    const wrap = document.createElement('div');
+    wrap.className = 'wizard-item-label';
+    const title = document.createElement('div');
+    title.className = 'wizard-item-title';
+    title.textContent = labelText;
+    wrap.appendChild(title);
+    if (descText) {
+      const desc = document.createElement('div');
+      desc.className = 'wizard-item-desc';
+      desc.textContent = descText;
+      wrap.appendChild(desc);
+    }
+    item.appendChild(wrap);
+    item.addEventListener('click', () => {
+      const nowChecked = !item.classList.contains('checked');
+      item.classList.toggle('checked', nowChecked);
+      onToggle(nowChecked);
+    });
+    return item;
+  }
+
+  function renderWizardWelcome(body) {
+    body.className = 'wizard-body wizard-welcome-body';
+    const note = wizardMode === 'newUser' ? '' : '<p class="wizard-note">(This is a one-time setup — we bumped how skills are tracked, so existing entries have been preserved under "legacy skills" and today you\'ll see individual DBT skills instead of the four modules.)</p>';
+    body.innerHTML =
+      '<p>This diary shows every emotion, urge, skill, and daily check-in by default. That\'s a lot — most people only track a subset.</p>' +
+      '<p>This quick walkthrough lets you pick which items are visible. You can change your mind any time from the <strong>?</strong> menu in the top corner.</p>' +
+      '<p><strong>Nothing is permanent.</strong> Hiding an item just takes it off your daily form — it doesn\'t delete any existing data, and you can un-hide later.</p>' +
+      note;
+  }
+
+  function renderWizardEmotions(body) {
+    body.className = 'wizard-body';
+    const group = document.createElement('div');
+    group.className = 'wizard-group';
+    DEFAULT_EMOTIONS.forEach(em => {
+      const checked = !wizardDraft.hiddenEmotions.includes(em);
+      group.appendChild(wizardMakeItem(em, null, checked, (on) => {
+        if (on) wizardDraft.hiddenEmotions = wizardDraft.hiddenEmotions.filter(e => e !== em);
+        else if (!wizardDraft.hiddenEmotions.includes(em)) wizardDraft.hiddenEmotions.push(em);
+      }));
+    });
+    body.appendChild(group);
+  }
+
+  function renderWizardUrges(body) {
+    body.className = 'wizard-body';
+    URGE_GROUPS.forEach(g => {
+      const section = document.createElement('div');
+      section.className = 'wizard-group';
+      const lbl = document.createElement('div');
+      lbl.className = 'wizard-group-label';
+      lbl.textContent = g.label;
+      section.appendChild(lbl);
+      g.indices.forEach(idx => {
+        const checked = !wizardDraft.hiddenUrges.includes(idx);
+        section.appendChild(wizardMakeItem(URGES[idx], null, checked, (on) => {
+          if (on) wizardDraft.hiddenUrges = wizardDraft.hiddenUrges.filter(x => x !== idx);
+          else if (!wizardDraft.hiddenUrges.includes(idx)) wizardDraft.hiddenUrges.push(idx);
+        }));
+      });
+      body.appendChild(section);
+    });
+  }
+
+  function renderWizardActions(body) {
+    body.className = 'wizard-body';
+    ACTION_GROUPS.forEach(g => {
+      const section = document.createElement('div');
+      section.className = 'wizard-group';
+      const lbl = document.createElement('div');
+      lbl.className = 'wizard-group-label';
+      lbl.textContent = g.label;
+      section.appendChild(lbl);
+      g.ids.forEach(id => {
+        const action = ACTIONS.find(a => a.id === id);
+        if (!action) return;
+        const checked = !wizardDraft.hiddenActions.includes(id);
+        section.appendChild(wizardMakeItem(action.label, null, checked, (on) => {
+          if (on) wizardDraft.hiddenActions = wizardDraft.hiddenActions.filter(x => x !== id);
+          else if (!wizardDraft.hiddenActions.includes(id)) wizardDraft.hiddenActions.push(id);
+        }));
+      });
+      body.appendChild(section);
+    });
+  }
+
+  function renderWizardCategories(body) {
+    body.className = 'wizard-body';
+    const group = document.createElement('div');
+    group.className = 'wizard-group';
+    CATEGORIES.forEach(cat => {
+      const checked = !wizardDraft.hiddenCategories.includes(cat.id);
+      group.appendChild(wizardMakeItem(cat.label, cat.desc, checked, (on) => {
+        if (on) wizardDraft.hiddenCategories = wizardDraft.hiddenCategories.filter(x => x !== cat.id);
+        else if (!wizardDraft.hiddenCategories.includes(cat.id)) wizardDraft.hiddenCategories.push(cat.id);
+      }));
+    });
+    body.appendChild(group);
+  }
+
+  function renderWizardSkills(body) {
+    body.className = 'wizard-body';
+
+    // Quick actions row
+    const qa = document.createElement('div');
+    qa.className = 'wizard-quick-actions';
+    const justModules = document.createElement('button');
+    justModules.className = 'wizard-quick-btn';
+    justModules.textContent = 'Just the four modules';
+    justModules.addEventListener('click', () => {
+      wizardDraft.hiddenSkills = [];
+      for (let i = 0; i < SKILLS.length; i++) {
+        if (!MODULE_PROXY_SKILL_INDICES.includes(i)) wizardDraft.hiddenSkills.push(i);
+      }
+      renderWizardStep();
+    });
+    qa.appendChild(justModules);
+
+    const all = document.createElement('button');
+    all.className = 'wizard-quick-btn';
+    all.textContent = 'All skills';
+    all.addEventListener('click', () => {
+      wizardDraft.hiddenSkills = [];
+      renderWizardStep();
+    });
+    qa.appendChild(all);
+
+    const none = document.createElement('button');
+    none.className = 'wizard-quick-btn';
+    none.textContent = 'None';
+    none.addEventListener('click', () => {
+      wizardDraft.hiddenSkills = SKILLS.map((_, i) => i);
+      renderWizardStep();
+    });
+    qa.appendChild(none);
+
+    body.appendChild(qa);
+
+    SKILL_GROUPS.forEach(g => {
+      const section = document.createElement('div');
+      section.className = 'wizard-group';
+      const lbl = document.createElement('div');
+      lbl.className = 'wizard-group-label';
+      lbl.textContent = g.label;
+      section.appendChild(lbl);
+      g.indices.forEach(idx => {
+        const checked = !wizardDraft.hiddenSkills.includes(idx);
+        section.appendChild(wizardMakeItem(SKILLS[idx], null, checked, (on) => {
+          if (on) wizardDraft.hiddenSkills = wizardDraft.hiddenSkills.filter(x => x !== idx);
+          else if (!wizardDraft.hiddenSkills.includes(idx)) wizardDraft.hiddenSkills.push(idx);
+        }));
+      });
+      body.appendChild(section);
+    });
+  }
+
+  function renderWizardDone(body) {
+    body.className = 'wizard-body wizard-welcome-body';
+    const hiddenCounts = {
+      emotions: wizardDraft.hiddenEmotions.length,
+      urges: wizardDraft.hiddenUrges.length,
+      actions: wizardDraft.hiddenActions.length,
+      categories: wizardDraft.hiddenCategories.length,
+      skills: wizardDraft.hiddenSkills.length
+    };
+    const line = (label, total, hidden) => {
+      const shown = total - hidden;
+      return '<div class="budget-stat"><span>' + label + '</span><strong>' + shown + ' of ' + total + '</strong></div>';
+    };
+    body.innerHTML =
+      '<p>Ready to save. Your daily entry form will show:</p>' +
+      '<div class="url-budget-popover-body">' +
+        line('Emotions', DEFAULT_EMOTIONS.length, hiddenCounts.emotions) +
+        line('Urges', URGES.length, hiddenCounts.urges) +
+        line('Actions', ACTIONS.length, hiddenCounts.actions) +
+        line('Daily check-ins', CATEGORIES.length, hiddenCounts.categories) +
+        line('Skills', SKILLS.length, hiddenCounts.skills) +
+      '</div>' +
+      (wizardMode === 'newUser'
+        ? '<p style="margin-top:0.85rem">Next: you\'ll set a passphrase to encrypt your diary. There is no recovery if you forget it, so write it down somewhere safe.</p>'
+        : '<p style="margin-top:0.85rem" class="wizard-note">Click Done to apply these changes. You can always open this wizard again from the <strong>?</strong> menu.</p>');
+  }
+
+  async function wizardFinish() {
+    // Copy draft into prefs
+    prefs.hiddenEmotions = wizardDraft.hiddenEmotions;
+    prefs.hiddenUrges = wizardDraft.hiddenUrges;
+    prefs.hiddenActions = wizardDraft.hiddenActions;
+    prefs.hiddenCategories = wizardDraft.hiddenCategories;
+    prefs.hiddenSkills = wizardDraft.hiddenSkills;
+    prefs.onboarded = true;
+
+    if (wizardMode === 'newUser') {
+      // New users don't have a cryptoKey yet — hand off to passphrase creation.
+      closeWizard();
+      showNewUserPassphraseScreen();
+      return;
+    }
+    await savePrefs();
+    closeWizard();
+    // Rebuild dynamic sections + apply visibility
+    buildDynamicSections();
+    applyCategoryVisibility();
+    renderEntry();
+    scheduleUrlBudgetUpdate();
+  }
+
+  document.getElementById('wizard-next').addEventListener('click', async () => {
+    const steps = activeWizardSteps();
+    if (wizardStepIdx >= steps.length - 1) {
+      await wizardFinish();
+      return;
+    }
+    wizardStepIdx++;
+    renderWizardStep();
+  });
+  document.getElementById('wizard-back').addEventListener('click', () => {
+    if (wizardStepIdx > 0) { wizardStepIdx--; renderWizardStep(); }
+  });
+  document.getElementById('wizard-skip').addEventListener('click', async () => {
+    // Skip in firstRun means: accept the defaults (nothing hidden), mark onboarded, close.
+    wizardDraft = {
+      hiddenEmotions: [], hiddenUrges: [], hiddenActions: [], hiddenCategories: [], hiddenSkills: []
+    };
+    await wizardFinish();
+  });
+
+  // ─── URL Budget Indicator ───
+  let _budgetTimer = null;
+
+  function formatNum(n) {
+    return n.toLocaleString('en-US');
+  }
+
+  function scheduleUrlBudgetUpdate() {
+    if (_budgetTimer) clearTimeout(_budgetTimer);
+    _budgetTimer = setTimeout(() => { updateUrlBudget(); }, 250);
+  }
+
+  function collectShareEntries() {
+    const shareEntries = {};
+    if (sessionDate) {
+      const today = dateKey(new Date());
+      const d = new Date(sessionDate + 'T00:00:00');
+      const end = new Date(today + 'T00:00:00');
+      while (d <= end) {
+        const k = dateKey(d);
+        if (entries[k]) shareEntries[k] = entries[k];
+        d.setDate(d.getDate() + 1);
+      }
+    } else {
+      // No session marker — estimate from just the current day, since that's what a future share would start with.
+      const k = dateKey(currentDate);
+      if (entries[k]) shareEntries[k] = entries[k];
+    }
+    return shareEntries;
+  }
+
+  // base64url character count for a given byte count (no padding).
+  function b64urlLen(byteLen) {
+    const full = Math.floor(byteLen / 3);
+    const rem = byteLen % 3;
+    return full * 4 + (rem === 0 ? 0 : rem + 1);
+  }
+
+  // Compute the real share-URL length without actually encrypting. This works because:
+  //  - DEFLATE output length is deterministic for a given input
+  //  - AES-GCM ciphertext length = plaintext length + 16 (auth tag), by spec
+  //  - The envelope is fixed: 1 (version) + 16 (salt) + 12 (IV) + ciphertext
+  //  - Base64url length is a pure function of byte count
+  // This dodges PBKDF2 (~200ms per call) so the debounced updater is fast.
+  async function estimateShareUrlLength() {
+    const shareEntries = collectShareEntries();
+    const basePrefix = (location.origin + location.pathname + '#share=').length;
+    const hasAny = Object.keys(shareEntries).length > 0;
+    const json = hasAny ? JSON.stringify(shareEntries) : '{}';
+    const compressed = await deflate(new TextEncoder().encode(json));
+    const envelopeBytes = 1 + 16 + 12 + compressed.length + 16; // version + salt + iv + ct + gcm-tag
+    return {
+      len: basePrefix + b64urlLen(envelopeBytes),
+      days: hasAny ? Object.keys(shareEntries).length : 0
+    };
+  }
+
+  async function updateUrlBudget() {
+    const budgetEl = document.getElementById('url-budget');
+    if (!budgetEl) return;
+    try {
+      const { len, days } = await estimateShareUrlLength();
+      const budget = prefs.urlBudget || 2000;
+      const pct = Math.min(999, Math.round((len / budget) * 100));
+      const fill = document.getElementById('url-budget-fill');
+      fill.style.width = Math.min(100, pct) + '%';
+      fill.classList.toggle('warn', pct >= 60 && pct < 90);
+      fill.classList.toggle('alert', pct >= 90);
+      document.getElementById('url-budget-chars').textContent = formatNum(len);
+      document.getElementById('url-budget-max').textContent = formatNum(budget);
+      document.getElementById('url-budget-pct').textContent = pct + '%';
+      // Popover stats
+      document.getElementById('budget-current').textContent = formatNum(len) + ' chars';
+      document.getElementById('budget-days').textContent = days === 0 ? '(no entries yet)' : days;
+      document.getElementById('budget-per-day').textContent = days > 0 ? formatNum(Math.round(len / days)) + ' chars' : '—';
+    } catch (e) {
+      // Ignore — probably called before cryptoKey was set.
+    }
+  }
+
+  function budgetSliderNote(v) {
+    if (v <= 600) return 'aggressive SMS safe';
+    if (v <= 2200) return 'safe for every common messaging channel';
+    if (v <= 4500) return 'still safe almost everywhere';
+    if (v <= 8500) return 'server-safe (most self-hosted HTTP servers accept this)';
+    return 'approaching browser address-bar limits';
+  }
+
+  document.getElementById('url-budget').addEventListener('click', () => {
+    document.getElementById('budget-overlay').classList.add('visible');
+    const slider = document.getElementById('budget-slider');
+    slider.value = prefs.urlBudget || 2000;
+    document.getElementById('budget-slider-value').textContent = formatNum(slider.value);
+    document.getElementById('budget-slider-note').textContent = budgetSliderNote(parseInt(slider.value));
+    updateUrlBudget();
+  });
+  document.getElementById('budget-slider').addEventListener('input', async function() {
+    const v = parseInt(this.value);
+    prefs.urlBudget = v;
+    document.getElementById('budget-slider-value').textContent = formatNum(v);
+    document.getElementById('budget-slider-note').textContent = budgetSliderNote(v);
+    updateUrlBudget();
+  });
+  document.getElementById('budget-slider').addEventListener('change', async function() {
+    await savePrefs();
+  });
+  document.getElementById('budget-close').addEventListener('click', () => {
+    document.getElementById('budget-overlay').classList.remove('visible');
+  });
+  document.getElementById('budget-overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
+  });
 
   // ─── Passphrase Gate ───
   function showApp() {
@@ -2246,12 +3244,81 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   async function initApp() {
     await loadPrefs();
-    initSections();
     await loadEntries();
+    await migrateEntriesV1toV2();
+    initSections();
     await loadSessionDate();
     renderSessionBar();
     renderEmotions();
     renderEntry();
+    scheduleUrlBudgetUpdate();
+    if (!prefs.onboarded) {
+      // Existing user who hasn't seen the wizard — open in firstRun mode on top of the entry view.
+      openWizard('firstRun');
+    }
+  }
+
+  // Clear every app-owned localStorage key and reload — used when "start a new diary" is confirmed.
+  function wipeVaultAndReload() {
+    try {
+      [SALT_KEY, CHECK_KEY, STORAGE_KEY, SESSION_ENC_KEY, PREFS_KEY].forEach(k => localStorage.removeItem(k));
+    } catch {}
+    location.reload();
+  }
+
+  // New-user flow step 2: after the wizard, collect a passphrase and finish setup.
+  // The new-user branch of the init flow never attaches a handler to lock-form, so we can just
+  // attach ours here directly — no cloning needed.
+  function showNewUserPassphraseScreen() {
+    document.getElementById('lock-title').textContent = 'Create a passphrase';
+    document.getElementById('lock-subtitle').textContent = 'Your diary will be encrypted with this passphrase. There is no recovery if you forget it.';
+    document.getElementById('lock-new').style.display = 'block';
+    document.getElementById('lock-pass').value = '';
+    document.getElementById('lock-confirm').value = '';
+    document.getElementById('lock-error').textContent = '';
+    document.getElementById('lock-start-over').style.display = 'none';
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.querySelector('.app').style.display = 'none';
+
+    document.getElementById('lock-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const pass = document.getElementById('lock-pass').value;
+      const confirm = document.getElementById('lock-confirm').value;
+      if (!pass) return;
+      if (pass !== confirm) {
+        document.getElementById('lock-error').textContent = 'Passphrases don\'t match.';
+        return;
+      }
+      if (pass.length < 4) {
+        document.getElementById('lock-error').textContent = 'Use at least 4 characters.';
+        return;
+      }
+      await setupPassphrase(pass);
+      // Persist the wizard choices that were sitting in prefs (now that cryptoKey is set).
+      await savePrefs();
+      showApp();
+      // We already have prefs from the wizard; entries are empty; session is unset.
+      entries = {};
+      initSections();
+      await loadSessionDate();
+      renderSessionBar();
+      renderEmotions();
+      renderEntry();
+      scheduleUrlBudgetUpdate();
+    });
+
+    document.getElementById('lock-pass').focus();
+  }
+
+  // No-vault flow: skip the lock screen entirely and open the wizard directly.
+  // The .app shell stays hidden behind the overlay so the empty entry form isn't visible through
+  // the wizard's semi-transparent backdrop.
+  function startNewUserFlow() {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.querySelector('.app').style.display = 'none';
+    // Reset prefs to a clean default snapshot so the wizard starts from "everything shown."
+    prefs = makeDefaultPrefs();
+    openWizard('newUser');
   }
 
   // ─── Init ───
@@ -2286,11 +3353,12 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       }
     });
   } else if (hasExistingVault()) {
-    // Returning user — unlock
+    // Returning user — unlock (with a "start over" escape hatch)
     document.getElementById('lock-title').textContent = 'Welcome back';
     document.getElementById('lock-subtitle').textContent = 'Enter your passphrase to unlock your diary.';
     document.getElementById('lock-new').style.display = 'none';
     document.getElementById('lock-screen').style.display = 'flex';
+    document.getElementById('lock-start-over').style.display = '';
     document.getElementById('lock-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const pass = document.getElementById('lock-pass').value;
@@ -2305,32 +3373,15 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
         document.getElementById('lock-pass').focus();
       }
     });
-  } else {
-    // New user — set passphrase
-    document.getElementById('lock-title').textContent = 'Create a passphrase';
-    document.getElementById('lock-subtitle').textContent = 'Your diary will be encrypted with this passphrase. There is no recovery if you forget it.';
-    document.getElementById('lock-new').style.display = 'block';
-    document.getElementById('lock-screen').style.display = 'flex';
-    document.getElementById('lock-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const pass = document.getElementById('lock-pass').value;
-      const confirm = document.getElementById('lock-confirm').value;
-      if (!pass) return;
-      if (pass !== confirm) {
-        document.getElementById('lock-error').textContent = 'Passphrases don\'t match.';
-        return;
-      }
-      if (pass.length < 4) {
-        document.getElementById('lock-error').textContent = 'Use at least 4 characters.';
-        return;
-      }
-      await setupPassphrase(pass);
-      showApp();
-      await initApp();
+    document.getElementById('lock-start-over').addEventListener('click', () => {
+      const ok = confirm('Start a new diary? This will permanently delete your existing encrypted diary. There is no way to recover it.');
+      if (ok) wipeVaultAndReload();
     });
+    document.getElementById('lock-pass').focus();
+  } else {
+    // New user — skip straight to the wizard, then collect a passphrase.
+    startNewUserFlow();
   }
-
-  document.getElementById('lock-pass').focus();
 
 })();
 </script>
