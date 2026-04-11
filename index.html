@@ -1201,13 +1201,52 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   background: transparent;
 }
 .lock-btn-alt:hover { background: var(--accent-dim); }
-.lock-warning {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 0.5rem;
-  text-align: center;
-  line-height: 1.4;
+
+/* ─── Vault list ─── */
+.vault-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
+.vault-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.vault-card:not(.expanded):hover { border-color: var(--text-muted); }
+.vault-card.expanded { border-color: var(--accent); }
+.vault-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+}
+.vault-card.expanded .vault-header { cursor: default; }
+.vault-dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.vault-label { flex: 1; }
+.vault-body {
+  display: none;
+  padding: 0 0.8rem 0.8rem;
+}
+.vault-card.expanded .vault-body { display: block; }
+.vault-body .lock-input { margin-bottom: 0.5rem; }
+.vault-body .lock-btn { margin-top: 0.25rem; }
 
 /* ─── URL Budget Indicator ─── */
 .url-budget {
@@ -1322,6 +1361,56 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 }
 .info-panel .customize-btn:hover { background: var(--accent-glow); }
 
+/* ─── Delete-this-diary (info panel) ─── */
+.delete-vault-wrap {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.delete-vault-btn {
+  display: block;
+  margin: 0 auto;
+  background: none;
+  border: 1px solid var(--c5);
+  border-radius: var(--radius-pill);
+  color: var(--c5);
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  padding: 0.35rem 1rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.delete-vault-btn:hover:not(:disabled) {
+  background: var(--c5);
+  color: var(--bg);
+}
+.delete-vault-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.delete-vault-input {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto 0.6rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+.delete-vault-input:focus { outline: none; border-color: var(--c5); }
+.delete-vault-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  align-items: center;
+}
+
 /* ─── Skill tooltip ─── */
 .skill-hint {
   font-size: 0.6rem;
@@ -1346,20 +1435,34 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     <div class="lock-icon">
       <svg width="28" height="28" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2 2 0 012 2v4H6V3a2 2 0 012-2zm3 6V3a3 3 0 00-6 0v4a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
     </div>
-    <h1 class="lock-title" id="lock-title">diary</h1>
-    <p class="lock-subtitle" id="lock-subtitle"></p>
-    <form id="lock-form" autocomplete="off">
-      <input type="password" id="lock-pass" class="lock-input" placeholder="passphrase" autocomplete="new-password">
-      <div id="lock-new" style="display:none">
-        <input type="password" id="lock-confirm" class="lock-input" placeholder="confirm passphrase" autocomplete="new-password">
-      </div>
-      <div class="lock-error" id="lock-error"></div>
-      <button type="submit" class="lock-btn">unlock</button>
-    </form>
-    <div id="lock-start-over-section" style="display:none">
+    <h1 class="lock-title">diary</h1>
+
+    <!-- Share-link unlock (only when hash starts with #share=) -->
+    <div class="lock-mode" id="lock-share" style="display:none">
+      <p class="lock-subtitle">This link contains encrypted diary entries.</p>
+      <form id="share-form" autocomplete="off">
+        <input type="password" id="share-pass" class="lock-input" placeholder="share passphrase" autocomplete="new-password">
+        <div class="lock-error" id="share-error"></div>
+        <button type="submit" class="lock-btn">unlock</button>
+      </form>
+    </div>
+
+    <!-- Vault list (normal returning-user flow — one or more vaults) -->
+    <div class="lock-mode" id="lock-vaults" style="display:none">
+      <div class="vault-list" id="vault-list"></div>
       <div class="lock-or">or</div>
-      <button type="button" class="lock-btn lock-btn-alt" id="lock-start-over">start a new diary</button>
-      <p class="lock-warning">replaces your existing diary — can't be undone</p>
+      <button type="button" class="lock-btn lock-btn-alt" id="lock-new-vault">start a new diary</button>
+    </div>
+
+    <!-- New-vault passphrase creation (after the wizard finishes) -->
+    <div class="lock-mode" id="lock-newvault" style="display:none">
+      <p class="lock-subtitle">Your diary will be encrypted with this passphrase. There is no recovery if you forget it.</p>
+      <form id="newvault-form" autocomplete="off">
+        <input type="password" id="newvault-pass" class="lock-input" placeholder="passphrase" autocomplete="new-password">
+        <input type="password" id="newvault-confirm" class="lock-input" placeholder="confirm passphrase" autocomplete="new-password">
+        <div class="lock-error" id="newvault-error"></div>
+        <button type="submit" class="lock-btn">create diary</button>
+      </form>
     </div>
   </div>
 </div>
@@ -1500,10 +1603,10 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <p>When you share, you pick a share passphrase — it doesn't have to be the same as your diary passphrase. Give it to your therapist separately (in person, text, etc.). The link you send them is scrambled — it only becomes readable when they enter the passphrase. No one in between can read it.</p>
 
       <h3>If you forget your passphrase</h3>
-      <p>Your data is gone. There is no "forgot password" option and no way to recover it. This is the price of not trusting a server with your information. Write it down somewhere safe.</p>
+      <p>That diary is unrecoverable. There's no "forgot password" option — this is the price of not trusting a server with your information. You can start a new diary alongside it, but the old entries are inaccessible forever. Write your passphrase down somewhere safe.</p>
 
       <h3>If you clear your browser data</h3>
-      <p>Your diary is deleted permanently. Same reason — there's no backup anywhere.</p>
+      <p>Every diary on this device is deleted permanently. Same reason — there's no backup anywhere.</p>
 
       <h3 class="caveat">What this doesn't protect against</h3>
       <p class="caveat">Someone looking at your screen while the diary is open. A weak passphrase that's easy to guess. Malware on your device. Your browser history will show that you visited this site (though the diary content itself is encrypted).</p>
@@ -1514,6 +1617,20 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
       <button class="customize-btn" id="info-customize">Customize fields</button>
       <button class="info-close" id="info-close">got it</button>
+
+      <div class="delete-vault-wrap">
+        <div id="delete-vault-idle">
+          <button class="delete-vault-btn" id="delete-vault-start">Delete this diary</button>
+        </div>
+        <div id="delete-vault-confirm" style="display:none">
+          <p class="caveat" style="text-align:center;margin-bottom:0.5rem">Type <strong>DELETE</strong> to confirm. This only affects the currently unlocked diary.</p>
+          <input type="text" id="delete-vault-input" class="delete-vault-input" placeholder="DELETE" autocomplete="off">
+          <div class="delete-vault-actions">
+            <button class="info-close" id="delete-vault-cancel" style="margin:0">cancel</button>
+            <button class="delete-vault-btn" id="delete-vault-go" disabled>delete permanently</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1565,10 +1682,70 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   'use strict';
 
   // ─── Crypto ───
-  const SALT_KEY = 'dbt_salt';
-  const CHECK_KEY = 'dbt_check';
-  const STORAGE_KEY = 'dbt_diary_enc';
-  const SESSION_ENC_KEY = 'dbt_session_enc';
+  // Multi-vault storage. Each vault is an isolated AES-GCM diary identified by a random id.
+  // Public index at VAULTS_INDEX_KEY lists `{ id, accent, createdAt }` — safe to read unencrypted
+  // because it only exposes that a vault exists, which is already visible in localStorage inspection.
+  const VAULTS_INDEX_KEY = 'dbt_vaults';
+  const saltKey    = id => `dbt_vault_${id}_salt`;
+  const checkKey   = id => `dbt_vault_${id}_check`;
+  const diaryKey   = id => `dbt_vault_${id}_diary_enc`;
+  const sessionKey = id => `dbt_vault_${id}_session_enc`;
+  const prefsKey   = id => `dbt_vault_${id}_prefs_enc`;
+
+  let activeVaultId = null;   // set on unlock or during new-vault creation
+  let pendingVault = null;    // { id, accent } held across the wizard until passphrase is committed
+
+  function listVaults() {
+    try {
+      const raw = localStorage.getItem(VAULTS_INDEX_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  }
+  function writeVaults(list) {
+    try { localStorage.setItem(VAULTS_INDEX_KEY, JSON.stringify(list)); } catch {}
+  }
+  function addVault(vault) {
+    writeVaults([...listVaults(), vault]);
+  }
+  function removeVault(id) {
+    writeVaults(listVaults().filter(v => v.id !== id));
+    [saltKey(id), checkKey(id), diaryKey(id), sessionKey(id), prefsKey(id)]
+      .forEach(k => { try { localStorage.removeItem(k); } catch {} });
+  }
+  function generateVaultId() {
+    const bytes = new Uint8Array(6);
+    crypto.getRandomValues(bytes);
+    return bytesToB64(bytes).replace(/[+/=]/g, '').slice(0, 8);
+  }
+  function generateAccentHue() {
+    const a = new Uint8Array(1);
+    crypto.getRandomValues(a);
+    return Math.floor(a[0] * 360 / 256);
+  }
+
+  // Migrate a single-vault legacy install (flat `dbt_*` keys) into the indexed scheme on first load.
+  // Leaves `createdAt` undefined on the migrated vault — lock screen renders that as "your diary"
+  // rather than inventing a bogus date.
+  function migrateLegacyVault() {
+    const legacySalt = localStorage.getItem('dbt_salt');
+    const legacyCheck = localStorage.getItem('dbt_check');
+    if (!legacySalt || !legacyCheck) return;
+    if (listVaults().length > 0) return;
+    const id = generateVaultId();
+    try {
+      localStorage.setItem(saltKey(id), legacySalt);
+      localStorage.setItem(checkKey(id), legacyCheck);
+      const legacyDiary = localStorage.getItem('dbt_diary_enc');
+      if (legacyDiary) localStorage.setItem(diaryKey(id), legacyDiary);
+      const legacySession = localStorage.getItem('dbt_session_enc');
+      if (legacySession) localStorage.setItem(sessionKey(id), legacySession);
+      const legacyPrefs = localStorage.getItem('dbt_prefs_enc');
+      if (legacyPrefs) localStorage.setItem(prefsKey(id), legacyPrefs);
+    } catch { return; }
+    addVault({ id, accent: generateAccentHue() });
+    ['dbt_salt', 'dbt_check', 'dbt_diary_enc', 'dbt_session_enc', 'dbt_prefs_enc']
+      .forEach(k => { try { localStorage.removeItem(k); } catch {} });
+  }
   const MAGIC = 'dbt_ok'; // plaintext check to verify passphrase
 
   let cryptoKey = null; // AES-GCM key derived from passphrase
@@ -1675,37 +1852,46 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     return new TextDecoder().decode(plaintext);
   }
 
+  // Create a fresh vault under `activeVaultId` (which the caller has already set from `pendingVault`).
+  // Commits the vault to the public index on success.
   async function setupPassphrase(passphrase) {
+    if (!activeVaultId) throw new Error('setupPassphrase called without an active vault id');
     const salt = crypto.getRandomValues(new Uint8Array(16));
     cryptoKey = await deriveKey(passphrase, salt);
     const check = await encryptString(MAGIC);
     try {
-      localStorage.setItem(SALT_KEY, bytesToB64(salt));
-      localStorage.setItem(CHECK_KEY, check);
+      localStorage.setItem(saltKey(activeVaultId), bytesToB64(salt));
+      localStorage.setItem(checkKey(activeVaultId), check);
     } catch {}
+    addVault({
+      id: activeVaultId,
+      accent: pendingVault ? pendingVault.accent : generateAccentHue(),
+      createdAt: new Date().toISOString()
+    });
+    pendingVault = null;
   }
 
-  async function unlockWithPassphrase(passphrase) {
-    const saltB64 = localStorage.getItem(SALT_KEY);
-    const checkB64 = localStorage.getItem(CHECK_KEY);
+  async function unlockWithPassphrase(passphrase, vaultId) {
+    const saltB64 = localStorage.getItem(saltKey(vaultId));
+    const checkB64 = localStorage.getItem(checkKey(vaultId));
     if (!saltB64 || !checkB64) return false;
     const salt = b64ToBytes(saltB64);
     cryptoKey = await deriveKey(passphrase, salt);
     try {
       const result = await decryptString(checkB64);
-      return result === MAGIC;
+      if (result === MAGIC) {
+        activeVaultId = vaultId;
+        return true;
+      }
+      cryptoKey = null;
+      return false;
     } catch {
       cryptoKey = null;
       return false;
     }
   }
 
-  function hasExistingVault() {
-    return !!(localStorage.getItem(SALT_KEY) && localStorage.getItem(CHECK_KEY));
-  }
-
   // ─── Data ───
-  const PREFS_KEY = 'dbt_prefs_enc';
   const DEFAULT_EMOTIONS = ['Sadness','Anger','Shame','Fear / Anxiety','Joy','Guilt','Loneliness','Jealousy','Disgust','Numbness','Overwhelm','Hopelessness','Love / Connection'];
   const CURRENT_SCHEMA_VERSION = 2;
 
@@ -1822,7 +2008,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   async function loadPrefs() {
     try {
-      const enc = localStorage.getItem(PREFS_KEY);
+      const enc = localStorage.getItem(prefsKey(activeVaultId));
       if (enc) {
         const json = await decryptString(enc);
         const saved = JSON.parse(json);
@@ -1858,7 +2044,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
         urlBudget: prefs.urlBudget,
         schemaVersion: prefs.schemaVersion
       }));
-      localStorage.setItem(PREFS_KEY, enc);
+      localStorage.setItem(prefsKey(activeVaultId), enc);
     } catch {}
   }
 
@@ -1873,7 +2059,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   async function loadEntries() {
     try {
-      const enc = localStorage.getItem(STORAGE_KEY);
+      const enc = localStorage.getItem(diaryKey(activeVaultId));
       if (enc) {
         const json = await decryptString(enc);
         entries = JSON.parse(json);
@@ -1886,7 +2072,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   async function saveEntries() {
     try {
       const enc = await encryptString(JSON.stringify(entries));
-      localStorage.setItem(STORAGE_KEY, enc);
+      localStorage.setItem(diaryKey(activeVaultId), enc);
     } catch {}
   }
 
@@ -2544,7 +2730,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   async function loadSessionDate() {
     try {
-      const enc = localStorage.getItem(SESSION_ENC_KEY);
+      const enc = localStorage.getItem(sessionKey(activeVaultId));
       if (enc) sessionDate = await decryptString(enc);
       else sessionDate = null;
     } catch { sessionDate = null; }
@@ -2553,8 +2739,8 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   async function saveSessionDate(val) {
     sessionDate = val;
     try {
-      if (val) localStorage.setItem(SESSION_ENC_KEY, await encryptString(val));
-      else localStorage.removeItem(SESSION_ENC_KEY);
+      if (val) localStorage.setItem(sessionKey(activeVaultId), await encryptString(val));
+      else localStorage.removeItem(sessionKey(activeVaultId));
     } catch {}
   }
 
@@ -3273,83 +3459,183 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     }
   }
 
-  // Clear every app-owned localStorage key and reload — used when "start a new diary" is confirmed.
-  function wipeVaultAndReload() {
-    try {
-      [SALT_KEY, CHECK_KEY, STORAGE_KEY, SESSION_ENC_KEY, PREFS_KEY].forEach(k => localStorage.removeItem(k));
-    } catch {}
-    location.reload();
+  // ─── Lock screen rendering ───
+  function formatVaultLabel(v) {
+    if (!v.createdAt) return 'your diary';
+    const d = new Date(v.createdAt);
+    if (isNaN(d.getTime())) return 'your diary';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `started ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   }
 
-  // New-user flow step 2: after the wizard, collect a passphrase and finish setup.
-  // The new-user branch of the init flow never attaches a handler to lock-form, so we can just
-  // attach ours here directly — no cloning needed.
-  function showNewUserPassphraseScreen() {
-    document.getElementById('lock-title').textContent = 'Create a passphrase';
-    document.getElementById('lock-subtitle').textContent = 'Your diary will be encrypted with this passphrase. There is no recovery if you forget it.';
-    document.getElementById('lock-new').style.display = 'block';
-    document.getElementById('lock-pass').value = '';
-    document.getElementById('lock-confirm').value = '';
-    document.getElementById('lock-error').textContent = '';
-    document.getElementById('lock-start-over-section').style.display = 'none';
-    document.getElementById('lock-screen').style.display = 'flex';
-    document.querySelector('.app').style.display = 'none';
+  function renderVaultList() {
+    const container = document.getElementById('vault-list');
+    const vaults = listVaults();
+    container.innerHTML = '';
+    vaults.forEach((v, idx) => {
+      const card = document.createElement('div');
+      card.className = 'vault-card' + (idx === 0 ? ' expanded' : '');
+      card.dataset.vaultId = v.id;
 
-    document.getElementById('lock-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const pass = document.getElementById('lock-pass').value;
-      const confirm = document.getElementById('lock-confirm').value;
-      if (!pass) return;
-      if (pass !== confirm) {
-        document.getElementById('lock-error').textContent = 'Passphrases don\'t match.';
-        return;
-      }
-      if (pass.length < 4) {
-        document.getElementById('lock-error').textContent = 'Use at least 4 characters.';
-        return;
-      }
-      await setupPassphrase(pass);
-      // Persist the wizard choices that were sitting in prefs (now that cryptoKey is set).
-      await savePrefs();
-      showApp();
-      // We already have prefs from the wizard; entries are empty; session is unset.
-      entries = {};
-      initSections();
-      await loadSessionDate();
-      renderSessionBar();
-      renderEmotions();
-      renderEntry();
-      scheduleUrlBudgetUpdate();
+      const header = document.createElement('button');
+      header.type = 'button';
+      header.className = 'vault-header';
+      const dot = document.createElement('span');
+      dot.className = 'vault-dot';
+      dot.style.background = `hsl(${v.accent != null ? v.accent : 210}, 65%, 58%)`;
+      header.appendChild(dot);
+      const label = document.createElement('span');
+      label.className = 'vault-label';
+      label.textContent = formatVaultLabel(v);
+      header.appendChild(label);
+      header.addEventListener('click', () => {
+        if (card.classList.contains('expanded')) return;
+        container.querySelectorAll('.vault-card').forEach(c => c.classList.remove('expanded'));
+        card.classList.add('expanded');
+        const input = card.querySelector('.vault-pass');
+        if (input) input.focus();
+      });
+      card.appendChild(header);
+
+      const body = document.createElement('form');
+      body.className = 'vault-body';
+      body.autocomplete = 'off';
+      const passInput = document.createElement('input');
+      passInput.type = 'password';
+      passInput.className = 'lock-input vault-pass';
+      passInput.placeholder = 'passphrase';
+      passInput.autocomplete = 'new-password';
+      body.appendChild(passInput);
+      const errorEl = document.createElement('div');
+      errorEl.className = 'lock-error vault-error';
+      body.appendChild(errorEl);
+      const submitBtn = document.createElement('button');
+      submitBtn.type = 'submit';
+      submitBtn.className = 'lock-btn';
+      submitBtn.textContent = 'unlock';
+      body.appendChild(submitBtn);
+      body.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const pass = passInput.value;
+        if (!pass) return;
+        const ok = await unlockWithPassphrase(pass, v.id);
+        if (ok) {
+          showApp();
+          await initApp();
+        } else {
+          errorEl.textContent = 'Wrong passphrase.';
+          passInput.value = '';
+          passInput.focus();
+        }
+      });
+      card.appendChild(body);
+
+      container.appendChild(card);
     });
 
-    document.getElementById('lock-pass').focus();
+    const firstInput = container.querySelector('.vault-card.expanded .vault-pass');
+    if (firstInput) firstInput.focus();
   }
 
-  // No-vault flow: skip the lock screen entirely and open the wizard directly.
-  // The .app shell stays hidden behind the overlay so the empty entry form isn't visible through
-  // the wizard's semi-transparent backdrop.
+  function showVaultListUI() {
+    document.getElementById('lock-share').style.display = 'none';
+    document.getElementById('lock-newvault').style.display = 'none';
+    document.getElementById('lock-vaults').style.display = '';
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.querySelector('.app').style.display = 'none';
+    renderVaultList();
+  }
+
+  // Step 2 of the new-vault flow: wizard finished, now collect a passphrase.
+  function showNewUserPassphraseScreen() {
+    document.getElementById('lock-vaults').style.display = 'none';
+    document.getElementById('lock-share').style.display = 'none';
+    document.getElementById('lock-newvault').style.display = '';
+    document.getElementById('newvault-pass').value = '';
+    document.getElementById('newvault-confirm').value = '';
+    document.getElementById('newvault-error').textContent = '';
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.querySelector('.app').style.display = 'none';
+    document.getElementById('newvault-pass').focus();
+  }
+
+  // Step 1 of the new-vault flow: hide whatever was on screen, prime a pending vault
+  // (id + accent are generated up-front so the wizard can carry them to passphrase creation),
+  // and open the wizard on the welcome step.
   function startNewUserFlow() {
     document.getElementById('lock-screen').style.display = 'none';
     document.querySelector('.app').style.display = 'none';
-    // Reset prefs to a clean default snapshot so the wizard starts from "everything shown."
     prefs = makeDefaultPrefs();
+    pendingVault = { id: generateVaultId(), accent: generateAccentHue() };
+    activeVaultId = pendingVault.id;
     openWizard('newUser');
   }
 
-  // ─── Init ───
-  // Hide app until unlocked
-  document.querySelector('.app').style.display = 'none';
+  // ─── Delete-this-diary (info panel) ───
+  document.getElementById('delete-vault-start').addEventListener('click', () => {
+    document.getElementById('delete-vault-idle').style.display = 'none';
+    document.getElementById('delete-vault-confirm').style.display = '';
+    document.getElementById('delete-vault-input').value = '';
+    document.getElementById('delete-vault-go').disabled = true;
+    document.getElementById('delete-vault-input').focus();
+  });
+  document.getElementById('delete-vault-cancel').addEventListener('click', () => {
+    document.getElementById('delete-vault-confirm').style.display = 'none';
+    document.getElementById('delete-vault-idle').style.display = '';
+  });
+  document.getElementById('delete-vault-input').addEventListener('input', (e) => {
+    document.getElementById('delete-vault-go').disabled = e.target.value !== 'DELETE';
+  });
+  document.getElementById('delete-vault-go').addEventListener('click', () => {
+    if (activeVaultId) removeVault(activeVaultId);
+    location.reload();
+  });
 
-  // Check for share URL first — separate flow
+  // ─── Init ───
+  document.querySelector('.app').style.display = 'none';
+  migrateLegacyVault();
+
+  // Wire up the new-vault and share-unlock forms once. The new-vault form is shown only after the
+  // wizard finishes; the share form is shown only when the hash is a share link.
+  document.getElementById('lock-new-vault').addEventListener('click', () => {
+    document.getElementById('lock-vaults').style.display = 'none';
+    startNewUserFlow();
+  });
+
+  document.getElementById('newvault-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const pass = document.getElementById('newvault-pass').value;
+    const confirm = document.getElementById('newvault-confirm').value;
+    const errorEl = document.getElementById('newvault-error');
+    errorEl.textContent = '';
+    if (!pass) return;
+    if (pass !== confirm) {
+      errorEl.textContent = 'Passphrases don\'t match.';
+      return;
+    }
+    if (pass.length < 4) {
+      errorEl.textContent = 'Use at least 4 characters.';
+      return;
+    }
+    await setupPassphrase(pass);
+    await savePrefs();
+    showApp();
+    entries = {};
+    initSections();
+    await loadSessionDate();
+    renderSessionBar();
+    renderEmotions();
+    renderEntry();
+    scheduleUrlBudgetUpdate();
+  });
+
   if (location.hash.startsWith('#share=')) {
     const encrypted = location.hash.slice(7);
-    document.getElementById('lock-title').textContent = 'Enter the share passphrase';
-    document.getElementById('lock-subtitle').textContent = 'This link contains encrypted diary entries.';
-    document.getElementById('lock-new').style.display = 'none';
+    document.getElementById('lock-share').style.display = '';
     document.getElementById('lock-screen').style.display = 'flex';
-    document.getElementById('lock-form').addEventListener('submit', async function(e) {
+    document.getElementById('share-form').addEventListener('submit', async function(e) {
       e.preventDefault();
-      const pass = document.getElementById('lock-pass').value;
+      const pass = document.getElementById('share-pass').value;
       if (!pass) return;
       try {
         const json = await decryptWithPassphrase(encrypted, pass);
@@ -3362,39 +3648,15 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
         document.getElementById('share-view').classList.add('active', 'view-fade');
         renderShareView(shareEntries);
       } catch {
-        document.getElementById('lock-error').textContent = 'Wrong passphrase.';
-        document.getElementById('lock-pass').value = '';
-        document.getElementById('lock-pass').focus();
+        document.getElementById('share-error').textContent = 'Wrong passphrase.';
+        document.getElementById('share-pass').value = '';
+        document.getElementById('share-pass').focus();
       }
     });
-  } else if (hasExistingVault()) {
-    // Returning user — unlock (with a "start over" escape hatch)
-    document.getElementById('lock-title').textContent = 'Welcome back';
-    document.getElementById('lock-subtitle').textContent = 'Enter your passphrase to unlock your diary.';
-    document.getElementById('lock-new').style.display = 'none';
-    document.getElementById('lock-screen').style.display = 'flex';
-    document.getElementById('lock-start-over-section').style.display = '';
-    document.getElementById('lock-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const pass = document.getElementById('lock-pass').value;
-      if (!pass) return;
-      const ok = await unlockWithPassphrase(pass);
-      if (ok) {
-        showApp();
-        await initApp();
-      } else {
-        document.getElementById('lock-error').textContent = 'Wrong passphrase.';
-        document.getElementById('lock-pass').value = '';
-        document.getElementById('lock-pass').focus();
-      }
-    });
-    document.getElementById('lock-start-over').addEventListener('click', () => {
-      const ok = confirm('Start a new diary? This will permanently delete your existing encrypted diary. There is no way to recover it.');
-      if (ok) wipeVaultAndReload();
-    });
-    document.getElementById('lock-pass').focus();
+    document.getElementById('share-pass').focus();
+  } else if (listVaults().length > 0) {
+    showVaultListUI();
   } else {
-    // New user — skip straight to the wizard, then collect a passphrase.
     startNewUserFlow();
   }
 
