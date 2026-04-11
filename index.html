@@ -1181,22 +1181,33 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 .wizard-btn.ghost:hover { color: var(--text-secondary); }
 
 /* ─── Lock Screen extras ─── */
-.lock-secondary {
-  display: block;
-  margin-top: 1rem;
-  background: none;
-  border: none;
+.lock-or {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0 0.75rem;
   color: var(--text-muted);
-  font-size: 0.75rem;
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: var(--border);
-  text-underline-offset: 3px;
-  font-family: var(--font-body);
-  width: 100%;
-  transition: color var(--transition);
+  font-size: 0.7rem;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
 }
-.lock-secondary:hover { color: var(--accent); text-decoration-color: var(--accent); }
+.lock-or::before, .lock-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.lock-btn-alt {
+  background: transparent;
+}
+.lock-btn-alt:hover { background: var(--accent-dim); }
+.lock-warning {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  text-align: center;
+  line-height: 1.4;
+}
 
 /* ─── URL Budget Indicator ─── */
 .url-budget {
@@ -1345,7 +1356,11 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <div class="lock-error" id="lock-error"></div>
       <button type="submit" class="lock-btn">unlock</button>
     </form>
-    <button type="button" class="lock-secondary" id="lock-start-over" style="display:none">or — start a new diary (deletes the existing one)</button>
+    <div id="lock-start-over-section" style="display:none">
+      <div class="lock-or">or</div>
+      <button type="button" class="lock-btn lock-btn-alt" id="lock-start-over">start a new diary</button>
+      <p class="lock-warning">replaces your existing diary — can't be undone</p>
+    </div>
   </div>
 </div>
 
@@ -3276,7 +3291,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     document.getElementById('lock-pass').value = '';
     document.getElementById('lock-confirm').value = '';
     document.getElementById('lock-error').textContent = '';
-    document.getElementById('lock-start-over').style.display = 'none';
+    document.getElementById('lock-start-over-section').style.display = 'none';
     document.getElementById('lock-screen').style.display = 'flex';
     document.querySelector('.app').style.display = 'none';
 
@@ -3358,7 +3373,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     document.getElementById('lock-subtitle').textContent = 'Enter your passphrase to unlock your diary.';
     document.getElementById('lock-new').style.display = 'none';
     document.getElementById('lock-screen').style.display = 'flex';
-    document.getElementById('lock-start-over').style.display = '';
+    document.getElementById('lock-start-over-section').style.display = '';
     document.getElementById('lock-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const pass = document.getElementById('lock-pass').value;
