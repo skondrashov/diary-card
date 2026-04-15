@@ -1361,6 +1361,77 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 }
 .info-panel .customize-btn:hover { background: var(--accent-glow); }
 
+/* ─── Share-result modal ─── */
+.share-result-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+.share-result-url {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem;
+  max-height: 6.5rem;
+  overflow: auto;
+  word-break: break-all;
+  margin-bottom: 0.85rem;
+}
+.share-result-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.share-result-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.share-result-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.share-result-btn.primary {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.share-result-btn.primary:hover { background: var(--accent-glow); }
+.share-result-btn:disabled { opacity: 0.45; cursor: default; }
+.share-result-status {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  min-height: 1.1em;
+  margin-bottom: 0.6rem;
+}
+.share-result-disclosure {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 0.85rem;
+  margin-top: 0.2rem;
+}
+.share-result-disclosure summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  margin-bottom: 0.5rem;
+}
+.share-result-disclosure summary:hover { color: var(--accent); }
+.share-result-disclosure-body p { margin: 0 0 0.5rem; line-height: 1.5; }
+.share-result-disclosure-body ul { margin: 0 0 0.5rem; padding-left: 1.1rem; }
+.share-result-disclosure-body li { margin-bottom: 0.3rem; line-height: 1.45; }
+
 /* ─── Delete-this-diary (info panel) ─── */
 .delete-vault-wrap {
   margin-top: 1.5rem;
@@ -1591,6 +1662,33 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   <div class="share-view" id="share-view"></div>
 
   <div class="share-toast" id="share-toast">Link copied to clipboard</div>
+
+  <div class="info-overlay" id="share-result-overlay">
+    <div class="info-panel">
+      <h2>Your share link is ready</h2>
+      <div class="share-result-meta"><span id="share-result-length">—</span> characters</div>
+      <div class="share-result-url" id="share-result-url"></div>
+      <div class="share-result-actions">
+        <button class="share-result-btn primary" id="share-result-copy">Copy link</button>
+        <button class="share-result-btn" id="share-result-shorten">Shorten via da.gd</button>
+      </div>
+      <div class="share-result-status" id="share-result-status"></div>
+      <details class="share-result-disclosure">
+        <summary>What changes if I shorten?</summary>
+        <div class="share-result-disclosure-body">
+          <p>The encrypted contents stay encrypted. The shortener sees only the scrambled long URL — not your entries, your share passphrase, or who you're sending the link to.</p>
+          <p>What does change:</p>
+          <ul>
+            <li>A third party (da.gd) learns that a long URL exists and roughly how big the encrypted blob is.</li>
+            <li>The short-to-long mapping is stored on their server. If their service changes or goes down, the short link may stop working — the long link always works.</li>
+            <li>Short codes are guessable. Someone could enumerate them. Without your share passphrase they can't decrypt the entries, but they'd see that an encrypted diary exists.</li>
+          </ul>
+          <p>Your share passphrase is the only thing between an attacker and your entries. If it's strong, shortening is a small trade-off. If it's weak, no shortening choice helps.</p>
+        </div>
+      </details>
+      <button class="info-close" id="share-result-close">done</button>
+    </div>
+  </div>
 
   <div class="info-overlay" id="info-overlay">
     <div class="info-panel">
@@ -2737,6 +2835,32 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     scheduleUrlBudgetUpdate();
   });
 
+  // Current long URL shown in the share-result modal. Updated in place when the user shortens.
+  let currentShareUrl = '';
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      const toast = document.getElementById('share-toast');
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 2000);
+      return true;
+    } catch {
+      prompt('Copy this link:', text);
+      return false;
+    }
+  }
+
+  function showShareResult(url) {
+    currentShareUrl = url;
+    document.getElementById('share-result-url').textContent = url;
+    document.getElementById('share-result-length').textContent = url.length.toLocaleString('en-US');
+    document.getElementById('share-result-status').textContent = '';
+    document.getElementById('share-result-shorten').disabled = false;
+    document.getElementById('share-result-shorten').textContent = 'Shorten via da.gd';
+    document.getElementById('share-result-overlay').classList.add('visible');
+  }
+
   document.getElementById('share-btn').addEventListener('click', async () => {
     if (!sessionDate) {
       alert('Set your last session date first.');
@@ -2761,14 +2885,46 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     const json = JSON.stringify(shareEntries);
     const encrypted = await encryptWithPassphrase(json, sharePass);
     const url = location.origin + location.pathname + '#share=' + encrypted;
+    showShareResult(url);
+  });
+
+  document.getElementById('share-result-copy').addEventListener('click', async () => {
+    await copyToClipboard(currentShareUrl);
+  });
+
+  document.getElementById('share-result-shorten').addEventListener('click', async () => {
+    const btn = document.getElementById('share-result-shorten');
+    const status = document.getElementById('share-result-status');
+    btn.disabled = true;
+    btn.textContent = 'Shortening…';
+    status.textContent = '';
     try {
-      await navigator.clipboard.writeText(url);
-      const toast = document.getElementById('share-toast');
-      toast.classList.add('visible');
-      setTimeout(() => toast.classList.remove('visible'), 2000);
-    } catch {
-      prompt('Copy this link:', url);
+      const body = 'url=' + encodeURIComponent(currentShareUrl);
+      const resp = await fetch('https://da.gd/s', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body
+      });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const shortUrl = (await resp.text()).trim();
+      if (!shortUrl.startsWith('http')) throw new Error('malformed response');
+      currentShareUrl = shortUrl;
+      document.getElementById('share-result-url').textContent = shortUrl;
+      document.getElementById('share-result-length').textContent = shortUrl.length.toLocaleString('en-US');
+      btn.textContent = 'Shortened ✓';
+      status.textContent = 'Short link ready. Clicking Copy will copy the short link.';
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Shorten via da.gd';
+      status.textContent = 'Couldn\'t reach the shortener — the long link still works.';
     }
+  });
+
+  document.getElementById('share-result-close').addEventListener('click', () => {
+    document.getElementById('share-result-overlay').classList.remove('visible');
+  });
+  document.getElementById('share-result-overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
   });
 
   function ratingBar(value, max, colorVar) {
