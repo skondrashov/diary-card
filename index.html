@@ -1723,29 +1723,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     return Math.floor(a[0] * 360 / 256);
   }
 
-  // Migrate a single-vault legacy install (flat `dbt_*` keys) into the indexed scheme on first load.
-  // Leaves `createdAt` undefined on the migrated vault — lock screen renders that as "your diary"
-  // rather than inventing a bogus date.
-  function migrateLegacyVault() {
-    const legacySalt = localStorage.getItem('dbt_salt');
-    const legacyCheck = localStorage.getItem('dbt_check');
-    if (!legacySalt || !legacyCheck) return;
-    if (listVaults().length > 0) return;
-    const id = generateVaultId();
-    try {
-      localStorage.setItem(saltKey(id), legacySalt);
-      localStorage.setItem(checkKey(id), legacyCheck);
-      const legacyDiary = localStorage.getItem('dbt_diary_enc');
-      if (legacyDiary) localStorage.setItem(diaryKey(id), legacyDiary);
-      const legacySession = localStorage.getItem('dbt_session_enc');
-      if (legacySession) localStorage.setItem(sessionKey(id), legacySession);
-      const legacyPrefs = localStorage.getItem('dbt_prefs_enc');
-      if (legacyPrefs) localStorage.setItem(prefsKey(id), legacyPrefs);
-    } catch { return; }
-    addVault({ id, accent: generateAccentHue() });
-    ['dbt_salt', 'dbt_check', 'dbt_diary_enc', 'dbt_session_enc', 'dbt_prefs_enc']
-      .forEach(k => { try { localStorage.removeItem(k); } catch {} });
-  }
   const MAGIC = 'dbt_ok'; // plaintext check to verify passphrase
 
   let cryptoKey = null; // AES-GCM key derived from passphrase
@@ -1865,7 +1842,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     } catch {}
     addVault({
       id: activeVaultId,
-      accent: pendingVault ? pendingVault.accent : generateAccentHue(),
+      accent: pendingVault.accent,
       createdAt: new Date().toISOString()
     });
     pendingVault = null;
@@ -2757,6 +2734,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   document.getElementById('set-session').addEventListener('click', async () => {
     await saveSessionDate(dateKey(currentDate));
     renderSessionBar();
+    scheduleUrlBudgetUpdate();
   });
 
   document.getElementById('share-btn').addEventListener('click', async () => {
@@ -3461,9 +3439,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   // ─── Lock screen rendering ───
   function formatVaultLabel(v) {
-    if (!v.createdAt) return 'your diary';
     const d = new Date(v.createdAt);
-    if (isNaN(d.getTime())) return 'your diary';
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return `started ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   }
@@ -3593,7 +3569,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   // ─── Init ───
   document.querySelector('.app').style.display = 'none';
-  migrateLegacyVault();
 
   // Wire up the new-vault and share-unlock forms once. The new-vault form is shown only after the
   // wizard finishes; the share form is shown only when the hash is a share link.
