@@ -28,6 +28,7 @@
   --transition: 0.2s ease;
   --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
 
   /* emotion/urge intensity colors */
   --c0: #4a4640;
@@ -189,113 +190,9 @@ header {
   margin-bottom: 0.75rem;
 }
 
-/* ─── Rating Rows ─── */
-.rating-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  gap: 0.5rem;
-}
-.rating-label {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  flex-shrink: 0;
-  min-width: 90px;
-}
-.rating-pills {
-  display: flex;
-  gap: 4px;
-}
-.pill {
-  width: 32px;
-  height: 28px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.pill:hover { border-color: var(--border-light); }
-.pill.selected {
-  color: #fff;
-  border-color: transparent;
-  font-weight: 600;
-}
-.pill.selected.intensity-0 { background: var(--c0); color: var(--text-secondary); }
-.pill.selected.intensity-1 { background: var(--c1); }
-.pill.selected.intensity-2 { background: var(--c2); }
-.pill.selected.intensity-3 { background: var(--c3); color: #1a1a1a; }
-.pill.selected.intensity-4 { background: var(--c4); }
-.pill.selected.intensity-5 { background: var(--c5); }
-.pill.selected.skill-0 { background: var(--s0); color: var(--text-secondary); }
-.pill.selected.skill-1 { background: var(--s1); }
-.pill.selected.skill-2 { background: var(--s2); }
-.pill.selected.skill-3 { background: var(--s3); }
-.pill.selected.skill-4 { background: var(--s4); }
-.pill.selected.skill-5 { background: var(--s5); }
-.pill.selected.skill-6 { background: var(--s6); }
-.pill.selected.skill-7 { background: var(--s7); }
-
-.pill.selected {
-  box-shadow: 0 0 8px var(--pill-glow, rgba(201,149,107,0.3));
-  animation: pillBreath 3s ease-in-out infinite;
-}
-
-@keyframes pillBreath {
-  0%, 100% { box-shadow: 0 0 6px var(--pill-glow, rgba(201,149,107,0.2)); }
-  50% { box-shadow: 0 0 14px var(--pill-glow, rgba(201,149,107,0.4)); }
-}
-
-/* ─── Toggle Rows (Actions) ─── */
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.55rem 0;
-}
-.toggle-label {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-.toggle {
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  position: relative;
-  transition: all var(--transition);
-  -webkit-tap-highlight-color: transparent;
-}
-.toggle::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  transition: all var(--transition);
-}
-.toggle.on {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-}
-.toggle.on::after {
-  transform: translateX(20px);
-  background: var(--accent);
-}
+/* ─── Rating & Toggle: now in <rating-row> / <toggle-row> / <skill-row> Shadow DOM ─── */
+rating-row, toggle-row, skill-row, .emotion-row { margin: 5px 0; }
+.emotion-row rating-row { flex: 1; min-width: 0; margin: 0; }
 
 /* ─── Notes ─── */
 .notes-area {
@@ -318,16 +215,6 @@ header {
 }
 .notes-area::placeholder {
   color: var(--text-muted);
-}
-
-/* ─── Scale Legend ─── */
-.scale-legend {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  padding: 0 0 0.5rem;
-  margin-top: -0.25rem;
 }
 
 /* ─── Calendar ─── */
@@ -466,7 +353,6 @@ header {
   align-items: center;
   gap: 0.35rem;
 }
-.emotion-row .rating-row { flex: 1; min-width: 0; }
 .emotion-hide {
   background: none;
   border: none;
@@ -596,8 +482,6 @@ header {
   .app { max-width: 620px; }
 }
 @media (max-width: 400px) {
-  .pill { width: 28px; height: 26px; font-size: 0.7rem; }
-  .rating-label { min-width: 75px; font-size: 0.8rem; }
   html { font-size: 14px; }
 }
 
@@ -655,8 +539,6 @@ header {
   color: var(--text-muted);
   flex-shrink: 0;
 }
-.sleep-quality-pills { gap: 3px; }
-.sleep-quality-pills .pill { width: 26px; height: 24px; font-size: 0.7rem; }
 
 .add-meal-btn {
   background: none;
@@ -797,7 +679,7 @@ header {
   padding: 0.25rem 0;
   font-size: 0.8rem;
 }
-.share-row-label { color: var(--text-muted); min-width: 0; flex-shrink: 1; }
+.share-row-label { color: var(--text-muted); width: 110px; flex-shrink: 0; }
 .share-row-bar {
   flex: 1;
   height: 6px;
@@ -811,7 +693,7 @@ header {
   border-radius: 3px;
   transition: width 0.3s ease;
 }
-.share-row-value { color: var(--text); font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+.share-row-value { color: var(--text); font-weight: 500; white-space: nowrap; flex-shrink: 0; margin-left: auto; }
 .share-row-value.on { color: var(--accent); }
 .share-section-label {
   font-size: 0.65rem;
@@ -928,14 +810,13 @@ header {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   background: none;
   color: var(--text-muted);
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: 0.55rem;
+  font-weight: 500;
   font-family: var(--font-body);
   cursor: pointer;
   vertical-align: middle;
@@ -1482,20 +1363,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   align-items: center;
 }
 
-/* ─── Skill tooltip ─── */
-.skill-hint {
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  text-align: right;
-  flex-shrink: 0;
-  min-width: 0;
-  opacity: 0;
-  transition: opacity var(--transition);
-  margin-left: -4px;
-}
-.rating-row:has(.pill.selected) .skill-hint {
-  opacity: 1;
-}
 </style>
 </head>
 <body>
@@ -1540,7 +1407,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
 <div class="app">
   <header>
-    <div class="logo">diary <button class="info-btn" id="info-btn" aria-label="Privacy info">?</button></div>
+    <div class="logo">diary <button class="info-btn" id="info-btn" aria-label="Privacy info">privacy info</button></div>
     <div class="header-actions">
       <button class="icon-btn" id="cal-btn" title="Calendar">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 1a.5.5 0 01.5.5V2h6v-.5a.5.5 0 011 0V2h1.5A1.5 1.5 0 0115 3.5v10a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 13.5v-10A1.5 1.5 0 012.5 2H4v-.5a.5.5 0 01.5-.5zM2 5v8.5a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V5H2z"/></svg>
@@ -1552,10 +1419,10 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   </header>
 
   <div class="session-bar" id="session-bar">
-    <div><span class="session-bar-label">Last session: </span><span class="session-bar-date" id="session-date">not set</span></div>
+    <div><span class="session-bar-label">Checkpoint: </span><span class="session-bar-date" id="session-date">not set</span></div>
     <div class="session-bar-actions">
-      <button class="session-btn" id="set-session">mark current day</button>
-      <button class="session-btn share-btn" id="share-btn">share since session</button>
+      <button class="session-btn" id="set-session">set current day as checkpoint</button>
+      <button class="session-btn share-btn" id="share-btn">share since checkpoint</button>
     </div>
   </div>
 
@@ -1575,7 +1442,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
     <div class="section" id="emotions-section">
       <div class="section-header">Emotions <span style="float:right;font-size:0.6rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:0.6">7d avg</span></div>
-      <div class="scale-legend"><span>0 none</span><span>5 extreme</span></div>
       <div id="emotion-rows"></div>
       <div class="emotion-controls">
         <button class="emotion-add-btn" id="add-emotion">+ add</button>
@@ -1585,7 +1451,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
     <div class="section" id="urges-section">
       <div class="section-header">Urges</div>
-      <div class="scale-legend"><span>0 none</span><span>5 extreme</span></div>
     </div>
 
     <div class="section" id="actions-section">
@@ -1599,14 +1464,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
           <div class="tracking-label">Sleep</div>
           <div class="tracking-input-group">
             <input type="number" class="tracking-input" id="sleep-hours" min="0" max="24" step="0.5" placeholder="hrs">
-            <div class="rating-pills sleep-quality-pills" data-field="sleepQuality" data-type="intensity">
-              <div class="pill" data-value="0">0</div>
-              <div class="pill" data-value="1">1</div>
-              <div class="pill" data-value="2">2</div>
-              <div class="pill" data-value="3">3</div>
-              <div class="pill" data-value="4">4</div>
-              <div class="pill" data-value="5">5</div>
-            </div>
+            <rating-row label="" field="sleepQuality" max="5" type="intensity" small></rating-row>
             <span class="tracking-hint">quality</span>
           </div>
         </div>
@@ -1635,7 +1493,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
     <div class="section" id="skills-section">
       <div class="section-header">Skills Used</div>
-      <div class="scale-legend"><span>0 not thought about</span><span>7 automatic &amp; helped</span></div>
     </div>
 
     <div class="section">
@@ -1710,6 +1567,9 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <p class="caveat">Someone looking at your screen while the diary is open. A weak passphrase that's easy to guess. Malware on your device. Your browser history will show that you visited this site (though the diary content itself is encrypted).</p>
       <p class="caveat">If your browser syncs data across devices, the encrypted diary may appear on other devices signed into the same profile. The contents are still encrypted.</p>
 
+      <h3 class="caveat">If you use the URL shortener</h3>
+      <p class="caveat">Shortening a share link sends the encrypted URL to a third-party service (da.gd). They store the encrypted blob on their server — they can't read your entries without the share passphrase, but they know the blob exists and roughly how large it is. The resulting short code is sequential and could be guessed. The long link always works without any third party.</p>
+
       <h3>Technical details</h3>
       <p style="font-size:0.75rem">AES-256-GCM encryption. Key derived via PBKDF2 with 200,000 iterations and a random 128-bit salt. Each save uses a fresh 96-bit IV. Share links are self-contained: salt + IV + ciphertext in base64url. No cookies, no analytics, no network requests. All cryptography uses the browser's native Web Crypto API.</p>
 
@@ -1734,7 +1594,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   <div class="footer">
     <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2 2 0 012 2v4H6V3a2 2 0 012-2zm3 6V3a3 3 0 00-6 0v4a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
-    Encrypted on your device &mdash; never sent anywhere
+    Encrypted on your device
   </div>
 </div>
 
@@ -1776,6 +1636,243 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 </div>
 
 <script>
+// ─── Web Components ───
+
+class RatingRow extends HTMLElement {
+  static get observedAttributes() { return ['label','field','max','value','small']; }
+  static GLOWS = ['rgba(74,70,64,0.3)','rgba(91,122,138,0.4)','rgba(106,154,170,0.4)','rgba(184,164,85,0.4)','rgba(196,132,90,0.4)','rgba(184,90,90,0.4)'];
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this._value = null;
+  }
+
+  connectedCallback() {
+    this._render();
+    this.shadowRoot.querySelector('.pills').addEventListener('click', e => {
+      const pill = e.target.closest('.pill');
+      if (!pill) return;
+      const v = parseInt(pill.dataset.value);
+      const newVal = this._value === v ? null : v;
+      this._value = newVal;
+      this._updatePills();
+      this.dispatchEvent(new CustomEvent('field-change', {
+        bubbles: true, composed: true,
+        detail: { field: this.getAttribute('field'), value: newVal }
+      }));
+    });
+  }
+
+  attributeChangedCallback(name) {
+    if (name === 'value') {
+      const v = this.getAttribute('value');
+      this._value = v === null || v === '' ? null : parseInt(v);
+      this._updatePills();
+    }
+  }
+
+  get value() { return this._value; }
+  set value(v) {
+    this._value = v == null ? null : parseInt(v);
+    this._updatePills();
+  }
+
+  _render() {
+    const label = this.getAttribute('label') || '';
+    const max = parseInt(this.getAttribute('max') || '5');
+    const small = this.hasAttribute('small');
+
+    let colorCss = '';
+    for (let i = 0; i <= 5; i++) colorCss += `.pill.selected.i${i}{background:var(--c${i});${i===0?'color:var(--text-secondary);':''}${i===3?'color:#1a1a1a;':''}}`;
+
+    this.shadowRoot.innerHTML = `<style>
+:host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.5rem}
+:host([small]){padding:0;justify-content:flex-start}
+.label{font-size:0.85rem;color:var(--text-secondary);flex-shrink:0;min-width:90px}
+.pills{display:flex;gap:4px}
+.pill{width:${small?26:32}px;height:${small?24:28}px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:${small?'0.7':'0.75'}rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
+.pill:hover{border-color:var(--border-light)}
+.pill.selected{color:#fff;border-color:transparent;font-weight:600;box-shadow:0 0 8px var(--pill-glow,rgba(201,149,107,0.3));animation:pillBreath 3s ease-in-out infinite}
+${colorCss}
+@keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(201,149,107,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(201,149,107,0.4))}}
+@media(max-width:400px){.pill{width:${small?22:28}px;height:${small?22:26}px;font-size:0.7rem}.label{min-width:75px;font-size:0.8rem}}
+</style>
+${label ? `<div class="label">${label}</div>` : ''}
+<div class="pills">${Array.from({length:max+1},(_,i)=>`<div class="pill" data-value="${i}">${i}</div>`).join('')}</div>`;
+  }
+
+  _updatePills() {
+    const pills = this.shadowRoot?.querySelectorAll('.pill');
+    if (!pills) return;
+    pills.forEach(p => {
+      const v = parseInt(p.dataset.value);
+      p.className = 'pill';
+      p.style.removeProperty('--pill-glow');
+      if (this._value === v) {
+        p.classList.add('selected', 'i' + v);
+        p.style.setProperty('--pill-glow', RatingRow.GLOWS[v] || RatingRow.GLOWS[0]);
+      }
+    });
+    this.classList.toggle('has-value', this._value != null);
+  }
+}
+customElements.define('rating-row', RatingRow);
+
+class ToggleRow extends HTMLElement {
+  static get observedAttributes() { return ['label','field','value']; }
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this._value = false;
+  }
+
+  connectedCallback() {
+    this._render();
+    this.shadowRoot.querySelector('.toggle').addEventListener('click', () => {
+      this._value = !this._value;
+      this._updateToggle();
+      this.dispatchEvent(new CustomEvent('field-change', {
+        bubbles: true, composed: true,
+        detail: { field: this.getAttribute('field'), value: this._value }
+      }));
+    });
+  }
+
+  attributeChangedCallback(name) {
+    if (name === 'value') {
+      this._value = this.getAttribute('value') === 'true';
+      this._updateToggle();
+    }
+  }
+
+  get value() { return this._value; }
+  set value(v) {
+    this._value = !!v;
+    this._updateToggle();
+  }
+
+  _render() {
+    const label = this.getAttribute('label') || '';
+
+    this.shadowRoot.innerHTML = `<style>
+:host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0}
+.label{font-size:0.85rem;color:var(--text-secondary)}
+.toggle{width:44px;height:24px;border-radius:12px;background:var(--bg-input);border:1px solid var(--border);cursor:pointer;position:relative;transition:all var(--transition,0.2s ease);-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--text-muted);transition:all var(--transition,0.2s ease)}
+.toggle.on{background:var(--accent-dim);border-color:var(--accent)}
+.toggle.on::after{transform:translateX(20px);background:var(--accent)}
+</style>
+<div class="label">${label}</div>
+<div class="toggle"></div>`;
+  }
+
+  _updateToggle() {
+    const t = this.shadowRoot?.querySelector('.toggle');
+    if (t) t.classList.toggle('on', this._value);
+  }
+}
+customElements.define('toggle-row', ToggleRow);
+
+class SkillRow extends HTMLElement {
+  static get observedAttributes() { return ['label','field','value']; }
+  static LEVELS = ['aware','tried','used','auto'];
+  static GLOWS = ['rgba(77,109,77,0.4)','rgba(85,141,85,0.4)','rgba(95,173,95,0.5)','rgba(100,189,100,0.5)'];
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this._engagement = null;
+    this._helped = false;
+  }
+
+  connectedCallback() {
+    this._render();
+    this.shadowRoot.querySelector('.pills').addEventListener('click', e => {
+      const pill = e.target.closest('.pill');
+      if (!pill) return;
+      const level = parseInt(pill.dataset.level);
+      if (this._engagement === level) { this._engagement = null; this._helped = false; }
+      else this._engagement = level;
+      this._update();
+      this._dispatch();
+    });
+    this.shadowRoot.querySelector('.helped').addEventListener('click', () => {
+      this._helped = !this._helped;
+      this._update();
+      this._dispatch();
+    });
+  }
+
+  attributeChangedCallback(name) {
+    if (name === 'value') { this._decode(this.getAttribute('value')); this._update(); }
+  }
+
+  get value() {
+    return this._engagement === null ? null : this._engagement * 2 + (this._helped ? 1 : 0);
+  }
+  set value(v) { this._decode(v); this._update(); }
+
+  _decode(v) {
+    if (v == null || v === '') { this._engagement = null; this._helped = false; return; }
+    const n = parseInt(v);
+    if (isNaN(n)) { this._engagement = null; this._helped = false; return; }
+    this._engagement = Math.floor(n / 2);
+    this._helped = n % 2 === 1;
+  }
+
+  _render() {
+    const label = this.getAttribute('label') || '';
+    this.shadowRoot.innerHTML = `<style>
+:host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.4rem}
+.label{font-size:0.8rem;color:var(--text-secondary);flex-shrink:0;width:110px;line-height:1.2}
+.right{display:flex;align-items:center;gap:0.4rem}
+.pills{display:flex;gap:3px}
+.pill{padding:4px 7px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.65rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);user-select:none;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.pill:hover{border-color:var(--border-light)}
+.pill.selected{color:#fff;border-color:transparent;font-weight:600;box-shadow:0 0 8px var(--pill-glow,rgba(90,157,90,0.3));animation:pillBreath 3s ease-in-out infinite}
+.pill.selected.l0{background:var(--s2)}
+.pill.selected.l1{background:var(--s4)}
+.pill.selected.l2{background:var(--s6)}
+.pill.selected.l3{background:var(--s7)}
+.helped{padding:4px 7px;border-radius:var(--radius-pill,20px);border:1px dashed var(--border);background:none;color:var(--text-muted);font-size:0.6rem;cursor:pointer;transition:all var(--transition,0.2s ease);font-family:inherit;opacity:0;pointer-events:none;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+:host(.has-engagement) .helped{opacity:0.5;pointer-events:auto}
+:host(.has-engagement) .helped:hover{opacity:1;border-color:var(--accent)}
+.helped.on{opacity:1!important;background:var(--accent-dim);border-color:var(--accent);border-style:solid;color:var(--accent)}
+@keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(90,157,90,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(90,157,90,0.4))}}
+@media(max-width:400px){.label{width:85px;font-size:0.75rem}.pill{padding:3px 5px;font-size:0.6rem}.helped{padding:3px 5px;font-size:0.55rem}}
+</style>
+<div class="label">${label}</div>
+<div class="right"><button class="helped">helped</button><div class="pills">${SkillRow.LEVELS.map((l,i)=>`<div class="pill" data-level="${i}">${l}</div>`).join('')}</div></div>`;
+  }
+
+  _dispatch() {
+    this.dispatchEvent(new CustomEvent('field-change', {
+      bubbles: true, composed: true,
+      detail: { field: this.getAttribute('field'), value: this.value }
+    }));
+  }
+
+  _update() {
+    const pills = this.shadowRoot?.querySelectorAll('.pill');
+    if (!pills) return;
+    pills.forEach(p => {
+      const level = parseInt(p.dataset.level);
+      p.className = 'pill';
+      p.style.removeProperty('--pill-glow');
+      if (this._engagement === level) {
+        p.classList.add('selected', 'l' + level);
+        p.style.setProperty('--pill-glow', SkillRow.GLOWS[level]);
+      }
+    });
+    this.classList.toggle('has-engagement', this._engagement !== null);
+    const h = this.shadowRoot.querySelector('.helped');
+    if (h) h.classList.toggle('on', this._helped);
+  }
+}
+customElements.define('skill-row', SkillRow);
+
 (function() {
   'use strict';
 
@@ -2016,11 +2113,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     { label: 'Emotion Regulation', indices: [14, 15, 16, 17, 18, 19, 20] },
     { label: 'Interpersonal Effectiveness', indices: [21, 22, 23, 24, 25] }
   ];
-  const SKILL_HINTS = {
-    0:'not thought about',1:'thought about, didn\'t want to',2:'thought about, wanted to',
-    3:'tried, couldn\'t use',4:'tried, didn\'t help',5:'used, helped',6:'automatic, didn\'t help',7:'automatic, helped'
-  };
-
   // Daily categories. 'complex' categories have their own hand-built HTML (sleep/exercise/meals);
   // 'toggle' categories are simple booleans that we build dynamically in buildDynamicSections().
   // Append-only: new category ids go at the end so share-link field names stay stable.
@@ -2039,6 +2131,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   ];
 
   const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const DAYNAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   // ─── Prefs (declared after the vocabulary constants so defaults can reference SKILLS.length etc) ───
@@ -2194,76 +2287,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   // ─── Build UI ───
   // dynKey is a stable identifier used by buildDynamicSections() to find and remove this row
   // when rebuilding (e.g., after the wizard changes visibility).
-  function buildRatingRow(container, label, fieldPrefix, max, type, dynKey) {
-    const row = document.createElement('div');
-    row.className = 'rating-row';
-    if (dynKey) row.dataset.dyn = dynKey;
-
-    const lbl = document.createElement('div');
-    lbl.className = 'rating-label';
-    lbl.textContent = label;
-    row.appendChild(lbl);
-
-    const pills = document.createElement('div');
-    pills.className = 'rating-pills';
-    pills.dataset.field = fieldPrefix;
-    pills.dataset.type = type;
-
-    for (let i = 0; i <= max; i++) {
-      const p = document.createElement('div');
-      p.className = 'pill';
-      p.textContent = i;
-      p.dataset.value = i;
-      p.addEventListener('click', () => {
-        const key = dateKey(currentDate);
-        const current = getEntry(key)[fieldPrefix];
-        if (current === i) {
-          // Deselect
-          setField(key, fieldPrefix, null);
-        } else {
-          setField(key, fieldPrefix, i);
-        }
-        renderEntry();
-        scheduleUrlBudgetUpdate();
-      });
-      pills.appendChild(p);
-    }
-    row.appendChild(pills);
-
-    if (type === 'skill') {
-      const hint = document.createElement('div');
-      hint.className = 'skill-hint';
-      hint.dataset.hintFor = fieldPrefix;
-      row.appendChild(hint);
-    }
-
-    container.appendChild(row);
-  }
-
-  function buildToggleRow(container, action, dynKey) {
-    const row = document.createElement('div');
-    row.className = 'toggle-row';
-    if (dynKey) row.dataset.dyn = dynKey;
-
-    const lbl = document.createElement('div');
-    lbl.className = 'toggle-label';
-    lbl.textContent = action.label;
-    row.appendChild(lbl);
-
-    const toggle = document.createElement('div');
-    toggle.className = 'toggle';
-    toggle.dataset.field = action.id;
-    toggle.addEventListener('click', () => {
-      const key = dateKey(currentDate);
-      const current = !!getEntry(key)[action.id];
-      setField(key, action.id, !current);
-      renderEntry();
-      scheduleUrlBudgetUpdate();
-    });
-    row.appendChild(toggle);
-
-    container.appendChild(row);
-  }
 
   function get7DayAvg(emotionIndex) {
     let sum = 0, count = 0;
@@ -2287,42 +2310,18 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       const wrapper = document.createElement('div');
       wrapper.className = 'emotion-row' + (isHidden ? ' hidden-visible' : '');
 
-      // Build the rating row inside the wrapper
-      const row = document.createElement('div');
-      row.className = 'rating-row';
-      const lbl = document.createElement('div');
-      lbl.className = 'rating-label';
-      lbl.textContent = em;
-      row.appendChild(lbl);
-
-      const pills = document.createElement('div');
-      pills.className = 'rating-pills';
-      pills.dataset.field = 'emotion_' + i;
-      pills.dataset.type = 'intensity';
-      for (let v = 0; v <= 5; v++) {
-        const p = document.createElement('div');
-        p.className = 'pill';
-        p.textContent = v;
-        p.dataset.value = v;
-        p.addEventListener('click', () => {
-          const key = dateKey(currentDate);
-          const current = getEntry(key)['emotion_' + i];
-          setField(key, 'emotion_' + i, current === v ? null : v);
-          renderEntry();
-          scheduleUrlBudgetUpdate();
-        });
-        pills.appendChild(p);
-      }
-      row.appendChild(pills);
+      const row = document.createElement('rating-row');
+      row.setAttribute('label', em);
+      row.setAttribute('field', 'emotion_' + i);
+      row.setAttribute('max', '5');
+      row.setAttribute('type', 'intensity');
       wrapper.appendChild(row);
 
-      // 7-day average
       const avg = document.createElement('div');
       avg.className = 'emotion-avg';
       avg.dataset.emotionIndex = i;
       wrapper.appendChild(avg);
 
-      // Hide button
       const hideBtn = document.createElement('button');
       hideBtn.className = 'emotion-hide';
       hideBtn.textContent = isHidden ? '◉' : '○';
@@ -2342,7 +2341,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       container.appendChild(wrapper);
     });
 
-    // Update hidden count
     document.getElementById('hidden-count').textContent = prefs.hiddenEmotions.length;
     const showBtn = document.getElementById('show-hidden');
     showBtn.style.display = prefs.hiddenEmotions.length ? '' : 'none';
@@ -2363,37 +2361,46 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   // minus whatever's hidden in prefs. Skips items in prefs.hiddenUrges / hiddenActions / hiddenSkills
   // so hidden fields are never even in the DOM, which is what makes hidden items shrink share links.
   function buildDynamicSections() {
-    // Urges
     const urgesSec = document.getElementById(DYNAMIC_KEYS.urges);
     urgesSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
     URGES.forEach((u, i) => {
       if (prefs.hiddenUrges.includes(i)) return;
-      buildRatingRow(urgesSec, u, 'urge_'+i, 5, 'intensity', 'urge_'+i);
+      const row = document.createElement('rating-row');
+      row.setAttribute('label', u); row.setAttribute('field', 'urge_'+i);
+      row.setAttribute('max', '5'); row.setAttribute('type', 'intensity');
+      row.dataset.dyn = 'urge_'+i;
+      urgesSec.appendChild(row);
     });
 
-    // Actions
     const actionsSec = document.getElementById(DYNAMIC_KEYS.actions);
     actionsSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
     ACTIONS.forEach(a => {
       if (prefs.hiddenActions.includes(a.id)) return;
-      buildToggleRow(actionsSec, a, 'action_'+a.id);
+      const row = document.createElement('toggle-row');
+      row.setAttribute('label', a.label); row.setAttribute('field', a.id);
+      row.dataset.dyn = 'action_'+a.id;
+      actionsSec.appendChild(row);
     });
 
-    // Skills
     const skillsSec = document.getElementById(DYNAMIC_KEYS.skills);
     skillsSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
     SKILLS.forEach((s, i) => {
       if (prefs.hiddenSkills.includes(i)) return;
-      buildRatingRow(skillsSec, s, 'skill_'+i, 7, 'skill', 'skill_'+i);
+      const row = document.createElement('skill-row');
+      row.setAttribute('label', s); row.setAttribute('field', 'skill_'+i);
+      row.dataset.dyn = 'skill_'+i;
+      skillsSec.appendChild(row);
     });
 
-    // Toggle categories (dynamic — built here instead of in HTML because they're optional)
     const toggleCatSec = document.getElementById(DYNAMIC_KEYS.toggleCategories);
     toggleCatSec.innerHTML = '';
     CATEGORIES.forEach(cat => {
       if (cat.type !== 'toggle') return;
       if (prefs.hiddenCategories.includes(cat.id)) return;
-      buildToggleRow(toggleCatSec, { id: cat.field, label: cat.label }, 'cat_'+cat.id);
+      const row = document.createElement('toggle-row');
+      row.setAttribute('label', cat.label); row.setAttribute('field', cat.field);
+      row.dataset.dyn = 'cat_'+cat.id;
+      toggleCatSec.appendChild(row);
     });
   }
 
@@ -2415,16 +2422,12 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     if (_staticHandlersAttached) return;
     _staticHandlersAttached = true;
 
-    // Sleep quality pills
-    document.querySelectorAll('.sleep-quality-pills .pill').forEach(p => {
-      p.addEventListener('click', () => {
-        const key = dateKey(currentDate);
-        const v = parseInt(p.dataset.value);
-        const current = getEntry(key).sleepQuality;
-        setField(key, 'sleepQuality', current === v ? null : v);
-        renderEntry();
-        scheduleUrlBudgetUpdate();
-      });
+    // Centralized handler for all <rating-row> and <toggle-row> field changes
+    document.addEventListener('field-change', e => {
+      const key = dateKey(currentDate);
+      setField(key, e.detail.field, e.detail.value);
+      renderEntry();
+      scheduleUrlBudgetUpdate();
     });
 
     // Sleep hours
@@ -2499,45 +2502,19 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
     // Date display
     const dd = document.getElementById('date-display');
-    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    dd.innerHTML = dayNames[currentDate.getDay()] + ', ' +
+    dd.innerHTML = DAYNAMES[currentDate.getDay()] + ', ' +
       MONTHS[currentDate.getMonth()] + ' ' + currentDate.getDate() +
       (isToday(currentDate) ? '<span class="today-badge">today</span>' : '');
 
-    // Pills
-    document.querySelectorAll('.rating-pills').forEach(pills => {
-      const field = pills.dataset.field;
-      const type = pills.dataset.type;
-      const val = entry[field];
-      pills.querySelectorAll('.pill').forEach(p => {
-        const v = parseInt(p.dataset.value);
-        p.classList.remove('selected');
-        // Remove all state classes
-        for (let c = 0; c <= 7; c++) {
-          p.classList.remove('intensity-'+c, 'skill-'+c);
-        }
-        p.style.removeProperty('--pill-glow');
-        if (val === v) {
-          p.classList.add('selected');
-          if (type === 'intensity') {
-            p.classList.add('intensity-'+v);
-            const glows = ['rgba(74,70,64,0.3)','rgba(91,122,138,0.4)','rgba(106,154,170,0.4)','rgba(184,164,85,0.4)','rgba(196,132,90,0.4)','rgba(184,90,90,0.4)'];
-            p.style.setProperty('--pill-glow', glows[v] || glows[0]);
-          } else {
-            p.classList.add('skill-'+v);
-            const glows = ['rgba(74,70,64,0.3)','rgba(74,94,74,0.4)','rgba(77,109,77,0.4)','rgba(80,125,80,0.4)','rgba(85,141,85,0.4)','rgba(90,157,90,0.5)','rgba(95,173,95,0.5)','rgba(100,189,100,0.5)'];
-            p.style.setProperty('--pill-glow', glows[v] || glows[0]);
-          }
-        }
-      });
-
-      // Skill hints
-      if (type === 'skill') {
-        const hint = document.querySelector('[data-hint-for="'+field+'"]');
-        if (hint) {
-          hint.textContent = val !== null && val !== undefined ? SKILL_HINTS[val] || '' : '';
-        }
-      }
+    // Web components
+    document.querySelectorAll('rating-row').forEach(row => {
+      row.value = entry[row.getAttribute('field')];
+    });
+    document.querySelectorAll('skill-row').forEach(row => {
+      row.value = entry[row.getAttribute('field')];
+    });
+    document.querySelectorAll('toggle-row').forEach(row => {
+      row.value = !!entry[row.getAttribute('field')];
     });
 
     // 7-day averages
@@ -2548,25 +2525,8 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       el.classList.toggle('has-data', avg !== null);
     });
 
-    // Toggles
-    document.querySelectorAll('.toggle').forEach(t => {
-      const field = t.dataset.field;
-      t.classList.toggle('on', !!entry[field]);
-    });
-
     // Sleep
     document.getElementById('sleep-hours').value = entry.sleepHours != null ? entry.sleepHours : '';
-    document.querySelectorAll('.sleep-quality-pills .pill').forEach(p => {
-      const v = parseInt(p.dataset.value);
-      p.classList.remove('selected');
-      for (let c = 0; c <= 5; c++) p.classList.remove('intensity-'+c);
-      p.style.removeProperty('--pill-glow');
-      if (entry.sleepQuality === v) {
-        p.classList.add('selected', 'intensity-'+v);
-        const glows = ['rgba(74,70,64,0.3)','rgba(91,122,138,0.4)','rgba(106,154,170,0.4)','rgba(184,164,85,0.4)','rgba(196,132,90,0.4)','rgba(184,90,90,0.4)'];
-        p.style.setProperty('--pill-glow', glows[v]);
-      }
-    });
 
     // Exercise
     document.getElementById('exercise-mins').value = entry.exerciseMins != null ? entry.exerciseMins : '';
@@ -2882,7 +2842,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       alert('No entries between session date and today.');
       return;
     }
-    const json = JSON.stringify(shareEntries);
+    const json = JSON.stringify(buildSharePayload(shareEntries));
     const encrypted = await encryptWithPassphrase(json, sharePass);
     const url = location.origin + location.pathname + '#share=' + encrypted;
     showShareResult(url);
@@ -2893,6 +2853,15 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   });
 
   document.getElementById('share-result-shorten').addEventListener('click', async () => {
+    const ok = confirm(
+      'Shortening sends your encrypted link to a third party (da.gd).\n\n' +
+      'They can\'t read your entries without the share passphrase, but they will:\n' +
+      '• Store the encrypted URL on their server\n' +
+      '• Know roughly how large the encrypted blob is\n' +
+      '• Create a short code that anyone could guess\n\n' +
+      'The long link always works without any third party. Continue?'
+    );
+    if (!ok) return;
     const btn = document.getElementById('share-result-shorten');
     const status = document.getElementById('share-result-status');
     btn.disabled = true;
@@ -2932,58 +2901,81 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     return '<div class="share-row-bar"><div class="share-row-bar-fill" style="width:' + pct + '%;background:var(' + colorVar + ')"></div></div>';
   }
 
+  // ─── Share Payload ───
+  function buildSharePayload(shareEntries) {
+    const hidden = {};
+    if (prefs.hiddenUrges.length) hidden.urges = prefs.hiddenUrges;
+    if (prefs.hiddenActions.length) hidden.actions = prefs.hiddenActions;
+    if (prefs.hiddenSkills.length) hidden.skills = prefs.hiddenSkills;
+    if (prefs.hiddenCategories.length) hidden.categories = prefs.hiddenCategories;
+    if (prefs.hiddenEmotions.length) hidden.emotions = prefs.hiddenEmotions;
+    return Object.keys(hidden).length ? { entries: shareEntries, hidden } : shareEntries;
+  }
+
+  function parseSharePayload(parsed) {
+    if (parsed.entries && typeof parsed.entries === 'object' && !Array.isArray(parsed.entries)) {
+      return { entries: parsed.entries, hidden: parsed.hidden || {} };
+    }
+    return { entries: parsed, hidden: {} };
+  }
+
   // ─── Share View (read-only) ───
   let _shareEntries = null;
+  let _shareHidden = {};
   let _shareHiddenEmotions = new Set();
-  let _shareMode = 'calendar'; // 'calendar' | 'list'
+  let _shareMode = 'calendar';
   let _shareSelectedDay = null;
 
   function renderShareDayCard(entry, key) {
     const d = new Date(key + 'T00:00:00');
-    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     let html = '<div class="share-day-card">';
-    html += '<div class="share-day-date">' + dayNames[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '</div>';
+    html += '<div class="share-day-date">' + DAYNAMES[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '</div>';
 
     // Emotions
+    const hiddenEmotions = _shareHidden.emotions || [];
     let hasEmotions = false;
     for (let i = 0; i < EMOTIONS.length; i++) {
-      if (entry['emotion_'+i] != null && !_shareHiddenEmotions.has(EMOTIONS[i])) { hasEmotions = true; break; }
+      if (entry['emotion_'+i] != null && !hiddenEmotions.includes(EMOTIONS[i]) && !_shareHiddenEmotions.has(EMOTIONS[i])) { hasEmotions = true; break; }
     }
     if (hasEmotions) {
       html += '<div class="share-section-label">Emotions</div>';
       EMOTIONS.forEach((em, i) => {
-        if (_shareHiddenEmotions.has(em)) return;
+        if (hiddenEmotions.includes(em) || _shareHiddenEmotions.has(em)) return;
         const v = entry['emotion_'+i];
         if (v != null) html += '<div class="share-row"><span class="share-row-label">' + em + '</span>' + ratingBar(v, 5, '--c' + v) + '<span class="share-row-value">' + v + '/5</span></div>';
       });
     }
 
     // Urges
+    const hiddenUrges = _shareHidden.urges || [];
     let hasUrges = false;
     for (let i = 0; i < URGES.length; i++) {
-      if (entry['urge_'+i] != null) { hasUrges = true; break; }
+      if (entry['urge_'+i] != null && !hiddenUrges.includes(i)) { hasUrges = true; break; }
     }
     if (hasUrges) {
       html += '<div class="share-section-label">Urges</div>';
       URGES.forEach((u, i) => {
+        if (hiddenUrges.includes(i)) return;
         const v = entry['urge_'+i];
         if (v != null) html += '<div class="share-row"><span class="share-row-label">' + u + '</span>' + ratingBar(v, 5, '--c' + v) + '<span class="share-row-value">' + v + '/5</span></div>';
       });
     }
 
     // Actions
-    let hasActions = false;
-    ACTIONS.forEach(a => { if (entry[a.id]) hasActions = true; });
-    if (hasActions) {
+    const hiddenActions = _shareHidden.actions || [];
+    const visibleActions = ACTIONS.filter(a => !hiddenActions.includes(a.id));
+    if (visibleActions.length) {
       html += '<div class="share-section-label">Actions</div>';
-      ACTIONS.forEach(a => {
-        if (entry[a.id]) html += '<div class="share-row"><span class="share-row-label">' + a.label + '</span><span class="share-row-value on">yes</span></div>';
+      visibleActions.forEach(a => {
+        const on = !!entry[a.id];
+        html += '<div class="share-row"><span class="share-row-label">' + a.label + '</span><span class="share-row-value' + (on ? ' on' : '') + '">' + (on ? 'yes' : 'no') + '</span></div>';
       });
     }
 
     // Body / Daily check-ins
-    const toggleCats = CATEGORIES.filter(c => c.type === 'toggle' && entry[c.field]);
-    const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length) || toggleCats.length > 0;
+    const hiddenCats = _shareHidden.categories || [];
+    const visibleToggleCats = CATEGORIES.filter(c => c.type === 'toggle' && !hiddenCats.includes(c.id));
+    const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length) || visibleToggleCats.length > 0;
     if (hasBody) {
       html += '<div class="share-section-label">Daily</div>';
       if (entry.sleepHours != null) html += '<div class="share-row"><span class="share-row-label">Sleep</span><span class="share-row-value">' + entry.sleepHours + ' hrs' + (entry.sleepQuality != null ? ' (quality ' + entry.sleepQuality + '/5)' : '') + '</span></div>';
@@ -2992,21 +2984,28 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
         html += '<div class="share-row"><span class="share-row-label">Meals</span><span class="share-row-value">' + entry.meals.filter(m => m).length + '</span></div>';
         entry.meals.filter(m => m).forEach(m => { html += '<div class="share-meals">&bull; ' + m.replace(/</g,'&lt;') + '</div>'; });
       }
-      toggleCats.forEach(cat => {
-        html += '<div class="share-row"><span class="share-row-label">' + cat.label + '</span><span class="share-row-value on">yes</span></div>';
+      visibleToggleCats.forEach(cat => {
+        const on = !!entry[cat.field];
+        html += '<div class="share-row"><span class="share-row-label">' + cat.label + '</span><span class="share-row-value' + (on ? ' on' : '') + '">' + (on ? 'yes' : 'no') + '</span></div>';
       });
     }
 
     // Skills
+    const hiddenSkills = _shareHidden.skills || [];
     let hasSkills = false;
     for (let i = 0; i < SKILLS.length; i++) {
-      if (entry['skill_'+i] != null) { hasSkills = true; break; }
+      if (entry['skill_'+i] != null && !hiddenSkills.includes(i)) { hasSkills = true; break; }
     }
     if (hasSkills) {
       html += '<div class="share-section-label">Skills</div>';
+      const _sLevels = ['aware','tried','used','auto'];
       SKILLS.forEach((s, i) => {
+        if (hiddenSkills.includes(i)) return;
         const v = entry['skill_'+i];
-        if (v != null) html += '<div class="share-row"><span class="share-row-label">' + s + '</span>' + ratingBar(v, 7, '--s' + v) + '<span class="share-row-value">' + v + '/7</span></div>';
+        if (v != null) {
+          const eng = Math.floor(v / 2), helped = v % 2 === 1;
+          html += '<div class="share-row"><span class="share-row-label">' + s + '</span><span class="share-row-value">' + _sLevels[eng] + (helped ? ', helped' : '') + '</span></div>';
+        }
       });
     }
 
@@ -3506,7 +3505,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     const shareEntries = collectShareEntries();
     const basePrefix = (location.origin + location.pathname + '#share=').length;
     const hasAny = Object.keys(shareEntries).length > 0;
-    const json = hasAny ? JSON.stringify(shareEntries) : '{}';
+    const json = hasAny ? JSON.stringify(buildSharePayload(shareEntries)) : '{}';
     const compressed = await deflate(new TextEncoder().encode(json));
     const envelopeBytes = 1 + 16 + 12 + compressed.length + 16; // version + salt + iv + ct + gcm-tag
     return {
@@ -3770,14 +3769,15 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       if (!pass) return;
       try {
         const json = await decryptWithPassphrase(encrypted, pass);
-        const shareEntries = JSON.parse(json);
+        const payload = parseSharePayload(JSON.parse(json));
         document.getElementById('lock-screen').style.display = 'none';
         document.querySelector('.app').style.display = 'block';
         document.getElementById('entry-view').classList.remove('active');
         document.getElementById('session-bar').style.display = 'none';
         document.getElementById('cal-btn').style.display = 'none';
         document.getElementById('share-view').classList.add('active', 'view-fade');
-        renderShareView(shareEntries);
+        _shareHidden = payload.hidden;
+        renderShareView(payload.entries);
       } catch {
         document.getElementById('share-error').textContent = 'Wrong passphrase.';
         document.getElementById('share-pass').value = '';
