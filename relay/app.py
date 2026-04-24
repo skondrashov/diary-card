@@ -3,11 +3,11 @@ import secrets
 import sqlite3
 import string
 import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -23,6 +23,7 @@ MAX_PAYLOAD = 100_000
 B64URL_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
+@contextmanager
 def get_db():
     conn = sqlite3.connect(str(DB_PATH))
     conn.execute("PRAGMA journal_mode=WAL")
@@ -33,7 +34,10 @@ def get_db():
         "created_at REAL NOT NULL, "
         "expires_at REAL NOT NULL)"
     )
-    return conn
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 
 def current_prefix():
@@ -67,44 +71,40 @@ async def create_link(req: CreateRequest):
     now = time.time()
     expires_at = now + ttl
 
-    conn = get_db()
-    cleanup(conn)
+    with get_db() as conn:
+        cleanup(conn)
+        for _ in range(5):
+            token = generate_token()
+            try:
+                conn.execute(
+                    "INSERT INTO links (token, payload, created_at, expires_at) VALUES (?, ?, ?, ?)",
+                    (token, req.payload, now, expires_at),
+                )
+                conn.commit()
+                return {
+                    "token": token,
+                    "expires_at": datetime.fromtimestamp(expires_at, tz=timezone.utc).isoformat(),
+                }
+            except sqlite3.IntegrityError:
+                continue
 
-    for _ in range(5):
-        token = generate_token()
-        try:
-            conn.execute(
-                "INSERT INTO links (token, payload, created_at, expires_at) VALUES (?, ?, ?, ?)",
-                (token, req.payload, now, expires_at),
-            )
-            conn.commit()
-            conn.close()
-            return {
-                "token": token,
-                "expires_at": datetime.fromtimestamp(expires_at, tz=timezone.utc).isoformat(),
-            }
-        except sqlite3.IntegrityError:
-            continue
-
-    conn.close()
     raise HTTPException(503, "Token generation failed")
 
 
 @app.get("/api/relay/health")
 async def health():
-    conn = get_db()
-    count = conn.execute("SELECT COUNT(*) FROM links WHERE expires_at > ?", (time.time(),)).fetchone()[0]
-    conn.close()
+    with get_db() as conn:
+        cleanup(conn)
+        count = conn.execute("SELECT COUNT(*) FROM links WHERE expires_at > ?", (time.time(),)).fetchone()[0]
     return {"status": "ok", "active_links": count}
 
 
 @app.get("/api/relay/{token}")
 async def get_link(token: str):
-    conn = get_db()
-    row = conn.execute(
-        "SELECT payload, expires_at FROM links WHERE token = ?", (token,)
-    ).fetchone()
-    conn.close()
+    with get_db() as conn:
+        row = conn.execute(
+            "SELECT payload, expires_at FROM links WHERE token = ?", (token,)
+        ).fetchone()
 
     if not row or row[1] < time.time():
         raise HTTPException(404, detail="expired")

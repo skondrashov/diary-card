@@ -3562,11 +3562,15 @@ customElements.define('skill-row', SkillRow);
     renderEntry();
   });
 
-  function setupShareUnlock(encryptedPayload) {
+  function showShareLock(message, showForm) {
     document.getElementById('lock-share').style.display = '';
     document.getElementById('lock-screen').style.display = 'flex';
-    document.querySelector('#lock-share .lock-subtitle').textContent = 'This link contains encrypted diary entries.';
-    document.querySelector('#lock-share form').style.display = '';
+    document.querySelector('#lock-share .lock-subtitle').textContent = message;
+    document.querySelector('#lock-share form').style.display = showForm ? '' : 'none';
+  }
+
+  function setupShareUnlock(encryptedPayload) {
+    showShareLock('This link contains encrypted diary entries.', true);
     document.getElementById('share-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const pass = document.getElementById('share-pass').value;
@@ -3593,10 +3597,7 @@ customElements.define('skill-row', SkillRow);
 
   if (location.hash.startsWith('#relay=')) {
     const token = location.hash.slice(7);
-    document.getElementById('lock-share').style.display = '';
-    document.getElementById('lock-screen').style.display = 'flex';
-    document.querySelector('#lock-share .lock-subtitle').textContent = 'Loading encrypted diary\u2026';
-    document.querySelector('#lock-share form').style.display = 'none';
+    showShareLock('Loading encrypted diary\u2026', false);
     fetch('/api/relay/' + encodeURIComponent(token))
       .then(r => { if (!r.ok) throw new Error('expired'); return r.json(); })
       .then(data => setupShareUnlock(data.payload))
@@ -3607,11 +3608,7 @@ customElements.define('skill-row', SkillRow);
   } else if (location.hash.startsWith('#share=')) {
     setupShareUnlock(location.hash.slice(7));
   } else if (location.hash === '#link-expired') {
-    document.getElementById('lock-share').style.display = '';
-    document.getElementById('lock-screen').style.display = 'flex';
-    document.querySelector('#lock-share .lock-subtitle').textContent =
-      'This share link has expired. Ask for a new one.';
-    document.querySelector('#lock-share form').style.display = 'none';
+    showShareLock('This share link has expired. Ask for a new one.', false);
   } else if (listVaults().length > 0) {
     showVaultListUI();
   } else {
