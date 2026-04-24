@@ -1129,101 +1129,42 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 .vault-body .lock-input { margin-bottom: 0.5rem; }
 .vault-body .lock-btn { margin-top: 0.25rem; }
 
-/* ─── URL Budget Indicator ─── */
-.url-budget {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 0.75rem;
-  margin-bottom: 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-card);
-  cursor: pointer;
-  transition: border-color var(--transition);
-  font-size: 0.72rem;
-}
-.url-budget:hover { border-color: var(--border-light); }
-.url-budget-label {
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-  font-size: 0.6rem;
-  flex-shrink: 0;
-}
-.url-budget-bar {
-  flex: 1;
-  height: 6px;
-  background: var(--bg-input);
-  border-radius: 3px;
-  overflow: hidden;
-  position: relative;
-}
-.url-budget-fill {
-  height: 100%;
-  width: 0%;
-  background: var(--accent);
-  border-radius: 3px;
-  transition: width 0.3s ease, background 0.3s ease;
-}
-.url-budget-fill.warn { background: var(--c3); }
-.url-budget-fill.alert { background: var(--c5); }
-.url-budget-text {
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.url-budget-pct {
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0;
-}
-.url-budget-popover-body { font-size: 0.8rem; }
-.url-budget-popover-body .budget-stat {
+.wizard-summary { font-size: 0.8rem; }
+.wizard-summary .wizard-summary-stat {
   display: flex;
   justify-content: space-between;
   padding: 0.3rem 0;
   color: var(--text-secondary);
 }
-.url-budget-popover-body .budget-stat strong {
+.wizard-summary .wizard-summary-stat strong {
   color: var(--text);
   font-variant-numeric: tabular-nums;
 }
-.url-budget-slider {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 4px;
-  background: var(--bg-input);
-  border-radius: 2px;
-  outline: none;
-  margin: 0.6rem 0 0.25rem;
-}
-.url-budget-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: 2px solid var(--bg-raised);
-}
-.url-budget-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--accent);
-  cursor: pointer;
-  border: 2px solid var(--bg-raised);
-}
-.url-budget-marks {
+
+/* ─── Share result expiry selector ─── */
+.share-result-expiry {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+.share-result-ttl-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+}
+.share-result-long-url {
+  font-size: 0.65rem;
+  max-height: 4rem;
+  margin-bottom: 0.5rem;
 }
 
 /* ─── Info panel customize button ─── */
@@ -1243,12 +1184,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 .info-panel .customize-btn:hover { background: var(--accent-glow); }
 
 /* ─── Share-result modal ─── */
-.share-result-meta {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  text-align: center;
-  margin-bottom: 0.6rem;
-}
 .share-result-url {
   font-family: var(--font-mono, monospace);
   font-size: 0.7rem;
@@ -1379,7 +1314,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     <div class="lock-mode" id="lock-share" style="display:none">
       <p class="lock-subtitle">This link contains encrypted diary entries.</p>
       <form id="share-form" autocomplete="off">
-        <input type="password" id="share-pass" class="lock-input" placeholder="share passphrase" autocomplete="new-password">
+        <input type="password" id="share-pass" class="lock-input" placeholder="share passphrase" autocomplete="off">
         <div class="lock-error" id="share-error"></div>
         <button type="submit" class="lock-btn">unlock</button>
       </form>
@@ -1428,12 +1363,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   <!-- ─── Entry View ─── -->
   <div class="entry-view active" id="entry-view">
-    <div class="url-budget" id="url-budget" title="Share link size — click to adjust budget">
-      <span class="url-budget-label">share</span>
-      <div class="url-budget-bar"><div class="url-budget-fill" id="url-budget-fill"></div></div>
-      <span class="url-budget-text"><span id="url-budget-chars">—</span>/<span id="url-budget-max">2,000</span></span>
-      <span class="url-budget-pct" id="url-budget-pct">0%</span>
-    </div>
     <div class="date-nav">
       <button id="prev-day">&#9664;</button>
       <div class="date-display" id="date-display" title="Jump to calendar"></div>
@@ -1523,24 +1452,26 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   <div class="info-overlay" id="share-result-overlay">
     <div class="info-panel">
       <h2>Your share link is ready</h2>
-      <div class="share-result-meta"><span id="share-result-length">—</span> characters</div>
       <div class="share-result-url" id="share-result-url"></div>
-      <div class="share-result-actions">
-        <button class="share-result-btn primary" id="share-result-copy">Copy link</button>
-        <button class="share-result-btn" id="share-result-shorten">Shorten via da.gd</button>
+      <div class="share-result-expiry" id="share-result-expiry">
+        <span id="share-result-expiry-text"></span>
+        <select id="share-result-ttl" class="share-result-ttl-select">
+          <option value="86400">1 day</option>
+          <option value="259200">3 days</option>
+          <option value="604800">1 week</option>
+          <option value="2592000">1 month</option>
+          <option value="7776000">3 months</option>
+        </select>
       </div>
       <div class="share-result-status" id="share-result-status"></div>
-      <details class="share-result-disclosure">
-        <summary>What changes if I shorten?</summary>
+      <div class="share-result-actions">
+        <button class="share-result-btn primary" id="share-result-copy">Copy link</button>
+      </div>
+      <details class="share-result-disclosure" id="share-result-long-wrap">
+        <summary>Full link (no expiration)</summary>
         <div class="share-result-disclosure-body">
-          <p>The encrypted contents stay encrypted. The shortener sees only the scrambled long URL — not your entries, your share passphrase, or who you're sending the link to.</p>
-          <p>What does change:</p>
-          <ul>
-            <li>A third party (da.gd) learns that a long URL exists and roughly how big the encrypted blob is.</li>
-            <li>The short-to-long mapping is stored on their server. If their service changes or goes down, the short link may stop working — the long link always works.</li>
-            <li>Short codes are guessable. Someone could enumerate them. Without your share passphrase they can't decrypt the entries, but they'd see that an encrypted diary exists.</li>
-          </ul>
-          <p>Your share passphrase is the only thing between an attacker and your entries. If it's strong, shortening is a small trade-off. If it's weak, no shortening choice helps.</p>
+          <div class="share-result-url share-result-long-url" id="share-result-long-url"></div>
+          <button class="share-result-btn" id="share-result-copy-long">Copy full link</button>
         </div>
       </details>
       <button class="info-close" id="share-result-close">done</button>
@@ -1567,11 +1498,11 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <p class="caveat">Someone looking at your screen while the diary is open. A weak passphrase that's easy to guess. Malware on your device. Your browser history will show that you visited this site (though the diary content itself is encrypted).</p>
       <p class="caveat">If your browser syncs data across devices, the encrypted diary may appear on other devices signed into the same profile. The contents are still encrypted.</p>
 
-      <h3 class="caveat">If you use the URL shortener</h3>
-      <p class="caveat">Shortening a share link sends the encrypted URL to a third-party service (da.gd). They store the encrypted blob on their server — they can't read your entries without the share passphrase, but they know the blob exists and roughly how large it is. The resulting short code is sequential and could be guessed. The long link always works without any third party.</p>
+      <h3>When you share</h3>
+      <p>Sharing creates a short link stored temporarily on our server. The encrypted data is stored until the link expires (you choose how long, from 1 day to 3 months), then permanently deleted. The server cannot read your entries without the share passphrase. The full-length link (available when you share) works forever without any server.</p>
 
       <h3>Technical details</h3>
-      <p style="font-size:0.75rem">AES-256-GCM encryption. Key derived via PBKDF2 with 200,000 iterations and a random 128-bit salt. Each save uses a fresh 96-bit IV. Share links are self-contained: salt + IV + ciphertext in base64url. No cookies, no analytics, no network requests. All cryptography uses the browser's native Web Crypto API.</p>
+      <p style="font-size:0.75rem">AES-256-GCM encryption. Key derived via PBKDF2 with 200,000 iterations and a random 128-bit salt. Each save uses a fresh 96-bit IV. Share links are self-contained: salt + IV + ciphertext in base64url. No cookies, no analytics. Sharing sends encrypted data to our relay server, stored temporarily until the link expires. All cryptography uses the browser's native Web Crypto API.</p>
 
       <button class="customize-btn" id="info-customize">Customize fields</button>
       <button class="info-close" id="info-close">got it</button>
@@ -1613,25 +1544,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <button class="wizard-btn" id="wizard-skip">Skip all</button>
       <button class="wizard-btn primary" id="wizard-next">Next</button>
     </div>
-  </div>
-</div>
-
-<div class="info-overlay" id="budget-overlay">
-  <div class="info-panel">
-    <h2>Share link budget</h2>
-    <p>This is how many characters your share link would take right now, if you shared everything from your last session marker to today. The budget is your own soft limit — some messaging apps truncate long URLs, so set it to whatever's safe for where you usually send links.</p>
-    <div class="url-budget-popover-body">
-      <div class="budget-stat"><span>Current link</span><strong id="budget-current">—</strong></div>
-      <div class="budget-stat"><span>Per day average</span><strong id="budget-per-day">—</strong></div>
-      <div class="budget-stat"><span>Days included</span><strong id="budget-days">—</strong></div>
-    </div>
-    <h3>Your budget</h3>
-    <input type="range" class="url-budget-slider" id="budget-slider" min="500" max="30000" step="100">
-    <div class="url-budget-marks">
-      <span>500</span><span>2k</span><span>8k</span><span>30k</span>
-    </div>
-    <p style="font-size:0.72rem"><strong id="budget-slider-value">2000</strong> chars — <span id="budget-slider-note"></span></p>
-    <button class="info-close" id="budget-close">done</button>
   </div>
 </div>
 
@@ -2167,7 +2079,7 @@ customElements.define('skill-row', SkillRow);
       hiddenSkills: [...DEFAULT_HIDDEN_SKILLS],
       showHidden: false,
       onboarded: false,        // true after the user completes/skips the wizard
-      urlBudget: 2000,         // user-tuned target URL size in chars
+      shareTTL: 2592000,       // relay link TTL in seconds (default 30 days)
       schemaVersion: CURRENT_SCHEMA_VERSION
     };
   }
@@ -2191,7 +2103,7 @@ customElements.define('skill-row', SkillRow);
           hiddenSkills: saved.hiddenSkills || defaults.hiddenSkills,
           showHidden: false, // always reset — transient UI state
           onboarded: !!saved.onboarded,
-          urlBudget: typeof saved.urlBudget === 'number' ? saved.urlBudget : defaults.urlBudget,
+          shareTTL: typeof saved.shareTTL === 'number' ? saved.shareTTL : defaults.shareTTL,
           // schemaVersion missing from old prefs → treat as v1 so migration runs.
           schemaVersion: typeof saved.schemaVersion === 'number' ? saved.schemaVersion : 1
         };
@@ -2209,7 +2121,7 @@ customElements.define('skill-row', SkillRow);
         hiddenCategories: prefs.hiddenCategories,
         hiddenSkills: prefs.hiddenSkills,
         onboarded: prefs.onboarded,
-        urlBudget: prefs.urlBudget,
+        shareTTL: prefs.shareTTL,
         schemaVersion: prefs.schemaVersion
       }));
       localStorage.setItem(prefsKey(activeVaultId), enc);
@@ -2427,7 +2339,6 @@ customElements.define('skill-row', SkillRow);
       const key = dateKey(currentDate);
       setField(key, e.detail.field, e.detail.value);
       renderEntry();
-      scheduleUrlBudgetUpdate();
     });
 
     // Sleep hours
@@ -2435,7 +2346,6 @@ customElements.define('skill-row', SkillRow);
       const key = dateKey(currentDate);
       const v = this.value === '' ? null : parseFloat(this.value);
       setField(key, 'sleepHours', v);
-      scheduleUrlBudgetUpdate();
     });
 
     // Exercise
@@ -2443,12 +2353,10 @@ customElements.define('skill-row', SkillRow);
       const key = dateKey(currentDate);
       const v = this.value === '' ? null : parseInt(this.value);
       setField(key, 'exerciseMins', v);
-      scheduleUrlBudgetUpdate();
     });
     document.getElementById('exercise-type').addEventListener('input', function() {
       const key = dateKey(currentDate);
       setField(key, 'exerciseType', this.value || null);
-      scheduleUrlBudgetUpdate();
     });
 
     // Meals
@@ -2459,7 +2367,6 @@ customElements.define('skill-row', SkillRow);
       meals.push('');
       setField(key, 'meals', meals);
       renderEntry();
-      scheduleUrlBudgetUpdate();
       // Focus the new input
       const inputs = document.querySelectorAll('#meals-list input');
       if (inputs.length) inputs[inputs.length - 1].focus();
@@ -2548,7 +2455,6 @@ customElements.define('skill-row', SkillRow);
         const m = getEntry(key).meals || [];
         m[i] = this.value;
         setField(key, 'meals', m);
-        scheduleUrlBudgetUpdate();
       });
       row.appendChild(inp);
       const rm = document.createElement('button');
@@ -2560,7 +2466,6 @@ customElements.define('skill-row', SkillRow);
         m.splice(i, 1);
         setField(key, 'meals', m.length ? m : null);
         renderEntry();
-        scheduleUrlBudgetUpdate();
       });
       row.appendChild(rm);
       mealsList.appendChild(row);
@@ -2739,7 +2644,6 @@ customElements.define('skill-row', SkillRow);
   document.getElementById('notes').addEventListener('input', function() {
     const key = dateKey(currentDate);
     setField(key, 'notes', this.value);
-    scheduleUrlBudgetUpdate();
   });
 
   document.getElementById('theme-btn').addEventListener('click', () => {
@@ -2792,11 +2696,11 @@ customElements.define('skill-row', SkillRow);
   document.getElementById('set-session').addEventListener('click', async () => {
     await saveSessionDate(dateKey(currentDate));
     renderSessionBar();
-    scheduleUrlBudgetUpdate();
   });
 
-  // Current long URL shown in the share-result modal. Updated in place when the user shortens.
   let currentShareUrl = '';
+  let currentLongUrl = '';
+  let currentPayload = '';
 
   async function copyToClipboard(text) {
     try {
@@ -2811,13 +2715,36 @@ customElements.define('skill-row', SkillRow);
     }
   }
 
-  function showShareResult(url) {
-    currentShareUrl = url;
-    document.getElementById('share-result-url').textContent = url;
-    document.getElementById('share-result-length').textContent = url.length.toLocaleString('en-US');
-    document.getElementById('share-result-status').textContent = '';
-    document.getElementById('share-result-shorten').disabled = false;
-    document.getElementById('share-result-shorten').textContent = 'Shorten via da.gd';
+  async function postToRelay(payload, ttl) {
+    const resp = await fetch('/api/relay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload, ttl })
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return resp.json();
+  }
+
+  function showShareResult(shortUrl, longUrl, expiresAt) {
+    currentLongUrl = longUrl;
+    const ttlSelect = document.getElementById('share-result-ttl');
+    ttlSelect.value = String(prefs.shareTTL || 2592000);
+    if (shortUrl) {
+      currentShareUrl = shortUrl;
+      document.getElementById('share-result-url').textContent = shortUrl;
+      const exp = new Date(expiresAt);
+      document.getElementById('share-result-expiry-text').textContent = 'Expires ' + exp.toLocaleDateString();
+      document.getElementById('share-result-expiry').style.display = '';
+      document.getElementById('share-result-status').textContent = '';
+      document.getElementById('share-result-long-wrap').style.display = '';
+      document.getElementById('share-result-long-url').textContent = longUrl;
+    } else {
+      currentShareUrl = longUrl;
+      document.getElementById('share-result-url').textContent = longUrl;
+      document.getElementById('share-result-expiry').style.display = 'none';
+      document.getElementById('share-result-status').textContent = 'Relay unavailable \u2014 this permanent link works directly.';
+      document.getElementById('share-result-long-wrap').style.display = 'none';
+    }
     document.getElementById('share-result-overlay').classList.add('visible');
   }
 
@@ -2828,7 +2755,6 @@ customElements.define('skill-row', SkillRow);
     }
     const sharePass = prompt('Enter a passphrase to encrypt this share link.\nYour therapist will need this passphrase to open it.');
     if (!sharePass) return;
-    // Collect entries from session date to today
     const today = dateKey(new Date());
     const shareEntries = {};
     const d = new Date(sessionDate + 'T00:00:00');
@@ -2844,48 +2770,41 @@ customElements.define('skill-row', SkillRow);
     }
     const json = JSON.stringify(buildSharePayload(shareEntries));
     const encrypted = await encryptWithPassphrase(json, sharePass);
-    const url = location.origin + location.pathname + '#share=' + encrypted;
-    showShareResult(url);
+    currentPayload = encrypted;
+    const longUrl = location.origin + location.pathname + '#share=' + encrypted;
+    const ttl = prefs.shareTTL || 2592000;
+    try {
+      const data = await postToRelay(encrypted, ttl);
+      const shortUrl = location.origin + location.pathname + '#relay=' + data.token;
+      showShareResult(shortUrl, longUrl, data.expires_at);
+    } catch {
+      showShareResult(null, longUrl, null);
+    }
   });
 
   document.getElementById('share-result-copy').addEventListener('click', async () => {
     await copyToClipboard(currentShareUrl);
   });
+  document.getElementById('share-result-copy-long').addEventListener('click', async () => {
+    await copyToClipboard(currentLongUrl);
+  });
 
-  document.getElementById('share-result-shorten').addEventListener('click', async () => {
-    const ok = confirm(
-      'Shortening sends your encrypted link to a third party (da.gd).\n\n' +
-      'They can\'t read your entries without the share passphrase, but they will:\n' +
-      '• Store the encrypted URL on their server\n' +
-      '• Know roughly how large the encrypted blob is\n' +
-      '• Create a short code that anyone could guess\n\n' +
-      'The long link always works without any third party. Continue?'
-    );
-    if (!ok) return;
-    const btn = document.getElementById('share-result-shorten');
-    const status = document.getElementById('share-result-status');
-    btn.disabled = true;
-    btn.textContent = 'Shortening…';
-    status.textContent = '';
+  document.getElementById('share-result-ttl').addEventListener('change', async function() {
+    const ttl = parseInt(this.value);
+    prefs.shareTTL = ttl;
+    await savePrefs();
+    if (!currentPayload) return;
+    document.getElementById('share-result-status').textContent = 'Updating\u2026';
     try {
-      const body = 'url=' + encodeURIComponent(currentShareUrl);
-      const resp = await fetch('https://da.gd/s', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body
-      });
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const shortUrl = (await resp.text()).trim();
-      if (!shortUrl.startsWith('http')) throw new Error('malformed response');
+      const data = await postToRelay(currentPayload, ttl);
+      const shortUrl = location.origin + location.pathname + '#relay=' + data.token;
       currentShareUrl = shortUrl;
       document.getElementById('share-result-url').textContent = shortUrl;
-      document.getElementById('share-result-length').textContent = shortUrl.length.toLocaleString('en-US');
-      btn.textContent = 'Shortened ✓';
-      status.textContent = 'Short link ready. Clicking Copy will copy the short link.';
-    } catch (e) {
-      btn.disabled = false;
-      btn.textContent = 'Shorten via da.gd';
-      status.textContent = 'Couldn\'t reach the shortener — the long link still works.';
+      const exp = new Date(data.expires_at);
+      document.getElementById('share-result-expiry-text').textContent = 'Expires ' + exp.toLocaleDateString();
+      document.getElementById('share-result-status').textContent = '';
+    } catch {
+      document.getElementById('share-result-status').textContent = 'Couldn\u2019t update \u2014 previous link still works.';
     }
   });
 
@@ -3397,11 +3316,11 @@ customElements.define('skill-row', SkillRow);
     };
     const line = (label, total, hidden) => {
       const shown = total - hidden;
-      return '<div class="budget-stat"><span>' + label + '</span><strong>' + shown + ' of ' + total + '</strong></div>';
+      return '<div class="wizard-summary-stat"><span>' + label + '</span><strong>' + shown + ' of ' + total + '</strong></div>';
     };
     body.innerHTML =
       '<p>Ready to save. Your daily entry form will show:</p>' +
-      '<div class="url-budget-popover-body">' +
+      '<div class="wizard-summary">' +
         line('Emotions', DEFAULT_EMOTIONS.length, hiddenCounts.emotions) +
         line('Urges', URGES.length, hiddenCounts.urges) +
         line('Actions', ACTIONS.length, hiddenCounts.actions) +
@@ -3434,7 +3353,6 @@ customElements.define('skill-row', SkillRow);
     buildDynamicSections();
     applyCategoryVisibility();
     renderEntry();
-    scheduleUrlBudgetUpdate();
   }
 
   document.getElementById('wizard-next').addEventListener('click', async () => {
@@ -3457,119 +3375,6 @@ customElements.define('skill-row', SkillRow);
     await wizardFinish();
   });
 
-  // ─── URL Budget Indicator ───
-  let _budgetTimer = null;
-
-  function formatNum(n) {
-    return n.toLocaleString('en-US');
-  }
-
-  function scheduleUrlBudgetUpdate() {
-    if (_budgetTimer) clearTimeout(_budgetTimer);
-    _budgetTimer = setTimeout(() => { updateUrlBudget(); }, 250);
-  }
-
-  function collectShareEntries() {
-    const shareEntries = {};
-    if (sessionDate) {
-      const today = dateKey(new Date());
-      const d = new Date(sessionDate + 'T00:00:00');
-      const end = new Date(today + 'T00:00:00');
-      while (d <= end) {
-        const k = dateKey(d);
-        if (entries[k]) shareEntries[k] = entries[k];
-        d.setDate(d.getDate() + 1);
-      }
-    } else {
-      // No session marker — estimate from just the current day, since that's what a future share would start with.
-      const k = dateKey(currentDate);
-      if (entries[k]) shareEntries[k] = entries[k];
-    }
-    return shareEntries;
-  }
-
-  // base64url character count for a given byte count (no padding).
-  function b64urlLen(byteLen) {
-    const full = Math.floor(byteLen / 3);
-    const rem = byteLen % 3;
-    return full * 4 + (rem === 0 ? 0 : rem + 1);
-  }
-
-  // Compute the real share-URL length without actually encrypting. This works because:
-  //  - DEFLATE output length is deterministic for a given input
-  //  - AES-GCM ciphertext length = plaintext length + 16 (auth tag), by spec
-  //  - The envelope is fixed: 1 (version) + 16 (salt) + 12 (IV) + ciphertext
-  //  - Base64url length is a pure function of byte count
-  // This dodges PBKDF2 (~200ms per call) so the debounced updater is fast.
-  async function estimateShareUrlLength() {
-    const shareEntries = collectShareEntries();
-    const basePrefix = (location.origin + location.pathname + '#share=').length;
-    const hasAny = Object.keys(shareEntries).length > 0;
-    const json = hasAny ? JSON.stringify(buildSharePayload(shareEntries)) : '{}';
-    const compressed = await deflate(new TextEncoder().encode(json));
-    const envelopeBytes = 1 + 16 + 12 + compressed.length + 16; // version + salt + iv + ct + gcm-tag
-    return {
-      len: basePrefix + b64urlLen(envelopeBytes),
-      days: hasAny ? Object.keys(shareEntries).length : 0
-    };
-  }
-
-  async function updateUrlBudget() {
-    const budgetEl = document.getElementById('url-budget');
-    if (!budgetEl) return;
-    try {
-      const { len, days } = await estimateShareUrlLength();
-      const budget = prefs.urlBudget || 2000;
-      const pct = Math.min(999, Math.round((len / budget) * 100));
-      const fill = document.getElementById('url-budget-fill');
-      fill.style.width = Math.min(100, pct) + '%';
-      fill.classList.toggle('warn', pct >= 60 && pct < 90);
-      fill.classList.toggle('alert', pct >= 90);
-      document.getElementById('url-budget-chars').textContent = formatNum(len);
-      document.getElementById('url-budget-max').textContent = formatNum(budget);
-      document.getElementById('url-budget-pct').textContent = pct + '%';
-      // Popover stats
-      document.getElementById('budget-current').textContent = formatNum(len) + ' chars';
-      document.getElementById('budget-days').textContent = days === 0 ? '(no entries yet)' : days;
-      document.getElementById('budget-per-day').textContent = days > 0 ? formatNum(Math.round(len / days)) + ' chars' : '—';
-    } catch (e) {
-      // Ignore — probably called before cryptoKey was set.
-    }
-  }
-
-  function budgetSliderNote(v) {
-    if (v <= 600) return 'aggressive SMS safe';
-    if (v <= 2200) return 'safe for every common messaging channel';
-    if (v <= 4500) return 'still safe almost everywhere';
-    if (v <= 8500) return 'server-safe (most self-hosted HTTP servers accept this)';
-    return 'approaching browser address-bar limits';
-  }
-
-  document.getElementById('url-budget').addEventListener('click', () => {
-    document.getElementById('budget-overlay').classList.add('visible');
-    const slider = document.getElementById('budget-slider');
-    slider.value = prefs.urlBudget || 2000;
-    document.getElementById('budget-slider-value').textContent = formatNum(slider.value);
-    document.getElementById('budget-slider-note').textContent = budgetSliderNote(parseInt(slider.value));
-    updateUrlBudget();
-  });
-  document.getElementById('budget-slider').addEventListener('input', async function() {
-    const v = parseInt(this.value);
-    prefs.urlBudget = v;
-    document.getElementById('budget-slider-value').textContent = formatNum(v);
-    document.getElementById('budget-slider-note').textContent = budgetSliderNote(v);
-    updateUrlBudget();
-  });
-  document.getElementById('budget-slider').addEventListener('change', async function() {
-    await savePrefs();
-  });
-  document.getElementById('budget-close').addEventListener('click', () => {
-    document.getElementById('budget-overlay').classList.remove('visible');
-  });
-  document.getElementById('budget-overlay').addEventListener('click', e => {
-    if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
-  });
-
   // ─── Passphrase Gate ───
   function showApp() {
     document.getElementById('lock-screen').style.display = 'none';
@@ -3585,7 +3390,6 @@ customElements.define('skill-row', SkillRow);
     renderSessionBar();
     renderEmotions();
     renderEntry();
-    scheduleUrlBudgetUpdate();
     if (!prefs.onboarded) {
       // Existing user who hasn't seen the wizard — open in firstRun mode on top of the entry view.
       openWizard('firstRun');
@@ -3756,19 +3560,19 @@ customElements.define('skill-row', SkillRow);
     renderSessionBar();
     renderEmotions();
     renderEntry();
-    scheduleUrlBudgetUpdate();
   });
 
-  if (location.hash.startsWith('#share=')) {
-    const encrypted = location.hash.slice(7);
+  function setupShareUnlock(encryptedPayload) {
     document.getElementById('lock-share').style.display = '';
     document.getElementById('lock-screen').style.display = 'flex';
+    document.querySelector('#lock-share .lock-subtitle').textContent = 'This link contains encrypted diary entries.';
+    document.querySelector('#lock-share form').style.display = '';
     document.getElementById('share-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const pass = document.getElementById('share-pass').value;
       if (!pass) return;
       try {
-        const json = await decryptWithPassphrase(encrypted, pass);
+        const json = await decryptWithPassphrase(encryptedPayload, pass);
         const payload = parseSharePayload(JSON.parse(json));
         document.getElementById('lock-screen').style.display = 'none';
         document.querySelector('.app').style.display = 'block';
@@ -3785,6 +3589,29 @@ customElements.define('skill-row', SkillRow);
       }
     });
     document.getElementById('share-pass').focus();
+  }
+
+  if (location.hash.startsWith('#relay=')) {
+    const token = location.hash.slice(7);
+    document.getElementById('lock-share').style.display = '';
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.querySelector('#lock-share .lock-subtitle').textContent = 'Loading encrypted diary\u2026';
+    document.querySelector('#lock-share form').style.display = 'none';
+    fetch('/api/relay/' + encodeURIComponent(token))
+      .then(r => { if (!r.ok) throw new Error('expired'); return r.json(); })
+      .then(data => setupShareUnlock(data.payload))
+      .catch(() => {
+        document.querySelector('#lock-share .lock-subtitle').textContent =
+          'This share link has expired. Ask for a new one.';
+      });
+  } else if (location.hash.startsWith('#share=')) {
+    setupShareUnlock(location.hash.slice(7));
+  } else if (location.hash === '#link-expired') {
+    document.getElementById('lock-share').style.display = '';
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.querySelector('#lock-share .lock-subtitle').textContent =
+      'This share link has expired. Ask for a new one.';
+    document.querySelector('#lock-share form').style.display = 'none';
   } else if (listVaults().length > 0) {
     showVaultListUI();
   } else {

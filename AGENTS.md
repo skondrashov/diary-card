@@ -1,14 +1,15 @@
 # dbt.thisminute.org
 
-Encrypted DBT (Dialectical Behavior Therapy) diary card. Single static HTML file, no backend, no build step.
+Encrypted DBT (Dialectical Behavior Therapy) diary card. Single static HTML file with a small relay service for short share links.
 
 ## Architecture
 
-- **Single file**: `index.html` contains all CSS, HTML, and JS (~3750 lines)
+- **Single file**: `index.html` contains all CSS, HTML, and JS
 - **JS structure**: Web component definitions at top (outside IIFE), then one large IIFE containing all app logic
 - **Encryption**: AES-GCM via Web Crypto API. Multi-vault support — each vault is an isolated diary with its own passphrase
 - **Storage**: localStorage only. Entries keyed by date (`YYYY-MM-DD`), encrypted per-vault
 - **Theming**: CSS custom properties on `:root` (dark default) with `body.light-mode` overrides
+- **Relay**: `relay/app.py` — FastAPI service storing encrypted share payloads with configurable TTL. Runs on port 8050, proxied by nginx at `/api/relay`
 
 ## Web Components
 
@@ -32,13 +33,27 @@ Event listeners attach once in `connectedCallback()` after `_render()` — never
 
 ## Share Links
 
-Entries between checkpoint and today are serialized to JSON, DEFLATE-compressed, AES-GCM encrypted with a share passphrase, and base64url-encoded into a URL fragment (`#share=...`).
+Two formats coexist:
+
+- **`#share=PAYLOAD`**: Self-contained. Encrypted payload encoded directly in the URL fragment. Works forever, no server dependency. Can be very long (2K–30K+ chars).
+- **`#relay=TOKEN`**: Short link (5-char token). App fetches the encrypted payload from `/api/relay/TOKEN`. Expires after a user-chosen TTL (1 day to 3 months, default 30 days).
+
+Entries between checkpoint and today are serialized to JSON, DEFLATE-compressed, AES-GCM encrypted with a share passphrase, and base64url-encoded.
 
 **Critical constraint**: `URGES`, `ACTIONS`, and `SKILLS` arrays are append-only. Their indices are baked into stored entries and share URLs. Never reorder or remove items — only append.
 
 Share payload format (v2): `{ entries: {...}, hidden: {...} }` when items are hidden, or flat entries object for backward compat when nothing is hidden.
 
-The URL budget indicator tracks share link size in real time using a fast estimation path that avoids PBKDF2.
+## Relay Service
+
+`relay/app.py` — FastAPI + SQLite. Stores encrypted payloads temporarily.
+
+**Token scheme**: 26 letter prefixes (a–z), each active for 1 week, cycling every 26 weeks. Token = prefix + 4 random alphanumeric chars. When a prefix cycles back, all its old tokens are guaranteed expired. Cleanup runs on each POST.
+
+**Endpoints**:
+- `POST /api/relay` — store payload, return token + expiry
+- `GET /api/relay/{token}` — retrieve payload or 404 if expired
+- `GET /api/relay/health` — status check
 
 ## Key Functions
 
@@ -47,6 +62,7 @@ The URL budget indicator tracks share link size in real time using a fast estima
 - `renderEntry()`: Pushes current date's entry values into all web components and static inputs
 - `renderShareDayCard()`: Generates HTML string for one day's read-only share view
 - `initStaticHandlers()`: Attaches event listeners once — includes the centralized `field-change` handler
+- `setupShareUnlock()`: Configures the share passphrase form for both `#share=` and `#relay=` flows
 
 ## Testing
 
@@ -54,4 +70,4 @@ No local dev server or test suite. Verify changes via static analysis (grep for 
 
 ## Deployment
 
-Managed through a separate ops pipeline. Do not push or deploy directly.
+Add an entry to `../ops/DEPLOY_QUEUE.md` with scope `deploy`. The ops steward SCPs `index.html` to `/opt/dbt.thisminute.org/` and the relay files to `/opt/dbt.thisminute.org/relay/` on the VM. Do not push or deploy directly.

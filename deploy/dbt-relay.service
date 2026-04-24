@@ -1,0 +1,15 @@
+[Unit]
+Description=dbt.thisminute.org URL relay
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/dbt.thisminute.org/relay
+ExecStart=/opt/dbt.thisminute.org/relay/venv/bin/uvicorn app:app --host 127.0.0.1 --port 8050
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
