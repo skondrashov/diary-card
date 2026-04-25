@@ -14,9 +14,10 @@ app = FastAPI()
 
 DB_PATH = Path(__file__).parent / "relay.db"
 PREFIXES = string.ascii_lowercase
-EPOCH_SECONDS = 7 * 86400
+PREFIX_ROTATION_SECONDS = 7 * 86400
 SUFFIX_CHARS = string.ascii_lowercase + string.digits
 SUFFIX_LEN = 4
+MIN_TTL = 60
 DEFAULT_TTL = 30 * 86400
 MAX_TTL = 90 * 86400
 MAX_PAYLOAD = 100_000
@@ -41,7 +42,7 @@ def get_db():
 
 
 def current_prefix():
-    return PREFIXES[int(time.time() // EPOCH_SECONDS) % len(PREFIXES)]
+    return PREFIXES[int(time.time() // PREFIX_ROTATION_SECONDS) % len(PREFIXES)]
 
 
 def generate_token():
@@ -67,7 +68,7 @@ async def create_link(req: CreateRequest):
     if not B64URL_RE.match(req.payload):
         raise HTTPException(400, "Payload must be base64url")
 
-    ttl = max(60, min(req.ttl, MAX_TTL))
+    ttl = max(MIN_TTL, min(req.ttl, MAX_TTL))
     now = time.time()
     expires_at = now + ttl
 

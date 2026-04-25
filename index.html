@@ -190,7 +190,7 @@ header {
   margin-bottom: 0.75rem;
 }
 
-/* ─── Rating & Toggle: now in <rating-row> / <toggle-row> / <skill-row> Shadow DOM ─── */
+/* ─── Components ─── */
 rating-row, toggle-row, skill-row, .emotion-row { margin: 5px 0; }
 .emotion-row rating-row { flex: 1; min-width: 0; margin: 0; }
 
@@ -248,7 +248,7 @@ rating-row, toggle-row, skill-row, .emotion-row { margin: 5px 0; }
   text-align: center;
 }
 
-.cal-grid {
+.cal-grid, .share-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 3px;
@@ -746,11 +746,6 @@ rating-row, toggle-row, skill-row, .emotion-row { margin: 5px 0; }
   color: var(--text-secondary);
   text-align: center;
   padding: 0.25rem 0 0.4rem;
-}
-.share-cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
 }
 .share-cal-weekday {
   text-align: center;
@@ -1871,7 +1866,7 @@ customElements.define('skill-row', SkillRow);
     const enc = new TextEncoder();
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, enc.encode(plaintext));
-    // Prepend IV to ciphertext
+    // Format: IV(12 bytes) || ciphertext
     const combined = new Uint8Array(iv.length + ciphertext.byteLength);
     combined.set(iv);
     combined.set(new Uint8Array(ciphertext), iv.length);
@@ -2019,6 +2014,7 @@ customElements.define('skill-row', SkillRow);
     // Interpersonal Effectiveness (21-25)
     'DEAR MAN','GIVE','FAST','Validate','Repair'
   ];
+  const SKILL_LEVELS = ['aware', 'tried', 'used', 'auto'];
   const SKILL_GROUPS = [
     { label: 'Mindfulness', indices: [0, 1, 2, 3, 4, 5, 6] },
     { label: 'Distress Tolerance', indices: [7, 8, 9, 10, 11, 12, 13] },
@@ -2046,17 +2042,8 @@ customElements.define('skill-row', SkillRow);
   const DAYNAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  // ─── Prefs (declared after the vocabulary constants so defaults can reference SKILLS.length etc) ───
-  // Conservative defaults: hide everything that's new in this release so that "Skip all" in the
-  // wizard yields the same experience the pre-feature version had (plus the skills migration).
-  // New users will explicitly opt-in to new items by walking through the wizard.
-  //
-  // Pre-feature urges were indices 0-4. New urges (5-11) default hidden.
-  // Pre-feature actions kept all 5 ids except tookMedications moved to Categories; new ones default hidden.
-  // Pre-feature categories: sleep/exercise/meals were always shown; tookMedications existed as an action
-  //   and is now a category — keep it visible so existing data stays reachable. New categories default hidden.
-  // Pre-feature skills were 4 modules. Post-migration those slots are gone; show the 4 "module proxy"
-  //   skills (Wise Mind / TIPP / Opposite Action / DEAR MAN — indices 0, 7, 14, 21).
+  // ─── Prefs ───
+  // Defaults hide new items so "skip" in the wizard gives the pre-feature experience.
   const DEFAULT_HIDDEN_URGES = [5, 6, 7, 8, 9, 10, 11];
   const DEFAULT_HIDDEN_ACTIONS = ['drankAlcohol', 'usedNicotine', 'binged', 'restricted', 'purged', 'isolated', 'lashedOut'];
   const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'shower', 'teeth', 'meditate', 'water', 'outside', 'social'];
@@ -2092,7 +2079,6 @@ customElements.define('skill-row', SkillRow);
       if (enc) {
         const json = await decryptString(enc);
         const saved = JSON.parse(json);
-        // Merge saved over defaults so any newly-added field has a sane default.
         const defaults = makeDefaultPrefs();
         prefs = {
           emotions: saved.emotions || defaults.emotions,
@@ -2189,7 +2175,6 @@ customElements.define('skill-row', SkillRow);
   function setField(key, field, value) {
     if (!entries[key]) entries[key] = {};
     entries[key][field] = value;
-    // Clean empty entries
     const e = entries[key];
     const hasData = Object.values(e).some(v => v !== null && v !== undefined && v !== '');
     if (!hasData) delete entries[key];
@@ -2197,8 +2182,6 @@ customElements.define('skill-row', SkillRow);
   }
 
   // ─── Build UI ───
-  // dynKey is a stable identifier used by buildDynamicSections() to find and remove this row
-  // when rebuilding (e.g., after the wizard changes visibility).
 
   function get7DayAvg(emotionIndex) {
     let sum = 0, count = 0;
@@ -2259,8 +2242,6 @@ customElements.define('skill-row', SkillRow);
     showBtn.classList.toggle('active', prefs.showHidden);
   }
 
-  // Section headers for urges/actions/skills live in HTML; we only rebuild the rows below them.
-  // Container used to parent dynamically-built rows for each section, per build cycle.
   const DYNAMIC_KEYS = {
     urges: 'urges-section',
     actions: 'actions-section',
@@ -2268,10 +2249,6 @@ customElements.define('skill-row', SkillRow);
     toggleCategories: 'toggle-categories'
   };
 
-  // Build (or rebuild) the dynamically-rendered rows. Safe to call repeatedly —
-  // clears existing children tagged as dynamic first, then rebuilds from the current vocabulary
-  // minus whatever's hidden in prefs. Skips items in prefs.hiddenUrges / hiddenActions / hiddenSkills
-  // so hidden fields are never even in the DOM, which is what makes hidden items shrink share links.
   function buildDynamicSections() {
     const urgesSec = document.getElementById(DYNAMIC_KEYS.urges);
     urgesSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
@@ -2316,8 +2293,6 @@ customElements.define('skill-row', SkillRow);
     });
   }
 
-  // Toggle display on the "complex" category wrappers (sleep/exercise/meals).
-  // Must run after buildDynamicSections so any toggle-categories have been rebuilt.
   function applyCategoryVisibility() {
     CATEGORIES.forEach(cat => {
       if (cat.type !== 'complex') return;
@@ -2326,29 +2301,23 @@ customElements.define('skill-row', SkillRow);
     });
   }
 
-  // Static input handlers — attach once per app load. If called a second time, handlers
-  // would stack up, so the init flow calls this once and buildDynamicSections+applyCategoryVisibility
-  // for subsequent re-renders (e.g., after wizard save).
   let _staticHandlersAttached = false;
   function initStaticHandlers() {
     if (_staticHandlersAttached) return;
     _staticHandlersAttached = true;
 
-    // Centralized handler for all <rating-row> and <toggle-row> field changes
     document.addEventListener('field-change', e => {
       const key = dateKey(currentDate);
       setField(key, e.detail.field, e.detail.value);
       renderEntry();
     });
 
-    // Sleep hours
     document.getElementById('sleep-hours').addEventListener('input', function() {
       const key = dateKey(currentDate);
       const v = this.value === '' ? null : parseFloat(this.value);
       setField(key, 'sleepHours', v);
     });
 
-    // Exercise
     document.getElementById('exercise-mins').addEventListener('input', function() {
       const key = dateKey(currentDate);
       const v = this.value === '' ? null : parseInt(this.value);
@@ -2359,7 +2328,6 @@ customElements.define('skill-row', SkillRow);
       setField(key, 'exerciseType', this.value || null);
     });
 
-    // Meals
     document.getElementById('add-meal').addEventListener('click', () => {
       const key = dateKey(currentDate);
       const entry = getEntry(key);
@@ -2367,12 +2335,10 @@ customElements.define('skill-row', SkillRow);
       meals.push('');
       setField(key, 'meals', meals);
       renderEntry();
-      // Focus the new input
       const inputs = document.querySelectorAll('#meals-list input');
       if (inputs.length) inputs[inputs.length - 1].focus();
     });
 
-    // Emotion controls
     document.getElementById('add-emotion').addEventListener('click', () => {
       const name = prompt('New emotion name:');
       if (!name || !name.trim()) return;
@@ -2398,22 +2364,23 @@ customElements.define('skill-row', SkillRow);
   }
 
   // ─── Render ───
+  function sameDay(a, b) {
+    return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+  }
+
   function isToday(d) {
-    const now = new Date();
-    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    return sameDay(d, new Date());
   }
 
   function renderEntry() {
     const key = dateKey(currentDate);
     const entry = getEntry(key);
 
-    // Date display
     const dd = document.getElementById('date-display');
     dd.innerHTML = DAYNAMES[currentDate.getDay()] + ', ' +
       MONTHS[currentDate.getMonth()] + ' ' + currentDate.getDate() +
       (isToday(currentDate) ? '<span class="today-badge">today</span>' : '');
 
-    // Web components
     document.querySelectorAll('rating-row').forEach(row => {
       row.value = entry[row.getAttribute('field')];
     });
@@ -2424,7 +2391,6 @@ customElements.define('skill-row', SkillRow);
       row.value = !!entry[row.getAttribute('field')];
     });
 
-    // 7-day averages
     document.querySelectorAll('.emotion-avg').forEach(el => {
       const i = parseInt(el.dataset.emotionIndex);
       const avg = get7DayAvg(i);
@@ -2432,14 +2398,11 @@ customElements.define('skill-row', SkillRow);
       el.classList.toggle('has-data', avg !== null);
     });
 
-    // Sleep
     document.getElementById('sleep-hours').value = entry.sleepHours != null ? entry.sleepHours : '';
 
-    // Exercise
     document.getElementById('exercise-mins').value = entry.exerciseMins != null ? entry.exerciseMins : '';
     document.getElementById('exercise-type').value = entry.exerciseType || '';
 
-    // Meals
     const mealsList = document.getElementById('meals-list');
     mealsList.innerHTML = '';
     const meals = entry.meals || [];
@@ -2471,7 +2434,6 @@ customElements.define('skill-row', SkillRow);
       mealsList.appendChild(row);
     });
 
-    // Notes
     const notes = document.getElementById('notes');
     notes.value = entry.notes || '';
   }
@@ -2521,7 +2483,6 @@ customElements.define('skill-row', SkillRow);
 
     document.getElementById('cal-month').textContent = MONTHS[calMonth] + ' ' + calYear;
 
-    // Weekday headers
     WEEKDAYS.forEach(w => {
       const el = document.createElement('div');
       el.className = 'cal-weekday';
@@ -2533,14 +2494,12 @@ customElements.define('skill-row', SkillRow);
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const now = new Date();
 
-    // Empty cells
     for (let i = 0; i < firstDay; i++) {
       const el = document.createElement('div');
       el.className = 'cal-day empty';
       grid.appendChild(el);
     }
 
-    // Day cells
     for (let d = 1; d <= daysInMonth; d++) {
       const el = document.createElement('div');
       el.className = 'cal-day';
@@ -2549,12 +2508,8 @@ customElements.define('skill-row', SkillRow);
       const key = dateKey(dayDate);
       const entry = entries[key];
 
-      if (dayDate.getDate() === now.getDate() && dayDate.getMonth() === now.getMonth() && dayDate.getFullYear() === now.getFullYear()) {
-        el.classList.add('today');
-      }
-      if (dayDate.getDate() === currentDate.getDate() && dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear()) {
-        el.classList.add('selected');
-      }
+      if (sameDay(dayDate, now)) el.classList.add('today');
+      if (sameDay(dayDate, currentDate)) el.classList.add('selected');
 
       const num = document.createElement('div');
       num.textContent = d;
@@ -2698,9 +2653,7 @@ customElements.define('skill-row', SkillRow);
     renderSessionBar();
   });
 
-  let currentShareUrl = '';
-  let currentLongUrl = '';
-  let currentPayload = '';
+  const shareState = { url: '', longUrl: '', payload: '' };
 
   async function copyToClipboard(text) {
     try {
@@ -2726,11 +2679,11 @@ customElements.define('skill-row', SkillRow);
   }
 
   function showShareResult(shortUrl, longUrl, expiresAt) {
-    currentLongUrl = longUrl;
+    shareState.longUrl = longUrl;
     const ttlSelect = document.getElementById('share-result-ttl');
     ttlSelect.value = String(prefs.shareTTL || 2592000);
     if (shortUrl) {
-      currentShareUrl = shortUrl;
+      shareState.url = shortUrl;
       document.getElementById('share-result-url').textContent = shortUrl;
       const exp = new Date(expiresAt);
       document.getElementById('share-result-expiry-text').textContent = 'Expires ' + exp.toLocaleDateString();
@@ -2739,7 +2692,7 @@ customElements.define('skill-row', SkillRow);
       document.getElementById('share-result-long-wrap').style.display = '';
       document.getElementById('share-result-long-url').textContent = longUrl;
     } else {
-      currentShareUrl = longUrl;
+      shareState.url = longUrl;
       document.getElementById('share-result-url').textContent = longUrl;
       document.getElementById('share-result-expiry').style.display = 'none';
       document.getElementById('share-result-status').textContent = 'Relay unavailable \u2014 this permanent link works directly.';
@@ -2770,7 +2723,7 @@ customElements.define('skill-row', SkillRow);
     }
     const json = JSON.stringify(buildSharePayload(shareEntries));
     const encrypted = await encryptWithPassphrase(json, sharePass);
-    currentPayload = encrypted;
+    shareState.payload = encrypted;
     const longUrl = location.origin + location.pathname + '#share=' + encrypted;
     const ttl = prefs.shareTTL || 2592000;
     try {
@@ -2783,22 +2736,22 @@ customElements.define('skill-row', SkillRow);
   });
 
   document.getElementById('share-result-copy').addEventListener('click', async () => {
-    await copyToClipboard(currentShareUrl);
+    await copyToClipboard(shareState.url);
   });
   document.getElementById('share-result-copy-long').addEventListener('click', async () => {
-    await copyToClipboard(currentLongUrl);
+    await copyToClipboard(shareState.longUrl);
   });
 
   document.getElementById('share-result-ttl').addEventListener('change', async function() {
     const ttl = parseInt(this.value);
     prefs.shareTTL = ttl;
     await savePrefs();
-    if (!currentPayload) return;
+    if (!shareState.payload) return;
     document.getElementById('share-result-status').textContent = 'Updating\u2026';
     try {
-      const data = await postToRelay(currentPayload, ttl);
+      const data = await postToRelay(shareState.payload, ttl);
       const shortUrl = location.origin + location.pathname + '#relay=' + data.token;
-      currentShareUrl = shortUrl;
+      shareState.url = shortUrl;
       document.getElementById('share-result-url').textContent = shortUrl;
       const exp = new Date(data.expires_at);
       document.getElementById('share-result-expiry-text').textContent = 'Expires ' + exp.toLocaleDateString();
@@ -2817,7 +2770,7 @@ customElements.define('skill-row', SkillRow);
 
   function ratingBar(value, max, colorVar) {
     const pct = (value / max) * 100;
-    return '<div class="share-row-bar"><div class="share-row-bar-fill" style="width:' + pct + '%;background:var(' + colorVar + ')"></div></div>';
+    return `<div class="share-row-bar"><div class="share-row-bar-fill" style="width:${pct}%;background:var(${colorVar})"></div></div>`;
   }
 
   // ─── Share Payload ───
@@ -2845,93 +2798,83 @@ customElements.define('skill-row', SkillRow);
   let _shareMode = 'calendar';
   let _shareSelectedDay = null;
 
+  function shareRow(label, value) {
+    return `<div class="share-row"><span class="share-row-label">${label}</span><span class="share-row-value">${value}</span></div>`;
+  }
+
+  function shareToggleRow(label, on) {
+    return `<div class="share-row"><span class="share-row-label">${label}</span><span class="share-row-value${on ? ' on' : ''}">${on ? 'yes' : 'no'}</span></div>`;
+  }
+
+  function shareRatingRow(label, value, max, colorVar) {
+    return `<div class="share-row"><span class="share-row-label">${label}</span>${ratingBar(value, max, colorVar)}<span class="share-row-value">${value}/${max}</span></div>`;
+  }
+
   function renderShareDayCard(entry, key) {
     const d = new Date(key + 'T00:00:00');
-    let html = '<div class="share-day-card">';
-    html += '<div class="share-day-date">' + DAYNAMES[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '</div>';
+    let html = `<div class="share-day-card"><div class="share-day-date">${DAYNAMES[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}</div>`;
 
-    // Emotions
     const hiddenEmotions = _shareHidden.emotions || [];
-    let hasEmotions = false;
-    for (let i = 0; i < EMOTIONS.length; i++) {
-      if (entry['emotion_'+i] != null && !hiddenEmotions.includes(EMOTIONS[i]) && !_shareHiddenEmotions.has(EMOTIONS[i])) { hasEmotions = true; break; }
-    }
+    const hasEmotions = EMOTIONS.some((em, i) => entry['emotion_' + i] != null && !hiddenEmotions.includes(em) && !_shareHiddenEmotions.has(em));
     if (hasEmotions) {
       html += '<div class="share-section-label">Emotions</div>';
       EMOTIONS.forEach((em, i) => {
         if (hiddenEmotions.includes(em) || _shareHiddenEmotions.has(em)) return;
-        const v = entry['emotion_'+i];
-        if (v != null) html += '<div class="share-row"><span class="share-row-label">' + em + '</span>' + ratingBar(v, 5, '--c' + v) + '<span class="share-row-value">' + v + '/5</span></div>';
+        const v = entry['emotion_' + i];
+        if (v != null) html += shareRatingRow(em, v, 5, '--c' + v);
       });
     }
 
-    // Urges
     const hiddenUrges = _shareHidden.urges || [];
-    let hasUrges = false;
-    for (let i = 0; i < URGES.length; i++) {
-      if (entry['urge_'+i] != null && !hiddenUrges.includes(i)) { hasUrges = true; break; }
-    }
+    const hasUrges = URGES.some((u, i) => entry['urge_' + i] != null && !hiddenUrges.includes(i));
     if (hasUrges) {
       html += '<div class="share-section-label">Urges</div>';
       URGES.forEach((u, i) => {
         if (hiddenUrges.includes(i)) return;
-        const v = entry['urge_'+i];
-        if (v != null) html += '<div class="share-row"><span class="share-row-label">' + u + '</span>' + ratingBar(v, 5, '--c' + v) + '<span class="share-row-value">' + v + '/5</span></div>';
+        const v = entry['urge_' + i];
+        if (v != null) html += shareRatingRow(u, v, 5, '--c' + v);
       });
     }
 
-    // Actions
     const hiddenActions = _shareHidden.actions || [];
     const visibleActions = ACTIONS.filter(a => !hiddenActions.includes(a.id));
     if (visibleActions.length) {
       html += '<div class="share-section-label">Actions</div>';
-      visibleActions.forEach(a => {
-        const on = !!entry[a.id];
-        html += '<div class="share-row"><span class="share-row-label">' + a.label + '</span><span class="share-row-value' + (on ? ' on' : '') + '">' + (on ? 'yes' : 'no') + '</span></div>';
-      });
+      visibleActions.forEach(a => { html += shareToggleRow(a.label, !!entry[a.id]); });
     }
 
-    // Body / Daily check-ins
     const hiddenCats = _shareHidden.categories || [];
     const visibleToggleCats = CATEGORIES.filter(c => c.type === 'toggle' && !hiddenCats.includes(c.id));
     const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length) || visibleToggleCats.length > 0;
     if (hasBody) {
       html += '<div class="share-section-label">Daily</div>';
-      if (entry.sleepHours != null) html += '<div class="share-row"><span class="share-row-label">Sleep</span><span class="share-row-value">' + entry.sleepHours + ' hrs' + (entry.sleepQuality != null ? ' (quality ' + entry.sleepQuality + '/5)' : '') + '</span></div>';
-      if (entry.exerciseMins != null) html += '<div class="share-row"><span class="share-row-label">Exercise</span><span class="share-row-value">' + entry.exerciseMins + ' min' + (entry.exerciseType ? ' — ' + entry.exerciseType : '') + '</span></div>';
+      if (entry.sleepHours != null) html += shareRow('Sleep', `${entry.sleepHours} hrs${entry.sleepQuality != null ? ` (quality ${entry.sleepQuality}/5)` : ''}`);
+      if (entry.exerciseMins != null) html += shareRow('Exercise', `${entry.exerciseMins} min${entry.exerciseType ? ` \u2014 ${entry.exerciseType}` : ''}`);
       if (entry.meals && entry.meals.length) {
-        html += '<div class="share-row"><span class="share-row-label">Meals</span><span class="share-row-value">' + entry.meals.filter(m => m).length + '</span></div>';
-        entry.meals.filter(m => m).forEach(m => { html += '<div class="share-meals">&bull; ' + m.replace(/</g,'&lt;') + '</div>'; });
+        const filled = entry.meals.filter(m => m);
+        html += shareRow('Meals', filled.length);
+        filled.forEach(m => { html += `<div class="share-meals">&bull; ${m.replace(/</g, '&lt;')}</div>`; });
       }
-      visibleToggleCats.forEach(cat => {
-        const on = !!entry[cat.field];
-        html += '<div class="share-row"><span class="share-row-label">' + cat.label + '</span><span class="share-row-value' + (on ? ' on' : '') + '">' + (on ? 'yes' : 'no') + '</span></div>';
-      });
+      visibleToggleCats.forEach(cat => { html += shareToggleRow(cat.label, !!entry[cat.field]); });
     }
 
-    // Skills
     const hiddenSkills = _shareHidden.skills || [];
-    let hasSkills = false;
-    for (let i = 0; i < SKILLS.length; i++) {
-      if (entry['skill_'+i] != null && !hiddenSkills.includes(i)) { hasSkills = true; break; }
-    }
+    const hasSkills = SKILLS.some((s, i) => entry['skill_' + i] != null && !hiddenSkills.includes(i));
     if (hasSkills) {
       html += '<div class="share-section-label">Skills</div>';
-      const _sLevels = ['aware','tried','used','auto'];
       SKILLS.forEach((s, i) => {
         if (hiddenSkills.includes(i)) return;
-        const v = entry['skill_'+i];
+        const v = entry['skill_' + i];
         if (v != null) {
           const eng = Math.floor(v / 2), helped = v % 2 === 1;
-          html += '<div class="share-row"><span class="share-row-label">' + s + '</span><span class="share-row-value">' + _sLevels[eng] + (helped ? ', helped' : '') + '</span></div>';
+          html += shareRow(s, SKILL_LEVELS[eng] + (helped ? ', helped' : ''));
         }
       });
     }
 
-    // Notes
     if (entry.notes) {
       html += '<div class="share-section-label">Notes</div>';
-      html += '<div class="share-notes">' + entry.notes.replace(/</g,'&lt;').replace(/\n/g,'<br>') + '</div>';
+      html += `<div class="share-notes">${entry.notes.replace(/</g, '&lt;').replace(/\n/g, '<br>')}</div>`;
     }
 
     html += '</div>';
@@ -2944,7 +2887,6 @@ customElements.define('skill-row', SkillRow);
     const from = new Date(dates[0] + 'T00:00:00');
     const to = new Date(dates[dates.length - 1] + 'T00:00:00');
 
-    // Collect months to render
     const months = [];
     let cur = new Date(from.getFullYear(), from.getMonth(), 1);
     while (cur <= to) {
@@ -3003,16 +2945,13 @@ customElements.define('skill-row', SkillRow);
     let html = '<div class="share-header"><strong>' + dates.length + ' days</strong> &mdash; ' +
       MONTHS[from.getMonth()] + ' ' + from.getDate() + ' to ' + MONTHS[to.getMonth()] + ' ' + to.getDate() + ', ' + to.getFullYear() + '</div>';
 
-    // Toolbar
     html += '<div class="share-toolbar">';
-    html += '<button data-share-mode="calendar"' + (_shareMode === 'calendar' ? ' class="active"' : '') + '>calendar</button>';
-    html += '<button data-share-mode="list"' + (_shareMode === 'list' ? ' class="active"' : '') + '>all days</button>';
+    html += `<button data-share-mode="calendar"${_shareMode === 'calendar' ? ' class="active"' : ''}>calendar</button>`;
+    html += `<button data-share-mode="list"${_shareMode === 'list' ? ' class="active"' : ''}>all days</button>`;
     html += '</div>';
 
-    // Emotion toggles
     html += renderShareEmotionToggles();
 
-    // Calendar or list
     html += '<div class="share-detail">';
     if (_shareMode === 'calendar') {
       html += renderShareCalendar();
@@ -3028,7 +2967,6 @@ customElements.define('skill-row', SkillRow);
 
     view.innerHTML = html;
 
-    // Event listeners — mode toggle
     view.querySelectorAll('[data-share-mode]').forEach(btn => {
       btn.addEventListener('click', () => {
         _shareMode = btn.dataset.shareMode;
@@ -3036,7 +2974,6 @@ customElements.define('skill-row', SkillRow);
       });
     });
 
-    // Event listeners — calendar day click
     view.querySelectorAll('.share-cal-day.has-data').forEach(el => {
       el.addEventListener('click', () => {
         _shareSelectedDay = el.dataset.shareDay;
@@ -3044,7 +2981,6 @@ customElements.define('skill-row', SkillRow);
       });
     });
 
-    // Event listeners — emotion toggles
     view.querySelectorAll('.share-emotion-toggle').forEach(btn => {
       btn.addEventListener('click', () => {
         const em = btn.dataset.shareEmotion;
@@ -3096,7 +3032,6 @@ customElements.define('skill-row', SkillRow);
   function openWizard(mode) {
     wizardMode = mode;
     wizardStepIdx = 0;
-    // Snapshot current prefs into a draft so cancel-by-closing doesn't mutate prefs mid-edit.
     wizardDraft = {
       hiddenEmotions: [...prefs.hiddenEmotions],
       hiddenUrges: [...prefs.hiddenUrges],
@@ -3137,9 +3072,13 @@ customElements.define('skill-row', SkillRow);
     document.getElementById('wizard-back').style.visibility = wizardStepIdx > 0 ? 'visible' : 'hidden';
     // Skip button: shown except in 'edit' mode (where the user is deliberately tweaking).
     document.getElementById('wizard-skip').style.display = wizardMode === 'edit' ? 'none' : '';
-    // Next button text
     const isLast = wizardStepIdx === steps.length - 1;
     document.getElementById('wizard-next').textContent = isLast ? 'Done' : 'Next';
+  }
+
+  function toggleWizardDraft(key, id, on) {
+    if (on) wizardDraft[key] = wizardDraft[key].filter(x => x !== id);
+    else if (!wizardDraft[key].includes(id)) wizardDraft[key].push(id);
   }
 
   function wizardMakeItem(labelText, descText, checked, onToggle) {
@@ -3185,10 +3124,7 @@ customElements.define('skill-row', SkillRow);
     group.className = 'wizard-group';
     DEFAULT_EMOTIONS.forEach(em => {
       const checked = !wizardDraft.hiddenEmotions.includes(em);
-      group.appendChild(wizardMakeItem(em, null, checked, (on) => {
-        if (on) wizardDraft.hiddenEmotions = wizardDraft.hiddenEmotions.filter(e => e !== em);
-        else if (!wizardDraft.hiddenEmotions.includes(em)) wizardDraft.hiddenEmotions.push(em);
-      }));
+      group.appendChild(wizardMakeItem(em, null, checked, (on) => toggleWizardDraft('hiddenEmotions', em, on)));
     });
     body.appendChild(group);
   }
@@ -3204,10 +3140,7 @@ customElements.define('skill-row', SkillRow);
       section.appendChild(lbl);
       g.indices.forEach(idx => {
         const checked = !wizardDraft.hiddenUrges.includes(idx);
-        section.appendChild(wizardMakeItem(URGES[idx], null, checked, (on) => {
-          if (on) wizardDraft.hiddenUrges = wizardDraft.hiddenUrges.filter(x => x !== idx);
-          else if (!wizardDraft.hiddenUrges.includes(idx)) wizardDraft.hiddenUrges.push(idx);
-        }));
+        section.appendChild(wizardMakeItem(URGES[idx], null, checked, (on) => toggleWizardDraft('hiddenUrges', idx, on)));
       });
       body.appendChild(section);
     });
@@ -3226,10 +3159,7 @@ customElements.define('skill-row', SkillRow);
         const action = ACTIONS.find(a => a.id === id);
         if (!action) return;
         const checked = !wizardDraft.hiddenActions.includes(id);
-        section.appendChild(wizardMakeItem(action.label, null, checked, (on) => {
-          if (on) wizardDraft.hiddenActions = wizardDraft.hiddenActions.filter(x => x !== id);
-          else if (!wizardDraft.hiddenActions.includes(id)) wizardDraft.hiddenActions.push(id);
-        }));
+        section.appendChild(wizardMakeItem(action.label, null, checked, (on) => toggleWizardDraft('hiddenActions', id, on)));
       });
       body.appendChild(section);
     });
@@ -3241,10 +3171,7 @@ customElements.define('skill-row', SkillRow);
     group.className = 'wizard-group';
     CATEGORIES.forEach(cat => {
       const checked = !wizardDraft.hiddenCategories.includes(cat.id);
-      group.appendChild(wizardMakeItem(cat.label, cat.desc, checked, (on) => {
-        if (on) wizardDraft.hiddenCategories = wizardDraft.hiddenCategories.filter(x => x !== cat.id);
-        else if (!wizardDraft.hiddenCategories.includes(cat.id)) wizardDraft.hiddenCategories.push(cat.id);
-      }));
+      group.appendChild(wizardMakeItem(cat.label, cat.desc, checked, (on) => toggleWizardDraft('hiddenCategories', cat.id, on)));
     });
     body.appendChild(group);
   }
@@ -3252,7 +3179,6 @@ customElements.define('skill-row', SkillRow);
   function renderWizardSkills(body) {
     body.className = 'wizard-body';
 
-    // Quick actions row
     const qa = document.createElement('div');
     qa.className = 'wizard-quick-actions';
     const justModules = document.createElement('button');
@@ -3296,10 +3222,7 @@ customElements.define('skill-row', SkillRow);
       section.appendChild(lbl);
       g.indices.forEach(idx => {
         const checked = !wizardDraft.hiddenSkills.includes(idx);
-        section.appendChild(wizardMakeItem(SKILLS[idx], null, checked, (on) => {
-          if (on) wizardDraft.hiddenSkills = wizardDraft.hiddenSkills.filter(x => x !== idx);
-          else if (!wizardDraft.hiddenSkills.includes(idx)) wizardDraft.hiddenSkills.push(idx);
-        }));
+        section.appendChild(wizardMakeItem(SKILLS[idx], null, checked, (on) => toggleWizardDraft('hiddenSkills', idx, on)));
       });
       body.appendChild(section);
     });
@@ -3529,8 +3452,6 @@ customElements.define('skill-row', SkillRow);
   // ─── Init ───
   document.querySelector('.app').style.display = 'none';
 
-  // Wire up the new-vault and share-unlock forms once. The new-vault form is shown only after the
-  // wizard finishes; the share form is shown only when the hash is a share link.
   document.getElementById('lock-new-vault').addEventListener('click', () => {
     document.getElementById('lock-vaults').style.display = 'none';
     startNewUserFlow();
