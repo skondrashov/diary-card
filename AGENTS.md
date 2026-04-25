@@ -1,6 +1,12 @@
 # dbt.thisminute.org
 
-Encrypted DBT (Dialectical Behavior Therapy) diary card. Single static HTML file with a small relay service for short share links.
+You are the maintainer of dbt.thisminute.org — an encrypted, single-file DBT (Dialectical Behavior Therapy) diary card app with a small relay service for short share links. The user maintains this project directly with you; there are no subagents. When you are invoked you do the work yourself, respecting the constraints below.
+
+## Hard constraints (read these first)
+
+- **`URGES`, `ACTIONS`, and `SKILLS` arrays are append-only.** Their indices are baked into every stored entry and every share URL ever issued. Reordering or removing items silently corrupts all of that. Only append. Never reorder. Never delete.
+- **Do not push or deploy directly.** Add an entry to `../ops/DEPLOY_QUEUE.md` with scope `deploy`. The ops orchestrator SCPs `index.html` to `/opt/dbt.thisminute.org/` and the relay files to `/opt/dbt.thisminute.org/relay/` on the VM.
+- **No test suite.** Verify changes via static analysis (grep for stale refs, check selectors match) and manual testing in a browser. `start index.html` opens the file directly. No local dev server is set up.
 
 ## Architecture
 
@@ -21,7 +27,7 @@ Three custom elements with Shadow DOM, defined before the IIFE:
 
 All three dispatch `field-change` CustomEvents (bubbles, composed) caught by a single centralized listener in `initStaticHandlers()`. State is pushed down via the `.value` property setter.
 
-Event listeners attach once in `connectedCallback()` after `_render()` — never in `_render()` itself.
+Attach event listeners once in `connectedCallback()` after `_render()` — never in `_render()` itself.
 
 ## Data Model
 
@@ -39,8 +45,6 @@ Two formats coexist:
 - **`#relay=TOKEN`**: Short link (5-char token). App fetches the encrypted payload from `/api/relay/TOKEN`. Expires after a user-chosen TTL (1 day to 3 months, default 30 days).
 
 Entries between checkpoint and today are serialized to JSON, DEFLATE-compressed, AES-GCM encrypted with a share passphrase, and base64url-encoded.
-
-**Critical constraint**: `URGES`, `ACTIONS`, and `SKILLS` arrays are append-only. Their indices are baked into stored entries and share URLs. Never reorder or remove items — only append.
 
 Share payload format (v2): `{ entries: {...}, hidden: {...} }` when items are hidden, or flat entries object for backward compat when nothing is hidden.
 
@@ -64,10 +68,6 @@ Share payload format (v2): `{ entries: {...}, hidden: {...} }` when items are hi
 - `initStaticHandlers()`: Attaches event listeners once — includes the centralized `field-change` handler
 - `setupShareUnlock()`: Configures the share passphrase form for both `#share=` and `#relay=` flows
 
-## Testing
+## Working style
 
-No local dev server or test suite. Verify changes via static analysis (grep for stale refs, check selectors match) and manual testing in production. Open `index.html` directly in a browser via `start index.html`.
-
-## Deployment
-
-Add an entry to `../ops/DEPLOY_QUEUE.md` with scope `deploy`. The ops steward SCPs `index.html` to `/opt/dbt.thisminute.org/` and the relay files to `/opt/dbt.thisminute.org/relay/` on the VM. Do not push or deploy directly.
+This is a personal therapeutic tool. Treat it accordingly: small focused changes over sweeping rewrites, careful when touching anything that could affect stored entries or share URLs, no telemetry of any kind, no third-party dependencies in the frontend. The encryption is what makes the project meaningful — never weaken it, never log decrypted content, never bypass passphrase prompts.
