@@ -2274,15 +2274,14 @@ customElements.define('urge-row', UrgeRow);
   const DEFAULT_HIDDEN_EMOTIONS = ['Interest / Curiosity','Irritability','Resentment','Hurt','Emptiness'];
   // Emotion families, after Linehan's Emotion Regulation handouts. Never shown as labels: they only
   // order the list (most pleasant first) so related feelings sit together. Custom emotions go last.
-  const EMOTION_FAMILIES = ['love','happiness','sadness','fear','anger','shame','guilt','disgust','envy','jealousy','other'];
+  const EMOTION_FAMILIES = ['love','happiness','sadness','fear','anger','shame','guilt','disgust','envy','jealousy'];
   const EMOTION_FAMILY = {
     'Love / Connection': 'love',
     'Joy': 'happiness', 'Contentment / Calm': 'happiness', 'Interest / Curiosity': 'happiness',
-    'Sadness': 'sadness', 'Hurt': 'sadness', 'Loneliness': 'sadness', 'Hopelessness': 'sadness', 'Emptiness': 'sadness',
+    'Sadness': 'sadness', 'Hurt': 'sadness', 'Loneliness': 'sadness', 'Hopelessness': 'sadness', 'Emptiness': 'sadness', 'Numbness': 'sadness',
     'Fear / Anxiety': 'fear', 'Overwhelm': 'fear',
     'Irritability': 'anger', 'Anger': 'anger', 'Resentment': 'anger',
-    'Shame': 'shame', 'Guilt': 'guilt', 'Disgust': 'disgust', 'Envy': 'envy', 'Jealousy': 'jealousy',
-    'Numbness': 'other'
+    'Shame': 'shame', 'Guilt': 'guilt', 'Disgust': 'disgust', 'Envy': 'envy', 'Jealousy': 'jealousy'
   };
   const EMOTION_FAMILY_ORDER = Object.keys(EMOTION_FAMILY);
   // Indices into `list` in display order. Storage order (the index) never changes.
