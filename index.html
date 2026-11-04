@@ -1518,30 +1518,35 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
           </div>
         </div>
       </div>
-      <div class="category-section" id="cat-exercise">
-        <div class="tracking-row">
-          <div class="tracking-label">Exercise</div>
-          <div class="tracking-input-group">
-            <input type="number" class="tracking-input" id="exercise-mins" min="0" max="999" step="5" placeholder="min">
-            <input type="text" class="tracking-text" id="exercise-type" placeholder="what'd you do?">
-          </div>
-        </div>
-      </div>
-      <div class="category-section" id="cat-meals">
-        <div class="meals-section">
-          <div class="tracking-row">
-            <div class="tracking-label">Meals</div>
-            <button class="add-meal-btn" id="add-meal">+ add</button>
-          </div>
-          <div id="meals-list"></div>
-        </div>
-      </div>
-      <!-- Toggle-style categories (medications, nap, shower, etc.) are built dynamically in buildDynamicSections(). -->
-      <div id="toggle-categories"></div>
+      <!-- Rating/toggle daily check-ins (energy, pain, therapy session...) are built in buildDynamicSections(). -->
+      <div id="daily-rows"></div>
     </div>
 
     <div class="section" id="skills-section">
-      <div class="section-header">Skills Used</div>
+      <div class="section-header">Skills</div>
+      <!-- Basics: everyday self-care, shown as the first group under Skills. -->
+      <div id="basics-block">
+        <div class="skills-school-label" id="basics-label">Basics</div>
+        <div class="category-section" id="cat-exercise">
+          <div class="tracking-row">
+            <div class="tracking-label">Exercise</div>
+            <div class="tracking-input-group">
+              <input type="number" class="tracking-input" id="exercise-mins" min="0" max="999" step="5" placeholder="min">
+              <input type="text" class="tracking-text" id="exercise-type" placeholder="what'd you do?">
+            </div>
+          </div>
+        </div>
+        <div class="category-section" id="cat-meals">
+          <div class="meals-section">
+            <div class="tracking-row">
+              <div class="tracking-label">Meals</div>
+              <button class="add-meal-btn" id="add-meal">+ add</button>
+            </div>
+            <div id="meals-list"></div>
+          </div>
+        </div>
+        <div id="basics-rows"></div>
+      </div>
       <div id="skill-rows"></div>
     </div>
 
@@ -2455,22 +2460,44 @@ customElements.define('urge-row', UrgeRow);
     SKILLS[j].similar = SKILLS[j].similar || [];
     if (!SKILLS[j].similar.includes(i)) SKILLS[j].similar.push(i);
   }));
-  // Daily categories. 'complex' categories have their own hand-built HTML (sleep/exercise/meals);
-  // 'toggle' categories are simple booleans that we build dynamically in buildDynamicSections().
-  // Append-only: new category ids go at the end so share-link field names stay stable.
+  // Daily check-ins. `section` is where the row lives on the card: 'daily' (how today was — sleep,
+  // energy, pain; things that happened to you) or 'basics' (things you did for yourself, shown
+  // under Skills › Basics). 'complex' categories have hand-built HTML (sleep/exercise/meals);
+  // 'toggle' and 'rating' rows are built in buildDynamicSections().
+  // Append-only: ids and field names are in stored entries and share payloads.
   const CATEGORIES = [
-    { id: 'sleep', label: 'Sleep', desc: 'Hours slept and quality rating', type: 'complex' },
-    { id: 'exercise', label: 'Exercise', desc: 'Minutes and what you did', type: 'complex' },
-    { id: 'meals', label: 'Meals', desc: 'List what you ate', type: 'complex' },
-    { id: 'medications', label: 'Took medications', desc: 'Did you take your meds today?', type: 'toggle', field: 'tookMedications' },
-    { id: 'nap', label: 'Napped', desc: 'Did you nap?', type: 'toggle', field: 'napped' },
-    { id: 'shower', label: 'Showered', desc: 'Did you shower?', type: 'toggle', field: 'showered' },
-    { id: 'teeth', label: 'Brushed teeth', desc: 'Did you brush your teeth?', type: 'toggle', field: 'brushedTeeth' },
-    { id: 'meditate', label: 'Meditated', desc: 'Did you meditate?', type: 'toggle', field: 'meditated' },
-    { id: 'water', label: 'Drank water', desc: 'Stayed hydrated?', type: 'toggle', field: 'drankWater' },
-    { id: 'outside', label: 'Went outside', desc: 'Got some fresh air?', type: 'toggle', field: 'wentOutside' },
-    { id: 'social', label: 'Social contact', desc: 'Interacted with someone?', type: 'toggle', field: 'socialContact' }
+    { id: 'sleep', section: 'daily', type: 'complex', label: 'Sleep', desc: 'Hours slept and quality rating' },
+    { id: 'exercise', section: 'basics', type: 'complex', label: 'Exercise', desc: 'Minutes and what you did' },
+    { id: 'meals', section: 'basics', type: 'complex', label: 'Meals', desc: 'List what you ate' },
+    { id: 'medications', section: 'basics', type: 'toggle', field: 'tookMedications', label: 'Took medications', desc: 'Did you take your scheduled meds today?' },
+    { id: 'nap', section: 'basics', type: 'toggle', field: 'napped', label: 'Napped', desc: 'Did you nap?' },
+    { id: 'shower', section: 'basics', type: 'toggle', field: 'showered', label: 'Showered', desc: 'Did you shower?' },
+    { id: 'teeth', section: 'basics', type: 'toggle', field: 'brushedTeeth', label: 'Brushed teeth', desc: 'Did you brush your teeth?' },
+    { id: 'meditate', section: 'basics', type: 'toggle', field: 'meditated', label: 'Meditated', desc: 'Did you meditate?' },
+    { id: 'water', section: 'basics', type: 'toggle', field: 'drankWater', label: 'Drank water', desc: 'Stayed hydrated?' },
+    { id: 'outside', section: 'basics', type: 'toggle', field: 'wentOutside', label: 'Went outside', desc: 'Got some fresh air?' },
+    { id: 'social', section: 'basics', type: 'toggle', field: 'socialContact', label: 'Social contact', desc: 'Interacted with someone?' },
+    // Added 2026-11
+    { id: 'energy', section: 'daily', type: 'rating', field: 'energy', label: 'Energy', desc: 'How much energy you had today, 0–5' },
+    { id: 'pain', section: 'daily', type: 'rating', field: 'pain', label: 'Pain / illness', desc: 'Physical pain or feeling unwell, 0–5' },
+    { id: 'overall', section: 'daily', type: 'rating', field: 'overallDay', label: 'Overall day', desc: 'The day as a whole, 0–5' },
+    { id: 'therapy', section: 'daily', type: 'toggle', field: 'therapySession', label: 'Therapy session', desc: 'Had a session today? Useful for seeing before/after patterns.' },
+    { id: 'cycle', section: 'daily', type: 'toggle', field: 'menstruating', label: 'Menstruating', desc: 'On your period today? Mood tracks the cycle more than people expect.' },
+    { id: 'caffeine', section: 'daily', type: 'toggle', field: 'hadCaffeine', label: 'Caffeine', desc: 'Had caffeine today?' },
+    { id: 'prn', section: 'basics', type: 'toggle', field: 'tookPrn', label: 'Took PRN medication', desc: 'As-needed medication, separate from your scheduled meds' },
+    { id: 'sunlight', section: 'basics', type: 'toggle', field: 'gotSunlight', label: 'Got sunlight', desc: 'Daylight on your face, ideally in the morning' },
+    { id: 'journal', section: 'basics', type: 'toggle', field: 'journaled', label: 'Journaled', desc: 'Wrote something down beyond this card' },
+    { id: 'reachedOut', section: 'basics', type: 'toggle', field: 'reachedOut', label: 'Reached out to someone', desc: 'Texted, called, or asked for support' },
+    { id: 'pets', section: 'basics', type: 'toggle', field: 'timeWithPet', label: 'Time with a pet', desc: 'Spent time with an animal' },
+    { id: 'pleasant', section: 'basics', type: 'toggle', field: 'didPleasant', label: 'Did something pleasant', desc: 'On purpose, just because it felt good' },
+    { id: 'creative', section: 'basics', type: 'toggle', field: 'didCreative', label: 'Did something creative', desc: 'Made, played, wrote, drew, built' },
+    { id: 'learned', section: 'basics', type: 'toggle', field: 'learnedSomething', label: 'Learned something', desc: 'Read, studied, or picked up something new' },
+    { id: 'helped', section: 'basics', type: 'toggle', field: 'helpedSomeone', label: 'Helped someone', desc: 'Did something for somebody else' },
+    { id: 'spiritual', section: 'basics', type: 'toggle', field: 'spiritualPractice', label: 'Spiritual practice', desc: 'Prayer, ritual, service — whatever that means to you' }
   ];
+  // The category ids that existed before prefs recorded which ones a vault had seen.
+  const KNOWN_CATEGORY_IDS_V1 = ['sleep', 'exercise', 'meals', 'medications', 'nap', 'shower', 'teeth', 'meditate', 'water', 'outside', 'social'];
+  const BASICS_INFO = { id: 'basics', label: 'Basics', name: 'Basics', desc: 'Everyday things you did for yourself. Not therapy skills, but they are the ground the skills stand on.' };
 
   const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
   const DAYNAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -2479,7 +2506,7 @@ customElements.define('urge-row', UrgeRow);
   // ─── Prefs ───
   // Defaults hide new items so "skip" in the wizard gives the pre-feature experience.
   const DEFAULT_HIDDEN_URGES = [2, 3, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18, 19, 20];
-  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'meditate', 'social'];
+  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'meditate', 'social', 'cycle', 'caffeine', 'prn', 'sunlight', 'journal', 'reachedOut', 'pets', 'creative', 'learned', 'helped', 'spiritual'];
   const MODULE_PROXY_SKILL_INDICES = [0, 7, 14, 21];
   const DEFAULT_HIDDEN_SKILLS = (function() {
     const hidden = [];
@@ -2534,6 +2561,10 @@ customElements.define('urge-row', UrgeRow);
         for (let i = knownUrges; i < URGES.length; i++) {
           if (!prefs.hiddenUrges.includes(i)) prefs.hiddenUrges.push(i);
         }
+        const knownCats = Array.isArray(saved.knownCategories) ? saved.knownCategories : KNOWN_CATEGORY_IDS_V1;
+        CATEGORIES.forEach(c => {
+          if (!knownCats.includes(c.id) && !prefs.hiddenCategories.includes(c.id)) prefs.hiddenCategories.push(c.id);
+        });
         // New default emotions are appended to the vault's list (never reordered) and start hidden.
         DEFAULT_EMOTIONS.forEach(em => {
           if (prefs.emotions.includes(em)) return;
@@ -2554,6 +2585,7 @@ customElements.define('urge-row', UrgeRow);
         hiddenSkills: prefs.hiddenSkills,
         knownSkillCount: SKILLS.length,
         knownUrgeCount: URGES.length,
+        knownCategories: CATEGORIES.map(c => c.id),
         onboarded: prefs.onboarded,
         shareTTL: prefs.shareTTL,
         schemaVersion: prefs.schemaVersion
@@ -2694,8 +2726,18 @@ customElements.define('urge-row', UrgeRow);
   const DYNAMIC_KEYS = {
     urges: 'urges-section',
     skills: 'skill-rows',
-    toggleCategories: 'toggle-categories'
+    daily: 'daily-rows',
+    basics: 'basics-rows'
   };
+
+  // A toggle-row or rating-row for a non-complex category.
+  function makeCategoryRow(cat) {
+    const row = document.createElement(cat.type === 'rating' ? 'rating-row' : 'toggle-row');
+    row.setAttribute('label', cat.label); row.setAttribute('field', cat.field);
+    if (cat.type === 'rating') { row.setAttribute('max', '5'); row.setAttribute('type', 'intensity'); }
+    row.dataset.dyn = 'cat_' + cat.id;
+    return row;
+  }
 
   function buildDynamicSections() {
     const urgesSec = document.getElementById(DYNAMIC_KEYS.urges);
@@ -2710,12 +2752,31 @@ customElements.define('urge-row', UrgeRow);
       urgesSec.appendChild(row);
     }));
 
+    const dailySec = document.getElementById(DYNAMIC_KEYS.daily);
+    dailySec.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+      if (cat.section !== 'daily' || cat.type === 'complex' || prefs.hiddenCategories.includes(cat.id)) return;
+      dailySec.appendChild(makeCategoryRow(cat));
+    });
+
+    const basicsSec = document.getElementById(DYNAMIC_KEYS.basics);
+    basicsSec.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+      if (cat.section !== 'basics' || cat.type === 'complex' || prefs.hiddenCategories.includes(cat.id)) return;
+      basicsSec.appendChild(makeCategoryRow(cat));
+    });
+    const basicsVisible = CATEGORIES.some(cat => cat.section === 'basics' && !prefs.hiddenCategories.includes(cat.id));
+    document.getElementById('basics-block').style.display = basicsVisible ? '' : 'none';
+
     const skillsSec = document.getElementById(DYNAMIC_KEYS.skills);
     skillsSec.innerHTML = '';
     const isVisible = i => !prefs.hiddenSkills.includes(i);
     const activeSchools = SKILL_CATALOG.filter(sc => sc.groups.some(g => g.indices.some(isVisible)));
+    // Group headers (Basics, DBT, ACT...) only earn their space when more than one group is showing.
+    const showSchoolLabels = activeSchools.length + (basicsVisible ? 1 : 0) > 1;
+    document.getElementById('basics-label').style.display = showSchoolLabels ? '' : 'none';
     activeSchools.forEach(sc => {
-      if (activeSchools.length > 1) {
+      if (showSchoolLabels) {
         const h = document.createElement('div');
         h.className = 'skills-school-label'; h.textContent = sc.label;
         skillsSec.appendChild(h);
@@ -2735,16 +2796,6 @@ customElements.define('urge-row', UrgeRow);
       });
     });
 
-    const toggleCatSec = document.getElementById(DYNAMIC_KEYS.toggleCategories);
-    toggleCatSec.innerHTML = '';
-    CATEGORIES.forEach(cat => {
-      if (cat.type !== 'toggle') return;
-      if (prefs.hiddenCategories.includes(cat.id)) return;
-      const row = document.createElement('toggle-row');
-      row.setAttribute('label', cat.label); row.setAttribute('field', cat.field);
-      row.dataset.dyn = 'cat_'+cat.id;
-      toggleCatSec.appendChild(row);
-    });
   }
 
   function applyCategoryVisibility() {
@@ -2823,14 +2874,19 @@ customElements.define('urge-row', UrgeRow);
     const s = SKILLS[idx];
     if (!s) return;
     const meta = SKILL_META[idx];
-    document.getElementById('skill-info-school').textContent = meta.school ? `${meta.school.label} \u00b7 ${meta.group.label}` : '';
-    document.getElementById('skill-info-title').textContent = s.label;
-    document.getElementById('skill-info-desc').textContent = s.desc || '';
+    showInfoCard(meta.school ? `${meta.school.label} \u00b7 ${meta.group.label}` : '', s.label, s.desc, s.similar);
+  }
+
+  // The info popover: a kicker line (school · group), title, description, and optional similar skills.
+  function showInfoCard(kicker, title, desc, similar) {
+    document.getElementById('skill-info-school').textContent = kicker || '';
+    document.getElementById('skill-info-title').textContent = title;
+    document.getElementById('skill-info-desc').textContent = desc || '';
     const sim = document.getElementById('skill-info-similar');
     sim.innerHTML = '';
-    if (s.similar && s.similar.length) {
+    if (similar && similar.length) {
       sim.appendChild(document.createTextNode('Similar: '));
-      s.similar.forEach((j, n) => {
+      similar.forEach((j, n) => {
         if (n) sim.appendChild(document.createTextNode(', '));
         const b = document.createElement('b');
         b.textContent = SKILLS[j].label;
@@ -3284,24 +3340,36 @@ customElements.define('urge-row', UrgeRow);
     }
 
     const hiddenCats = _shareHidden.categories || [];
-    const answeredToggleCats = CATEGORIES.filter(c => c.type === 'toggle' && !hiddenCats.includes(c.id) && entry[c.field] != null);
-    const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length) || answeredToggleCats.length > 0;
-    if (hasBody) {
+    const catShown = c => !hiddenCats.includes(c.id);
+    const answered = section => CATEGORIES.filter(c => c.section === section && c.type !== 'complex' && catShown(c) && entry[c.field] != null);
+    const catRow = cat => cat.type === 'rating' ? shareRatingRow(cat.label, entry[cat.field], 5, '--c' + entry[cat.field]) : shareToggleRow(cat.label, entry[cat.field]);
+
+    const dailyRows = answered('daily');
+    const hasSleep = entry.sleepHours != null || entry.sleepQuality != null;
+    if (hasSleep || dailyRows.length) {
       html += '<div class="share-section-label">Daily</div>';
-      if (entry.sleepHours != null) html += shareRow('Sleep', `${entry.sleepHours} hrs${entry.sleepQuality != null ? ` (quality ${entry.sleepQuality}/5)` : ''}`);
-      if (entry.exerciseMins != null) html += shareRow('Exercise', `${entry.exerciseMins} min${entry.exerciseType ? ` \u2014 ${entry.exerciseType}` : ''}`);
-      if (entry.meals && entry.meals.length) {
-        const filled = entry.meals.filter(m => m);
-        html += shareRow('Meals', filled.length);
-        filled.forEach(m => { html += `<div class="share-meals">&bull; ${m.replace(/</g, '&lt;')}</div>`; });
-      }
-      answeredToggleCats.forEach(cat => { html += shareToggleRow(cat.label, entry[cat.field]); });
+      if (hasSleep) html += shareRow('Sleep', `${entry.sleepHours != null ? entry.sleepHours + ' hrs' : ''}${entry.sleepQuality != null ? ` (quality ${entry.sleepQuality}/5)` : ''}`.trim());
+      dailyRows.forEach(cat => { html += catRow(cat); });
     }
 
+    const basicsRows = answered('basics');
+    const hasExercise = entry.exerciseMins != null;
+    const hasMeals = entry.meals && entry.meals.length > 0;
     const hiddenSkills = _shareHidden.skills || [];
     const skillShown = i => !hiddenSkills.includes(i) && entry['skill_' + i] != null;
-    if (SKILLS.some((s, i) => skillShown(i))) {
+    const anyBasics = hasExercise || hasMeals || basicsRows.length > 0;
+    if (anyBasics || SKILLS.some((s, i) => skillShown(i))) {
       html += '<div class="share-section-label">Skills</div>';
+      if (anyBasics) {
+        html += '<div class="share-sub-label">Basics</div>';
+        if (hasExercise) html += shareRow('Exercise', `${entry.exerciseMins} min${entry.exerciseType ? ` \u2014 ${entry.exerciseType}` : ''}`);
+        if (hasMeals) {
+          const filled = entry.meals.filter(m => m);
+          html += shareRow('Meals', filled.length);
+          filled.forEach(m => { html += `<div class="share-meals">&bull; ${m.replace(/</g, '&lt;')}</div>`; });
+        }
+        basicsRows.forEach(cat => { html += catRow(cat); });
+      }
       SKILL_CATALOG.forEach(sc => sc.groups.forEach(g => {
         const rows = g.indices.filter(skillShown);
         if (!rows.length) return;
@@ -3462,7 +3530,7 @@ customElements.define('urge-row', UrgeRow);
     { id: 'welcome', nav: 'Welcome', title: 'Welcome', subtitle: null, render: renderWizardWelcome, showInEdit: false },
     { id: 'emotions', nav: 'Emotions', title: 'Emotions', subtitle: 'Check the ones you want to track. You can change this any time with the pencil button at the top.', render: renderWizardEmotions, showInEdit: true },
     { id: 'urges', nav: 'Urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Each one is rated 0\u20135, and you can note whether you acted on it. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
-    { id: 'categories', nav: 'Daily', title: 'Daily check-ins', subtitle: 'Everything you might want to log about your day outside of feelings.', render: renderWizardCategories, showInEdit: true },
+    { id: 'categories', nav: 'Daily', title: 'Daily', subtitle: 'How today was: sleep, energy, pain, and so on. Things that happened to you rather than things you did \u2014 those are under Skills.', render: renderWizardCategories, showInEdit: true },
     { id: 'skills', nav: 'Skills', title: 'Skills', subtitle: 'Browse by school of therapy and check the skills you\'re actively working on. Tap ? to see what a skill means.', render: renderWizardSkills, showInEdit: true },
     // First-run summary. Edit mode has its own review step (renderWizardDiff) instead.
     { id: 'done', nav: 'Finish', title: 'All set', subtitle: null, render: renderWizardDone, showInEdit: false }
@@ -3541,16 +3609,20 @@ customElements.define('urge-row', UrgeRow);
   }
 
   // What the draft would change relative to saved prefs, per section, as display names.
+  const catSection = id => (CATEGORIES.find(c => c.id === id) || {}).section;
+  const catLabel = id => (CATEGORIES.find(c => c.id === id) || { label: id }).label;
   const WIZARD_DIFF_SECTIONS = [
     { key: 'hiddenEmotions', label: 'Emotions', name: id => id },
     { key: 'hiddenUrges', label: 'Urges', name: i => URGES[i].label },
-    { key: 'hiddenCategories', label: 'Daily check-ins', name: id => (CATEGORIES.find(c => c.id === id) || { label: id }).label },
+    { key: 'hiddenCategories', label: 'Daily', only: id => catSection(id) === 'daily', name: catLabel },
+    { key: 'hiddenCategories', label: 'Basics', only: id => catSection(id) === 'basics', name: catLabel },
     { key: 'hiddenSkills', label: 'Skills', name: i => SKILLS[i] ? `${SKILLS[i].label}${SKILL_META[i].school ? ` (${SKILL_META[i].school.label})` : ''}` : String(i) }
   ];
 
   function wizardDiff() {
     return WIZARD_DIFF_SECTIONS.map(sec => {
-      const before = prefs[sec.key], after = wizardDraft[sec.key];
+      const only = sec.only || (() => true);
+      const before = prefs[sec.key].filter(only), after = wizardDraft[sec.key].filter(only);
       return {
         label: sec.label,
         shown: before.filter(x => !after.includes(x)).map(sec.name),
@@ -3660,49 +3732,53 @@ customElements.define('urge-row', UrgeRow);
     body.className = 'wizard-body';
     const group = document.createElement('div');
     group.className = 'wizard-group';
-    CATEGORIES.forEach(cat => {
+    CATEGORIES.filter(cat => cat.section === 'daily').forEach(cat => {
       const checked = !wizardDraft.hiddenCategories.includes(cat.id);
       group.appendChild(wizardMakeItem(cat.label, cat.desc, checked, (on) => toggleWizardDraft('hiddenCategories', cat.id, on)));
     });
     body.appendChild(group);
   }
 
-  let wizardSkillTab = null; // id of the school whose tab is open
+  let wizardSkillTab = null; // id of the tab that's open: 'basics' or a school id
 
   function renderWizardSkills(body) {
     body.className = 'wizard-body';
     const isChecked = i => !wizardDraft.hiddenSkills.includes(i);
-    const countChecked = sc => sc.groups.reduce((n, g) => n + g.indices.filter(isChecked).length, 0);
+    const basics = CATEGORIES.filter(cat => cat.section === 'basics');
+    const basicChecked = cat => !wizardDraft.hiddenCategories.includes(cat.id);
+    const tabList = [BASICS_INFO, ...SKILL_CATALOG];
+    const countChecked = tab => tab.id === 'basics'
+      ? basics.filter(basicChecked).length
+      : tab.groups.reduce((n, g) => n + g.indices.filter(isChecked).length, 0);
 
-    if (!wizardSkillTab || !SKILL_CATALOG.some(sc => sc.id === wizardSkillTab)) {
-      const first = SKILL_CATALOG.find(sc => countChecked(sc) > 0);
-      wizardSkillTab = (first || SKILL_CATALOG[0]).id;
+    if (!wizardSkillTab || !tabList.some(t => t.id === wizardSkillTab)) {
+      const first = tabList.find(t => countChecked(t) > 0);
+      wizardSkillTab = (first || tabList[0]).id;
     }
-    const school = SKILL_CATALOG.find(sc => sc.id === wizardSkillTab);
-    const schoolIndices = school.groups.flatMap(g => g.indices);
+    const tab = tabList.find(t => t.id === wizardSkillTab);
 
     const tabs = document.createElement('div');
     tabs.className = 'wizard-tabs';
-    SKILL_CATALOG.forEach(sc => {
-      const t = document.createElement('button');
-      t.className = 'wizard-tab' + (sc.id === wizardSkillTab ? ' active' : '');
-      t.appendChild(document.createTextNode(sc.label));
-      const n = countChecked(sc);
+    tabList.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'wizard-tab' + (t.id === wizardSkillTab ? ' active' : '');
+      btn.appendChild(document.createTextNode(t.label));
+      const n = countChecked(t);
       if (n) {
         const c = document.createElement('span');
         c.className = 'wizard-tab-count'; c.textContent = n;
-        t.appendChild(c);
+        btn.appendChild(c);
       }
-      t.addEventListener('click', () => { wizardSkillTab = sc.id; renderWizardStep(); });
-      tabs.appendChild(t);
+      btn.addEventListener('click', () => { wizardSkillTab = t.id; renderWizardStep(); });
+      tabs.appendChild(btn);
     });
     body.appendChild(tabs);
 
     const intro = document.createElement('div');
     intro.className = 'wizard-school-intro';
-    const b = document.createElement('b'); b.textContent = school.name;
+    const b = document.createElement('b'); b.textContent = tab.name;
     intro.appendChild(b);
-    intro.appendChild(document.createTextNode(' — ' + school.desc));
+    intro.appendChild(document.createTextNode(' — ' + tab.desc));
     body.appendChild(intro);
 
     const qa = document.createElement('div');
@@ -3714,18 +3790,44 @@ customElements.define('urge-row', UrgeRow);
       btn.addEventListener('click', () => { fn(); renderWizardStep(); });
       qa.appendChild(btn);
     };
+    const makeItem = (label, checked, onToggle, infoFn) => {
+      const item = wizardMakeItem(label, null, checked, onToggle);
+      const info = document.createElement('button');
+      info.className = 'wizard-item-info';
+      info.textContent = '?';
+      info.title = 'What is this?';
+      info.addEventListener('click', e => { e.stopPropagation(); infoFn(); });
+      item.appendChild(info);
+      return item;
+    };
+
+    if (tab.id === 'basics') {
+      quick('All basics', () => { wizardDraft.hiddenCategories = wizardDraft.hiddenCategories.filter(id => !basics.some(c => c.id === id)); });
+      quick('None', () => basics.forEach(c => { if (!wizardDraft.hiddenCategories.includes(c.id)) wizardDraft.hiddenCategories.push(c.id); }));
+      body.appendChild(qa);
+      const section = document.createElement('div');
+      section.className = 'wizard-group';
+      basics.forEach(cat => {
+        section.appendChild(makeItem(cat.label, basicChecked(cat), (on) => toggleWizardDraft('hiddenCategories', cat.id, on),
+          () => showInfoCard('Basics', cat.label, cat.desc)));
+      });
+      body.appendChild(section);
+      return;
+    }
+
+    const schoolIndices = tab.groups.flatMap(g => g.indices);
     const hideAll = () => schoolIndices.forEach(i => { if (!wizardDraft.hiddenSkills.includes(i)) wizardDraft.hiddenSkills.push(i); });
-    if (school.id === 'dbt') {
+    if (tab.id === 'dbt') {
       quick('Just the four modules', () => {
         hideAll();
         wizardDraft.hiddenSkills = wizardDraft.hiddenSkills.filter(i => !MODULE_PROXY_SKILL_INDICES.includes(i));
       });
     }
-    quick(`All ${school.label}`, () => { wizardDraft.hiddenSkills = wizardDraft.hiddenSkills.filter(i => !schoolIndices.includes(i)); });
+    quick(`All ${tab.label}`, () => { wizardDraft.hiddenSkills = wizardDraft.hiddenSkills.filter(i => !schoolIndices.includes(i)); });
     quick('None', hideAll);
     body.appendChild(qa);
 
-    school.groups.forEach(g => {
+    tab.groups.forEach(g => {
       const section = document.createElement('div');
       section.className = 'wizard-group';
       const lbl = document.createElement('div');
@@ -3733,14 +3835,7 @@ customElements.define('urge-row', UrgeRow);
       lbl.textContent = g.label;
       section.appendChild(lbl);
       g.indices.forEach(idx => {
-        const item = wizardMakeItem(SKILLS[idx].label, null, isChecked(idx), (on) => toggleWizardDraft('hiddenSkills', idx, on));
-        const info = document.createElement('button');
-        info.className = 'wizard-item-info';
-        info.textContent = '?';
-        info.title = 'What is this?';
-        info.addEventListener('click', e => { e.stopPropagation(); showSkillInfo(idx); });
-        item.appendChild(info);
-        section.appendChild(item);
+        section.appendChild(makeItem(SKILLS[idx].label, isChecked(idx), (on) => toggleWizardDraft('hiddenSkills', idx, on), () => showSkillInfo(idx)));
       });
       body.appendChild(section);
     });
@@ -3751,9 +3846,12 @@ customElements.define('urge-row', UrgeRow);
     const hiddenCounts = {
       emotions: wizardDraft.hiddenEmotions.length,
       urges: wizardDraft.hiddenUrges.length,
-      categories: wizardDraft.hiddenCategories.length,
+      daily: wizardDraft.hiddenCategories.filter(id => catSection(id) === 'daily').length,
+      basics: wizardDraft.hiddenCategories.filter(id => catSection(id) === 'basics').length,
       skills: wizardDraft.hiddenSkills.length
     };
+    const dailyTotal = CATEGORIES.filter(c => c.section === 'daily').length;
+    const basicsTotal = CATEGORIES.filter(c => c.section === 'basics').length;
     const line = (label, total, hidden) => {
       const shown = total - hidden;
       return '<div class="wizard-summary-stat"><span>' + label + '</span><strong>' + shown + ' of ' + total + '</strong></div>';
@@ -3763,7 +3861,8 @@ customElements.define('urge-row', UrgeRow);
       '<div class="wizard-summary">' +
         line('Emotions', prefs.emotions.length, hiddenCounts.emotions) +
         line('Urges', URGES.length, hiddenCounts.urges) +
-        line('Daily check-ins', CATEGORIES.length, hiddenCounts.categories) +
+        line('Daily', dailyTotal, hiddenCounts.daily) +
+        line('Basics', basicsTotal, hiddenCounts.basics) +
         line('Skills', SKILLS.length, hiddenCounts.skills) +
       '</div>' +
       (wizardMode === 'newUser'
