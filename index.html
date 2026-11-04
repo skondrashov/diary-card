@@ -201,6 +201,29 @@ header {
 /* ─── Components ─── */
 rating-row, toggle-row, skill-row, urge-row, .emotion-row { margin: 5px 0; }
 
+/* ─── "Rate what's present": unrated rows collapse into name chips ─── */
+.present-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.15rem 0 0.45rem;
+}
+.present-chips:empty { display: none; }
+.present-chip {
+  background: var(--bg-input);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.present-chip:hover { border-color: var(--accent); color: var(--accent); }
+.present-chip.dim { opacity: 0.45; }
+
 /* ─── Skills section headers (school › group) ─── */
 .skills-school-label {
   font-size: 0.7rem;
@@ -1508,6 +1531,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
     <div class="section" id="emotions-section">
       <div class="section-header">Emotions <span style="float:right;font-size:0.6rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:0.6">7d avg</span></div>
+      <div class="present-chips" id="emotion-chips"></div>
       <div id="emotion-rows"></div>
       <div class="emotion-controls">
         <button class="emotion-add-btn" id="add-emotion">+ add</button>
@@ -1518,6 +1542,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     <!-- IFS parts: user-named, rated for how active each was. Hidden until the first part is added. -->
     <div class="section" id="parts-section">
       <div class="section-header">Parts <span class="section-header-hint">how active today</span></div>
+      <div class="present-chips" id="part-chips"></div>
       <div id="part-rows"></div>
       <div class="emotion-controls">
         <button class="emotion-add-btn" id="add-part">+ add</button>
@@ -1528,11 +1553,13 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     <!-- Schema therapy: schemas and modes, rated for how active each was. Built in buildDynamicSections(). -->
     <div class="section" id="schemas-section">
       <div class="section-header">Schemas &amp; modes <span class="section-header-hint">how active today</span></div>
+      <div class="present-chips" id="schema-chips"></div>
       <div id="schema-rows"></div>
     </div>
 
     <div class="section" id="urges-section">
       <div class="section-header">Urges <span class="section-header-hint">0–5, and whether you acted on it</span></div>
+      <div class="present-chips" id="urge-chips"></div>
     </div>
 
     <div class="section" id="body-section">
@@ -2846,6 +2873,7 @@ customElements.define('urge-row', UrgeRow);
     prefs[cfg.listKey].push(trimmed);
     savePrefs();
     renderCustomLists();
+    renderEntry();
   }
 
   const DYNAMIC_KEYS = {
@@ -2885,14 +2913,14 @@ customElements.define('urge-row', UrgeRow);
     activeSchemaGroups.forEach(g => {
       if (activeSchemaGroups.length > 1) {
         const gl = document.createElement('div');
-        gl.className = 'skills-group-label'; gl.textContent = g.label;
+        gl.className = 'skills-group-label'; gl.textContent = g.label; gl.dataset.group = g.label;
         schemaSec.appendChild(gl);
       }
       g.indices.filter(schemaVisible).forEach(i => {
         const row = document.createElement('rating-row');
         row.setAttribute('label', SCHEMAS[i].label); row.setAttribute('field', 'schema_' + i);
         row.setAttribute('max', '5'); row.setAttribute('type', 'intensity'); row.setAttribute('info', '');
-        row.dataset.dyn = 'schema_' + i;
+        row.dataset.dyn = 'schema_' + i; row.dataset.group = g.label;
         schemaSec.appendChild(row);
       });
     });
@@ -3086,6 +3114,7 @@ customElements.define('urge-row', UrgeRow);
       row.value = entry[row.getAttribute('field')];
       row.acted = entry[row.getAttribute('action')];
     });
+    layoutPresentSections(key, entry);
 
     document.querySelectorAll('.emotion-avg').forEach(el => {
       const avg = get7DayAvg(el.dataset.field);
@@ -3131,6 +3160,63 @@ customElements.define('urge-row', UrgeRow);
 
     const notes = document.getElementById('notes');
     notes.value = entry.notes || '';
+  }
+
+  // ─── "Rate what's present" ───
+  // In these sections a row only takes up space once it's relevant: it was rated today, it was
+  // rated yesterday (so a run can be continued), or the user tapped its chip. Everything else sits
+  // in a tray of name chips above the rows. Purely presentational; nothing stored changes.
+  const PRESENT_SECTIONS = [
+    { rows: 'emotion-rows', chips: 'emotion-chips' },
+    { rows: 'part-rows', chips: 'part-chips' },
+    { rows: 'schema-rows', chips: 'schema-chips' },
+    { rows: 'urges-section', chips: 'urge-chips' }
+  ];
+  const revealedByDate = {}; // dateKey → Set of fields the user opened by tapping a chip
+
+  function rowUnitInfo(unit) {
+    const el = unit.matches('rating-row, urge-row') ? unit : unit.querySelector('rating-row');
+    return { field: el.getAttribute('field'), action: el.getAttribute('action'), label: el.getAttribute('label') };
+  }
+
+  function isPresentIn(entry, info) {
+    if (!entry) return false;
+    return entry[info.field] != null || (info.action && entry[info.action] != null);
+  }
+
+  function layoutPresentSections(key, entry) {
+    const prev = new Date(currentDate);
+    prev.setDate(prev.getDate() - 1);
+    const yesterday = entries[dateKey(prev)];
+    const revealed = revealedByDate[key] || new Set();
+
+    PRESENT_SECTIONS.forEach(sec => {
+      const container = document.getElementById(sec.rows);
+      const tray = document.getElementById(sec.chips);
+      tray.innerHTML = '';
+      const units = Array.from(container.querySelectorAll(':scope > .emotion-row, :scope > rating-row, :scope > urge-row'));
+      units.forEach(unit => {
+        const info = rowUnitInfo(unit);
+        const expanded = revealed.has(info.field) || isPresentIn(entry, info) || isPresentIn(yesterday, info);
+        unit.style.display = expanded ? '' : 'none';
+        if (expanded) return;
+        const chip = document.createElement('button');
+        chip.className = 'present-chip' + (unit.classList.contains('hidden-visible') ? ' dim' : '');
+        chip.textContent = info.label;
+        chip.addEventListener('click', () => {
+          if (!revealedByDate[key]) revealedByDate[key] = new Set();
+          revealedByDate[key].add(info.field);
+          renderEntry();
+        });
+        tray.appendChild(chip);
+      });
+      // Group labels fold away when none of their rows are showing.
+      container.querySelectorAll(':scope > [data-group]').forEach(lbl => {
+        if (lbl.matches('rating-row, urge-row')) return;
+        const any = units.some(u => u.dataset.group === lbl.dataset.group && u.style.display !== 'none');
+        lbl.style.display = any ? '' : 'none';
+      });
+    });
   }
 
   // ─── Calendar ───
@@ -3834,6 +3920,22 @@ customElements.define('urge-row', UrgeRow);
     });
   }
 
+  // "All" / "None" quick actions for a hidden-set draft key, scoped to `ids`.
+  function wizardQuickAllNone(body, key, ids) {
+    const qa = document.createElement('div');
+    qa.className = 'wizard-quick-actions';
+    const quick = (text, fn) => {
+      const b = document.createElement('button');
+      b.className = 'wizard-quick-btn';
+      b.textContent = text;
+      b.addEventListener('click', () => { fn(); renderWizardStep(); });
+      qa.appendChild(b);
+    };
+    quick('All', () => { wizardDraft[key] = wizardDraft[key].filter(x => !ids.includes(x)); });
+    quick('None', () => { ids.forEach(x => { if (!wizardDraft[key].includes(x)) wizardDraft[key].push(x); }); });
+    body.appendChild(qa);
+  }
+
   function toggleWizardDraft(key, id, on) {
     if (on) wizardDraft[key] = wizardDraft[key].filter(x => x !== id);
     else if (!wizardDraft[key].includes(id)) wizardDraft[key].push(id);
@@ -3878,6 +3980,7 @@ customElements.define('urge-row', UrgeRow);
 
   function renderWizardEmotions(body) {
     body.className = 'wizard-body';
+    wizardQuickAllNone(body, 'hiddenEmotions', [...prefs.emotions]);
     const group = document.createElement('div');
     group.className = 'wizard-group';
     emotionDisplayOrder(prefs.emotions).forEach(i => {
@@ -3890,6 +3993,7 @@ customElements.define('urge-row', UrgeRow);
 
   function renderWizardParts(body) {
     body.className = 'wizard-body';
+    if (wizardDraft.parts.length > 1) wizardQuickAllNone(body, 'hiddenParts', [...wizardDraft.parts]);
     const group = document.createElement('div');
     group.className = 'wizard-group';
     wizardDraft.parts.forEach(name => {
@@ -3923,19 +4027,7 @@ customElements.define('urge-row', UrgeRow);
 
   function renderWizardSchemas(body) {
     body.className = 'wizard-body';
-    const all = SCHEMAS.map((_, i) => i);
-    const qa = document.createElement('div');
-    qa.className = 'wizard-quick-actions';
-    const quick = (text, fn) => {
-      const b = document.createElement('button');
-      b.className = 'wizard-quick-btn';
-      b.textContent = text;
-      b.addEventListener('click', () => { fn(); renderWizardStep(); });
-      qa.appendChild(b);
-    };
-    quick('All', () => { wizardDraft.hiddenSchemas = []; });
-    quick('None', () => { wizardDraft.hiddenSchemas = [...all]; });
-    body.appendChild(qa);
+    wizardQuickAllNone(body, 'hiddenSchemas', SCHEMAS.map((_, i) => i));
 
     SCHEMA_GROUPS.forEach(g => {
       const section = document.createElement('div');
@@ -3960,6 +4052,7 @@ customElements.define('urge-row', UrgeRow);
 
   function renderWizardUrges(body) {
     body.className = 'wizard-body';
+    wizardQuickAllNone(body, 'hiddenUrges', URGES.map((_, i) => i));
     URGE_GROUPS.forEach(g => {
       const section = document.createElement('div');
       section.className = 'wizard-group';
@@ -3977,6 +4070,7 @@ customElements.define('urge-row', UrgeRow);
 
   function renderWizardCategories(body) {
     body.className = 'wizard-body';
+    wizardQuickAllNone(body, 'hiddenCategories', CATEGORIES.filter(c => c.section === 'daily').map(c => c.id));
     const group = document.createElement('div');
     group.className = 'wizard-group';
     CATEGORIES.filter(cat => cat.section === 'daily').forEach(cat => {
