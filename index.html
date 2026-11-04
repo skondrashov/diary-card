@@ -1865,8 +1865,9 @@ class RatingRow extends HTMLElement {
 :host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.5rem}
 :host([small]){padding:0;justify-content:flex-start}
 .label{font-size:0.85rem;color:var(--text-secondary);flex-shrink:0;min-width:90px}
-:host([info]) .label{cursor:pointer;text-decoration:underline dotted;text-decoration-color:var(--border-light);text-underline-offset:3px;-webkit-tap-highlight-color:transparent}
-:host([info]) .label:hover{text-decoration-color:var(--accent)}
+:host([info]) .label{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.info-dot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border-light);font-size:0.55rem;line-height:1;color:var(--text-muted);flex-shrink:0;margin-left:5px;vertical-align:1px}
+.label:hover .info-dot{border-color:var(--accent);color:var(--accent)}
 .pills{display:flex;gap:4px}
 .pill{width:${small?26:32}px;height:${small?24:28}px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:${small?'0.7':'0.75'}rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
 .pill:hover{border-color:var(--border-light)}
@@ -1875,7 +1876,7 @@ ${colorCss}
 @keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(201,149,107,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(201,149,107,0.4))}}
 @media(max-width:400px){.pill{width:${small?22:28}px;height:${small?22:26}px;font-size:0.7rem}.label{min-width:75px;font-size:0.8rem}}
 </style>
-${label ? `<div class="label">${label}</div>` : ''}
+${label ? `<div class="label">${label}${this.hasAttribute('info') ? '<span class="info-dot">?</span>' : ''}</div>` : ''}
 <div class="pills">${Array.from({length:max+1},(_,i)=>`<div class="pill" data-value="${i}">${i}</div>`).join('')}</div>`;
   }
 
@@ -1897,7 +1898,7 @@ ${label ? `<div class="label">${label}</div>` : ''}
 customElements.define('rating-row', RatingRow);
 
 class ToggleRow extends HTMLElement {
-  static get observedAttributes() { return ['label','field','value']; }
+  static get observedAttributes() { return ['label','field','value','info']; }
 
   constructor() {
     super();
@@ -1919,6 +1920,14 @@ class ToggleRow extends HTMLElement {
         detail: { field: this.getAttribute('field'), value: this._value }
       }));
     });
+    if (this.hasAttribute('info')) {
+      this.shadowRoot.querySelector('.label').addEventListener('click', () => {
+        this.dispatchEvent(new CustomEvent('row-info', {
+          bubbles: true, composed: true,
+          detail: { field: this.getAttribute('field') }
+        }));
+      });
+    }
   }
 
   attributeChangedCallback(name) {
@@ -1941,6 +1950,9 @@ class ToggleRow extends HTMLElement {
     this.shadowRoot.innerHTML = `<style>
 :host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.5rem}
 .label{font-size:0.85rem;color:var(--text-secondary)}
+:host([info]) .label{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.info-dot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border-light);font-size:0.55rem;line-height:1;color:var(--text-muted);flex-shrink:0;margin-left:5px;vertical-align:1px}
+.label:hover .info-dot{border-color:var(--accent);color:var(--accent)}
 .pills{display:flex;gap:4px;flex-shrink:0}
 .pill{min-width:40px;padding:0 10px;height:28px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
 .pill:hover{border-color:var(--border-light)}
@@ -1949,7 +1961,7 @@ class ToggleRow extends HTMLElement {
 .pill.selected.yes{background:var(--accent);color:#fff;box-shadow:0 0 8px var(--accent-glow)}
 @media(max-width:400px){.pill{min-width:36px;height:26px;font-size:0.7rem}.label{font-size:0.8rem}}
 </style>
-<div class="label">${label}</div>
+<div class="label">${label}${this.hasAttribute('info') ? '<span class="info-dot">?</span>' : ''}</div>
 <div class="pills"><div class="pill no" data-value="no">no</div><div class="pill yes" data-value="yes">yes</div></div>`;
   }
 
@@ -2021,8 +2033,9 @@ class SkillRow extends HTMLElement {
     const label = this.getAttribute('label') || '';
     this.shadowRoot.innerHTML = `<style>
 :host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.4rem}
-.label{font-size:0.8rem;color:var(--text-secondary);flex-shrink:0;width:110px;line-height:1.2;cursor:pointer;text-decoration:underline dotted;text-decoration-color:var(--border-light);text-underline-offset:3px;-webkit-tap-highlight-color:transparent}
-.label:hover{text-decoration-color:var(--accent)}
+.label{font-size:0.8rem;color:var(--text-secondary);flex-shrink:0;width:110px;line-height:1.2;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.info-dot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border-light);font-size:0.55rem;line-height:1;color:var(--text-muted);flex-shrink:0;margin-left:5px;vertical-align:1px}
+.label:hover .info-dot{border-color:var(--accent);color:var(--accent)}
 .right{display:flex;align-items:center;gap:0.4rem}
 .pills{display:flex;gap:3px}
 .pill{padding:4px 7px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.65rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);user-select:none;-webkit-tap-highlight-color:transparent;white-space:nowrap}
@@ -2039,7 +2052,7 @@ class SkillRow extends HTMLElement {
 @keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(90,157,90,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(90,157,90,0.4))}}
 @media(max-width:400px){.label{width:85px;font-size:0.75rem}.pill{padding:3px 5px;font-size:0.6rem}.helped{padding:3px 5px;font-size:0.55rem}}
 </style>
-<div class="label">${label}</div>
+<div class="label">${label}<span class="info-dot">?</span></div>
 <div class="right"><button class="helped">helped</button><div class="pills">${SkillRow.LEVELS.map((l,i)=>`<div class="pill" data-level="${i}">${l}</div>`).join('')}</div></div>`;
   }
 
@@ -2120,15 +2133,16 @@ class UrgeRow extends HTMLElement {
 
     this.shadowRoot.innerHTML = `<style>
 :host{display:block;padding:0.5rem 0}
-.top{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
+.top,.bottom{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
+.bottom{margin-top:0.3rem;justify-content:flex-end}
 .label{font-size:0.85rem;color:var(--text-secondary);flex-shrink:0;min-width:90px}
+.urge-label{font-size:0.65rem;color:var(--text-muted);margin-right:0.25rem}
 .pills{display:flex;gap:4px}
 .pill{width:32px;height:28px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
 .pill:hover{border-color:var(--border-light)}
 .pill.selected{color:#fff;border-color:transparent;font-weight:600;box-shadow:0 0 8px var(--pill-glow,rgba(201,149,107,0.3));animation:pillBreath 3s ease-in-out infinite}
 ${colorCss}
-.acted{display:none;align-items:center;justify-content:flex-end;gap:4px;margin-top:0.35rem}
-:host(.engaged) .acted{display:flex}
+.acted{display:flex;align-items:center;justify-content:flex-end;gap:4px}
 .acted-label{font-size:0.65rem;color:var(--text-muted);margin-right:0.25rem}
 .apill{min-width:36px;padding:0 9px;height:24px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.68rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
 .apill:hover{border-color:var(--border-light)}
@@ -2139,8 +2153,9 @@ ${colorCss}
 @media(max-width:400px){.pill{width:28px;height:26px;font-size:0.7rem}.label{min-width:75px;font-size:0.8rem}}
 </style>
 <div class="top"><div class="label">${label}</div>
-<div class="pills">${Array.from({length:6},(_,i)=>`<div class="pill" data-value="${i}">${i}</div>`).join('')}</div></div>
-<div class="acted"><span class="acted-label">acted on it?</span><div class="apill no" data-value="no">no</div><div class="apill yes" data-value="yes">yes</div></div>`;
+<div class="acted"><span class="acted-label">acted on it?</span><div class="apill no" data-value="no">no</div><div class="apill yes" data-value="yes">yes</div></div></div>
+<div class="bottom"><span class="urge-label">urge</span>
+<div class="pills">${Array.from({length:6},(_,i)=>`<div class="pill" data-value="${i}">${i}</div>`).join('')}</div></div>`;
   }
 
   _update() {
@@ -2159,8 +2174,6 @@ ${colorCss}
       const isYes = p.dataset.value === 'yes';
       p.classList.toggle('selected', this._acted !== null && this._acted === isYes);
     });
-    // The acted question only appears once there's something to act on (or an old answer).
-    this.classList.toggle('engaged', this._value !== null || this._acted !== null);
   }
 }
 customElements.define('urge-row', UrgeRow);
@@ -2619,7 +2632,7 @@ customElements.define('urge-row', UrgeRow);
     { id: 'overall', section: 'daily', type: 'rating', field: 'overallDay', label: 'Overall day', desc: 'The day as a whole, 0–5' },
     { id: 'therapy', section: 'daily', type: 'toggle', field: 'therapySession', label: 'Therapy session', desc: 'Had a session today? Useful for seeing before/after patterns.' },
     { id: 'cycle', section: 'daily', type: 'toggle', field: 'menstruating', label: 'Menstruating', desc: 'On your period today? Mood tracks the cycle more than people expect.' },
-    { id: 'prn', section: 'basics', type: 'toggle', field: 'tookPrn', label: 'Took PRN medication', desc: 'As-needed medication, separate from your scheduled meds' },
+    { id: 'prn', section: 'basics', type: 'toggle', field: 'tookPrn', label: 'Took as-needed medication', desc: 'Something you take when needed rather than on a schedule (a PRN), separate from your regular meds' },
     { id: 'sunlight', section: 'basics', type: 'toggle', field: 'gotSunlight', label: 'Got sunlight', desc: 'Daylight on your face, ideally in the morning' },
     { id: 'journal', section: 'basics', type: 'toggle', field: 'journaled', label: 'Journaled', desc: 'Wrote something down beyond this card' },
     { id: 'reachedOut', section: 'basics', type: 'toggle', field: 'reachedOut', label: 'Reached out to someone', desc: 'Texted, called, or asked for support' },
@@ -2959,6 +2972,7 @@ customElements.define('urge-row', UrgeRow);
     const row = document.createElement(cat.type === 'rating' ? 'rating-row' : 'toggle-row');
     row.setAttribute('label', cat.label); row.setAttribute('field', cat.field);
     if (cat.type === 'rating') { row.setAttribute('max', '5'); row.setAttribute('type', 'intensity'); }
+    if (cat.desc) row.setAttribute('info', '');
     row.dataset.dyn = 'cat_' + cat.id;
     return row;
   }
@@ -3106,6 +3120,10 @@ customElements.define('urge-row', UrgeRow);
       const f = String(e.detail.field);
       if (f.startsWith('skill_')) showSkillInfo(parseInt(f.slice(6)));
       else if (f.startsWith('schema_')) showSchemaInfo(parseInt(f.slice(7)));
+      else {
+        const cat = CATEGORIES.find(c => c.field === f);
+        if (cat) showInfoCard(cat.section === 'daily' ? 'Daily' : 'Basics', cat.label, cat.desc);
+      }
     });
     document.getElementById('skill-info-overlay').addEventListener('click', e => {
       if (e.target.id === 'skill-info-overlay') hideSkillInfo();
