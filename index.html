@@ -1976,23 +1976,24 @@ customElements.define('skill-row', SkillRow);
 
   const EMOTIONS = DEFAULT_EMOTIONS; // reference for share view
   // Append-only: new urges must go at the end so stored indices remain stable forever.
-  const URGES = ['Self-harm','Suicide','Weed','Other substances','Quit therapy','Alcohol','Nicotine','Binge','Restrict','Purge','Isolate','Lash out'];
+  const URGES = ['Self-harm','Suicide','Cannabis','Other substances','Quit therapy','Alcohol','Nicotine','Binge eat','Restrict eating','Purge','Isolate','Lash out'];
   const URGE_GROUPS = [
     { label: 'Self-harm', indices: [0, 1] },
     { label: 'Substance use', indices: [2, 3, 5, 6] },
-    { label: 'Behavioral', indices: [4, 7, 8, 9, 10, 11] }
+    { label: 'Eating', indices: [7, 8, 9] },
+    { label: 'Behavioral', indices: [4, 10, 11] }
   ];
   // Append-only: new actions must go at the end. tookMedications was moved to CATEGORIES,
   // but we leave existing stored boolean data alone — the field id is unchanged.
   const ACTIONS = [
     { id: 'selfHarmed', label: 'Self-harmed' },
     { id: 'suicidalAction', label: 'Suicidal action' },
-    { id: 'usedWeed', label: 'Used weed' },
+    { id: 'usedWeed', label: 'Used cannabis' },
     { id: 'usedOtherSubstances', label: 'Used other substances' },
     { id: 'drankAlcohol', label: 'Drank alcohol' },
     { id: 'usedNicotine', label: 'Used nicotine' },
-    { id: 'binged', label: 'Binged' },
-    { id: 'restricted', label: 'Restricted' },
+    { id: 'binged', label: 'Binge ate' },
+    { id: 'restricted', label: 'Restricted eating' },
     { id: 'purged', label: 'Purged' },
     { id: 'isolated', label: 'Isolated' },
     { id: 'lashedOut', label: 'Lashed out' }
@@ -2000,7 +2001,8 @@ customElements.define('skill-row', SkillRow);
   const ACTION_GROUPS = [
     { label: 'Self-harm', ids: ['selfHarmed', 'suicidalAction'] },
     { label: 'Substance use', ids: ['usedWeed', 'usedOtherSubstances', 'drankAlcohol', 'usedNicotine'] },
-    { label: 'Behavioral', ids: ['binged', 'restricted', 'purged', 'isolated', 'lashedOut'] }
+    { label: 'Eating', ids: ['binged', 'restricted', 'purged'] },
+    { label: 'Behavioral', ids: ['isolated', 'lashedOut'] }
   ];
   // Schema v2: individual DBT skills (was 4 modules). Migration in migrateEntriesV1toV2() moves
   // old skill_0..3 into entry.legacySkills so they're not misinterpreted as individual skills.
@@ -2044,9 +2046,9 @@ customElements.define('skill-row', SkillRow);
 
   // ─── Prefs ───
   // Defaults hide new items so "skip" in the wizard gives the pre-feature experience.
-  const DEFAULT_HIDDEN_URGES = [5, 6, 7, 8, 9, 10, 11];
-  const DEFAULT_HIDDEN_ACTIONS = ['drankAlcohol', 'usedNicotine', 'binged', 'restricted', 'purged', 'isolated', 'lashedOut'];
-  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'shower', 'teeth', 'meditate', 'water', 'outside', 'social'];
+  const DEFAULT_HIDDEN_URGES = [2, 3, 5, 6, 7, 8, 9];
+  const DEFAULT_HIDDEN_ACTIONS = ['usedWeed', 'usedOtherSubstances', 'drankAlcohol', 'usedNicotine', 'binged', 'restricted', 'purged'];
+  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'meditate', 'social'];
   const MODULE_PROXY_SKILL_INDICES = [0, 7, 14, 21];
   const DEFAULT_HIDDEN_SKILLS = (function() {
     const hidden = [];

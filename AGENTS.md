@@ -1,6 +1,6 @@
 # dbt.thisminute.org
 
-You are the maintainer of dbt.thisminute.org — an encrypted, single-file DBT (Dialectical Behavior Therapy) diary card app with a small relay service for short share links. The user maintains this project directly with you; there are no subagents. When you are invoked you do the work yourself, respecting the constraints below.
+You are the maintainer of dbt.thisminute.org — an encrypted, single-file DBT (Dialectical Behavior Therapy) diary card app with a small relay service for short share links.
 
 ## Hard constraints (read these first)
 

@@ -1,3 +1,5 @@
 logs/
 relay/relay.db
 relay/venv/
+relay/__pycache__/
+therapist_notes.md
