@@ -223,6 +223,21 @@ rating-row, toggle-row, skill-row, urge-row, .emotion-row { margin: 5px 0; }
 }
 .present-chip:hover { border-color: var(--accent); color: var(--accent); }
 .present-chip.dim { opacity: 0.45; }
+.present-unit { display: flex; align-items: center; gap: 0.35rem; margin: 5px 0; }
+.present-unit > rating-row, .present-unit > urge-row { flex: 1; min-width: 0; margin: 0; }
+.present-collapse {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 2px 4px;
+  opacity: 0.45;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+.present-collapse:hover { opacity: 1; color: var(--accent); }
 
 /* ─── Skills section headers (school › group) ─── */
 .skills-school-label {
@@ -567,6 +582,7 @@ body.light-mode .skill-info-card { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 }
 
 /* ─── Tracking (Body) ─── */
+.tracking-sub { font-size: 0.6rem; color: var(--text-muted); font-weight: 400; letter-spacing: 0; text-transform: none; }
 .tracking-row {
   display: flex;
   align-items: center;
@@ -1596,7 +1612,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <div class="section-header">Daily</div>
       <div class="category-section" id="cat-sleep">
         <div class="tracking-row">
-          <div class="tracking-label">Sleep</div>
+          <div class="tracking-label">Sleep<div class="tracking-sub">last night</div></div>
           <div class="tracking-input-group">
             <input type="number" class="tracking-input" id="sleep-hours" min="0" max="24" step="0.5" placeholder="hrs">
             <rating-row label="" field="sleepQuality" max="5" type="intensity" small></rating-row>
@@ -2398,11 +2414,12 @@ customElements.define('urge-row', UrgeRow);
     { label: 'Doomscroll', action: 'doomscrolled' },
     { label: 'Zone out / dissociate', action: 'dissociated' },
     { label: 'Gamble', action: 'gambled' },
-    { label: 'Sexual compulsion', action: 'sexualCompulsion' }
+    { label: 'Sexual compulsion', action: 'sexualCompulsion' },
+    { label: 'Caffeine', action: 'hadCaffeine' }
   ];
   const URGE_GROUPS = [
     { label: 'Self-harm', indices: [0, 1] },
-    { label: 'Substances', indices: [2, 3, 5, 6] },
+    { label: 'Substances', indices: [2, 3, 5, 6, 21] },
     { label: 'Eating', indices: [7, 8, 9] },
     { label: 'Withdrawal', indices: [10, 12, 18, 17, 4] },
     { label: 'Relationships', indices: [11, 13, 14, 15] },
@@ -2416,61 +2433,61 @@ customElements.define('urge-row', UrgeRow);
   const SKILLS = [
     // ── DBT (0-30) ──
     // Mindfulness (0-6)
-    { label: 'Wise Mind', desc: 'The overlap of emotion mind and reasonable mind: a calm knowing that holds both feeling and fact.', similar: [66, 73] },
-    { label: 'Observe', desc: 'Notice what\'s happening inside and around you without reacting to it or putting words on it yet.', similar: [39, 91] },
+    { label: 'Wise Mind', desc: 'The overlap of emotion mind and reasonable mind: a calm knowing that holds both feeling and fact.', similar: [66, 67, 73, 85] },
+    { label: 'Observe', desc: 'Notice what\'s happening inside and around you without reacting to it or putting words on it yet.', similar: [39, 91, 34] },
     { label: 'Describe', desc: 'Put words on what you observed, sticking to facts: "a tight chest", "the thought that I failed".', similar: [33] },
     { label: 'Participate', desc: 'Throw yourself fully into what you\'re doing without self-consciousness or running commentary.' },
-    { label: 'Non-judgmental stance', desc: 'Drop "good/bad" and "should". Describe consequences instead of verdicts.', similar: [85] },
-    { label: 'One-mindfully', desc: 'Do one thing at a time with full attention, bringing the mind back each time it wanders.' },
-    { label: 'Effectiveness', desc: 'Do what works for the goal in front of you, rather than what feels fair or proves a point.' },
+    { label: 'Non-judgmental stance', desc: 'Drop "good/bad" and "should". Describe consequences instead of verdicts.', similar: [85, 76] },
+    { label: 'One-mindfully', desc: 'Do one thing at a time with full attention, bringing the mind back each time it wanders.', similar: [37] },
+    { label: 'Effectiveness', desc: 'Do what works for the goal in front of you, rather than what feels fair or proves a point.', similar: [42] },
     // Distress Tolerance (7-13)
-    { label: 'TIPP', desc: 'Change body chemistry fast: Temperature (cold water on the face), Intense exercise, Paced breathing, Paired muscle relaxation.', similar: [92, 93, 78] },
-    { label: 'Self-soothe', desc: 'Comfort yourself through the five senses: something to see, hear, smell, taste, or touch.', similar: [84, 87] },
-    { label: 'IMPROVE the moment', desc: 'Imagery, Meaning, Prayer, Relaxation, One thing in the moment, Vacation, Encouragement.', similar: [87] },
-    { label: 'Pros and cons', desc: 'Weigh acting on the urge against not acting on it, including the long-term costs of each.' },
+    { label: 'TIPP', desc: 'Change body chemistry fast: Temperature (cold water on the face), Intense exercise, Paced breathing, Paired muscle relaxation.', similar: [84, 92, 93, 78] },
+    { label: 'Self-soothe', desc: 'Comfort yourself through the five senses: something to see, hear, smell, taste, or touch.', similar: [87] },
+    { label: 'IMPROVE the moment', desc: 'Make the moment you\'re in more bearable without leaving it: Imagery, Meaning, Prayer, Relaxation, One thing in the moment, a brief Vacation, Encouragement. ACCEPTS distracts away from the moment; IMPROVE changes how the moment feels.', similar: [87] },
+    { label: 'Pros and cons', desc: 'Weigh acting on the urge against not acting on it, including the long-term costs of each.', similar: [42] },
     { label: 'Radical acceptance', desc: 'Fully accept reality as it is, all the way down, without approving of it. Fighting what is already true adds suffering.', similar: [31] },
     { label: 'Half-smile', desc: 'Relax the face into a slight smile and let the body tell the mind it\'s safe to soften. Often paired with willing hands.', similar: [85] },
-    { label: 'Turning the mind', desc: 'Notice you\'ve turned away from acceptance, and choose to turn back toward it. Usually has to be repeated.', similar: [28] },
+    { label: 'Turning the mind', desc: 'Acceptance of reality: the situation, the facts, the things you can\'t change right now. Turning the mind is noticing you\'ve slid back into fighting reality ("this shouldn\'t be happening") and choosing, again, to accept it. A choice you make over and over, not once.', similar: [28, 31] },
     // Emotion Regulation (14-20)
     { label: 'PLEASE', desc: 'Treat PhysicaL illness, balance Eating, avoid mood-Altering substances, balance Sleep, get Exercise. Reduces emotional vulnerability.' },
-    { label: 'Opposite action', desc: 'When the emotion doesn\'t fit the facts (or acting on it isn\'t effective), act opposite to its urge, all the way.', similar: [50, 75, 43] },
-    { label: 'Check the facts', desc: 'Ask: what event set this off? What am I assuming? Do the emotion and its intensity fit the actual facts?', similar: [33, 46, 47, 68] },
-    { label: 'Problem solving', desc: 'When the emotion does fit the facts, change the situation: define the problem, brainstorm, pick an option, try it.', similar: [55] },
-    { label: 'Accumulate positives', desc: 'Deliberately do pleasant things now, and build toward long-term goals that make life worth living.', similar: [51, 50] },
+    { label: 'Opposite action', desc: 'When the emotion doesn\'t fit the facts (or acting on it isn\'t effective), act opposite to its urge, all the way.', similar: [50, 75, 43, 44] },
+    { label: 'Check the facts', desc: 'Ask: what event set this off? What am I assuming? Do the emotion and its intensity fit the actual facts?', similar: [33, 46, 47, 68, 70] },
+    { label: 'Problem solving', desc: 'When the emotion does fit the facts, change the situation: define the problem, brainstorm, pick an option, try it.', similar: [55, 82] },
+    { label: 'Accumulate positives', desc: 'Deliberately do pleasant things now, and build toward long-term goals that make life worth living.', similar: [51, 50, 83] },
     { label: 'Build mastery', desc: 'Do something a little hard that leaves you feeling competent. Daily if you can.', similar: [54] },
     { label: 'Cope ahead', desc: 'Rehearse a difficult situation in advance: picture it, plan which skills you\'ll use, imagine it going well.', similar: [71, 77] },
     // Interpersonal Effectiveness (21-25)
-    { label: 'DEAR MAN', desc: 'Asking for something or saying no: Describe, Express, Assert, Reinforce; stay Mindful, Appear confident, Negotiate.' },
+    { label: 'DEAR MAN', desc: 'Asking for something or saying no: Describe, Express, Assert, Reinforce; stay Mindful, Appear confident, Negotiate.', similar: [63] },
     { label: 'GIVE', desc: 'Keeping the relationship: be Gentle, act Interested, Validate, use an Easy manner.' },
     { label: 'FAST', desc: 'Keeping self-respect: be Fair, no Apologies for existing, Stick to values, be Truthful.', similar: [42] },
     { label: 'Validate', desc: 'Acknowledge that someone\'s (or your own) feelings make sense given their situation, even if you don\'t agree.', similar: [64, 74] },
     { label: 'Repair', desc: 'After a rupture: own your part, make amends, and do something different next time.' },
     // DBT additions (26-30)
-    { label: 'STOP', desc: 'Stop. Take a step back. Observe. Proceed mindfully. A pause between the trigger and the reaction.', similar: [37, 90] },
-    { label: 'Distract (ACCEPTS)', desc: 'Activities, Contributing, Comparisons, Emotions (opposite), Pushing away, Thoughts, Sensations. Get through the crisis without making it worse.', similar: [56, 78] },
+    { label: 'STOP', desc: 'Stop. Take a step back. Observe. Proceed mindfully. A pause between the trigger and the reaction.', similar: [37, 90, 65] },
+    { label: 'Distract (ACCEPTS)', desc: 'Distraction: take your attention off the crisis for a while. Activities, Contributing, Comparisons, opposite Emotions, Pushing away, other Thoughts, strong Sensations. IMPROVE is the sibling skill: it stays in the moment and makes it more bearable, while ACCEPTS gets you out of it.', similar: [56, 78] },
     { label: 'Willingness', desc: 'Do what the situation needs, willingly, instead of digging in with willfulness ("I refuse", "it shouldn\'t be like this").', similar: [31] },
-    { label: 'Mindfulness of current emotion', desc: 'Let the emotion be there and watch it like a wave: notice where it is in your body, don\'t amplify it, don\'t push it down. It passes.', similar: [32, 94] },
+    { label: 'Mindfulness of current emotion', desc: 'Let the emotion be there and watch it like a wave: notice where it is in your body, don\'t amplify it, don\'t push it down. It passes.', similar: [32, 94, 91, 31] },
     { label: 'Dialectical thinking', desc: 'Hold two things that seem contradictory as both true: "I\'m doing my best AND I need to do better." Look for the middle path.', similar: [48] },
     // ── ACT (31-44) ──
     { label: 'Make room', desc: 'Allow an uncomfortable feeling to be present without struggling against it. Not liking it, just dropping the fight.' },
-    { label: 'Expansion', desc: 'Breathe into the feeling. Notice its edges, let it take up space, and let yourself move around it.' },
-    { label: 'Notice the thought', desc: 'Put "I\'m having the thought that…" in front of the thought. The thought is still there; you\'re no longer inside it.' },
-    { label: 'Leaves on a stream', desc: 'Place each thought on a leaf and watch it drift by. When you get pulled in, gently come back to the bank.' },
-    { label: 'Name the story', desc: 'Spot the familiar script ("there\'s the not-good-enough story again") and name it rather than argue with it.', similar: [68, 60] },
-    { label: 'Thank your mind', desc: '"Thanks, mind." Acknowledge the thought as your mind doing its job of warning you, and carry on.', similar: [46] },
-    { label: 'Dropping anchor', desc: 'Acknowledge what\'s showing up, come back into the body (push feet into the floor, stretch), and engage with where you are.' },
+    { label: 'Expansion', desc: 'Breathe into the feeling. Notice its edges, let it take up space, and let yourself move around it.', similar: [94, 91] },
+    { label: 'Notice the thought', desc: 'Put "I\'m having the thought that…" in front of the thought. The thought is still there; you\'re no longer inside it.', similar: [59] },
+    { label: 'Leaves on a stream', desc: 'Place each thought on a leaf and watch it drift by. When you get pulled in, gently come back to the bank.', similar: [59] },
+    { label: 'Name the story', desc: 'Spot the familiar script ("there\'s the not-good-enough story again") and name it rather than argue with it.', similar: [68, 60, 46] },
+    { label: 'Thank your mind', desc: '"Thanks, mind." Acknowledge the thought as your mind doing its job of warning you, and carry on.', similar: [46, 64] },
+    { label: 'Dropping anchor', desc: 'Acknowledge what\'s showing up, come back into the body (push feet into the floor, stretch), and engage with where you are.', similar: [89, 90] },
     { label: 'Notice five things', desc: 'Name five things you can see, five you can hear, five you can feel. Come back to the room.', similar: [89] },
-    { label: 'Observing self', desc: 'Notice the part of you that notices. Thoughts and feelings change; the one watching them doesn\'t.', similar: [66] },
+    { label: 'Observing self', desc: 'Notice the part of you that notices. Thoughts and feelings change; the one watching them doesn\'t.', similar: [66, 59] },
     { label: 'Sky and weather', desc: 'You are the sky; thoughts and feelings are the weather. Weather can be fierce, but it can\'t harm the sky.', similar: [59] },
     { label: 'Clarify values', desc: 'Ask what you want to stand for in this area of life, as a direction (not a goal that can be finished).', similar: [83] },
-    { label: 'Values check', desc: 'Is this a toward move or an away move? Is what I\'m about to do taking me toward the person I want to be?' },
-    { label: 'Committed action', desc: 'Take one concrete step in a valued direction, however small, and keep taking them.' },
-    { label: 'Passengers on the bus', desc: 'Keep driving toward what matters while the passengers (thoughts, urges, feelings) shout from the back. They can ride; they don\'t get to steer.' },
+    { label: 'Values check', desc: 'Is this a toward move or an away move? Is what I\'m about to do taking me toward the person I want to be?', similar: [67] },
+    { label: 'Committed action', desc: 'Take one concrete step in a valued direction, however small, and keep taking them.', similar: [50, 75] },
+    { label: 'Passengers on the bus', desc: 'Keep driving toward what matters while the passengers (thoughts, urges, feelings) shout from the back. They can ride; they don\'t get to steer.', similar: [67, 65] },
     // ── CBT (45-57) ──
     { label: 'Thought record', desc: 'Write it down: situation, emotion (0–100), automatic thought, evidence for and against, balanced thought, re-rated emotion.', similar: [70] },
     { label: 'Spot the distortion', desc: 'Name the thinking error: emotional reasoning, mind reading, catastrophizing, all-or-nothing, discounting positives, should statements, personalizing.' },
-    { label: 'Examine the evidence', desc: 'What\'s the actual evidence this thought is true? What\'s the evidence against? What would I tell a friend?' },
-    { label: 'Balanced thought', desc: 'Write a more accurate thought that accounts for all the evidence, not just the worst-case slice.', similar: [73] },
+    { label: 'Examine the evidence', desc: 'What\'s the actual evidence this thought is true? What\'s the evidence against? What would I tell a friend?', similar: [72] },
+    { label: 'Balanced thought', desc: 'Write a more accurate thought that accounts for all the evidence, not just the worst-case slice.', similar: [73, 71] },
     { label: 'Decatastrophize', desc: 'What\'s the worst that could happen? The best? The most likely? And if the worst happened, how would I cope?', similar: [62] },
     { label: 'Behavioral activation', desc: 'Do the activity before you feel like it. Action comes first; motivation follows, especially in depression.' },
     { label: 'Activity scheduling', desc: 'Plan specific activities into the day, especially ones with pleasure or accomplishment, and track how they actually feel.' },
@@ -2481,15 +2498,15 @@ customElements.define('urge-row', UrgeRow);
     { label: 'Worry postponement', desc: 'Note the worry, set it aside for a scheduled worry time later, and return to what you were doing.' },
     { label: 'Drop safety behaviors', desc: 'Notice the little things you do to feel safe (checking, rehearsing, escape routes) and leave one out to learn you didn\'t need it.', similar: [75] },
     // ── IFS (58-67) ──
-    { label: 'Parts check-in', desc: 'Pause and ask: who\'s here right now? Notice which parts are active and how blended you are with them.', similar: [69] },
+    { label: 'Parts check-in', desc: 'Pause and ask: who\'s here right now? Notice which parts are active and how blended you are with them.', similar: [69, 88] },
     { label: 'Unblending', desc: 'Shift from "I am worthless" to "a part of me feels worthless." Create a little space between you and the part.' },
-    { label: 'Name the part', desc: 'Give the part a name or a handle so you can recognize it when it shows up again.' },
+    { label: 'Name the part', desc: 'Give the part a name or a handle so you can recognize it when it shows up again.', similar: [69] },
     { label: 'Get curious about a part', desc: 'Find it, focus on it, flesh it out (where it lives in the body, what it looks like), and notice how you feel toward it.', similar: [66] },
     { label: 'Ask what the part fears', desc: 'Ask the part what it\'s afraid would happen if it stopped doing its job. Protectors always have a reason.' },
     { label: 'Speak for the part', desc: 'Say what the part wants to say, as its spokesperson, instead of letting it take over and say it for you.' },
     { label: 'Reassure the part', desc: 'Let the part know you see it, appreciate what it\'s trying to do, and that you (Self) are here now. Update it on how old you are.' },
     { label: 'Ask protectors to step back', desc: 'Ask the parts that are crowding in if they\'d be willing to give you some room so you can respond from Self.' },
-    { label: '8 C\'s check', desc: 'Am I in Self? Look for curiosity, calm, clarity, compassion, confidence, courage, creativity, connectedness. If not, a part is leading.' },
+    { label: '8 C\'s check', desc: 'Am I in Self? Look for curiosity, calm, clarity, compassion, confidence, courage, creativity, connectedness. If not, a part is leading.', similar: [88, 85] },
     { label: 'Self-led response', desc: 'Having unblended, respond to the situation from Self rather than from the part that got activated.', similar: [73, 85] },
     // ── Schema therapy (68-76) ──
     { label: 'Schema noticing', desc: 'Name the schema that\'s running ("that\'s defectiveness talking"). The schema is a lens, not a report on reality.' },
@@ -2500,7 +2517,7 @@ customElements.define('urge-row', UrgeRow);
     { label: 'Healthy Adult self-talk', desc: 'Respond to the activated schema the way a wise, caring adult would respond to a child who believed it.', similar: [86] },
     { label: 'Reparent the vulnerable child', desc: 'Turn toward the hurt part with warmth: "of course you feel that way. You\'re not alone with it now."', similar: [86, 87] },
     { label: 'Pattern breaking', desc: 'Do the behavior the schema says you can\'t (stay, ask, say no, show up) and let the outcome be data.' },
-    { label: 'Talk back to the critic', desc: 'Answer the punitive parent voice out loud or in writing. Set a limit on it. It is not the truth.', similar: [63] },
+    { label: 'Talk back to the critic', desc: 'Answer the punitive parent voice out loud or in writing. Set a limit on it. It is not the truth.', similar: [65, 85] },
     // ── CAMS (77-83) ──
     { label: 'Reviewed the plan', desc: 'Read through your CAMS stabilization plan: what to do, who to contact, what to remove, when to escalate.' },
     { label: 'Used a plan strategy', desc: 'Did one of the specific things on the plan to get through the hour or the day.' },
@@ -2528,10 +2545,12 @@ customElements.define('urge-row', UrgeRow);
   // school; cross-school overlap lives only in SKILLS[i].similar (shown in the info popover).
   const SKILL_CATALOG = [
     { id: 'dbt', label: 'DBT', name: 'Dialectical Behavior Therapy', desc: 'Four modules of concrete skills for staying regulated, tolerating crises, and handling relationships.', groups: [
-      { label: 'Mindfulness', indices: [0, 1, 2, 3, 4, 5, 6] },
+      // Linehan files dialectics under Interpersonal Effectiveness ("Walking the Middle Path"); as a
+      // way of thinking it belongs next to Wise Mind for anyone browsing.
+      { label: 'Mindfulness', indices: [0, 1, 2, 3, 4, 5, 6, 30] },
       { label: 'Distress Tolerance', indices: [7, 26, 27, 8, 9, 10, 11, 12, 13, 28] },
       { label: 'Emotion Regulation', indices: [14, 15, 16, 17, 18, 19, 20, 29] },
-      { label: 'Interpersonal Effectiveness', indices: [21, 22, 23, 24, 25, 30] }
+      { label: 'Interpersonal Effectiveness', indices: [21, 22, 23, 24, 25] }
     ] },
     { id: 'act', label: 'ACT', name: 'Acceptance and Commitment Therapy', desc: 'Six processes for getting unstuck from thoughts and feelings and moving toward what matters.', groups: [
       { label: 'Acceptance', indices: [31, 32] },
@@ -2583,7 +2602,7 @@ customElements.define('urge-row', UrgeRow);
   // 'toggle' and 'rating' rows are built in buildDynamicSections().
   // Append-only: ids and field names are in stored entries and share payloads.
   const CATEGORIES = [
-    { id: 'sleep', section: 'daily', type: 'complex', label: 'Sleep', desc: 'Hours slept and quality rating' },
+    { id: 'sleep', section: 'daily', type: 'complex', label: 'Sleep (last night)', desc: 'Hours slept last night and how good it was' },
     { id: 'exercise', section: 'basics', type: 'complex', label: 'Exercise', desc: 'Minutes and what you did' },
     { id: 'meals', section: 'basics', type: 'complex', label: 'Meals', desc: 'List what you ate' },
     { id: 'medications', section: 'basics', type: 'toggle', field: 'tookMedications', label: 'Took medications', desc: 'Did you take your scheduled meds today?' },
@@ -2600,7 +2619,6 @@ customElements.define('urge-row', UrgeRow);
     { id: 'overall', section: 'daily', type: 'rating', field: 'overallDay', label: 'Overall day', desc: 'The day as a whole, 0–5' },
     { id: 'therapy', section: 'daily', type: 'toggle', field: 'therapySession', label: 'Therapy session', desc: 'Had a session today? Useful for seeing before/after patterns.' },
     { id: 'cycle', section: 'daily', type: 'toggle', field: 'menstruating', label: 'Menstruating', desc: 'On your period today? Mood tracks the cycle more than people expect.' },
-    { id: 'caffeine', section: 'daily', type: 'toggle', field: 'hadCaffeine', label: 'Caffeine', desc: 'Had caffeine today?' },
     { id: 'prn', section: 'basics', type: 'toggle', field: 'tookPrn', label: 'Took PRN medication', desc: 'As-needed medication, separate from your scheduled meds' },
     { id: 'sunlight', section: 'basics', type: 'toggle', field: 'gotSunlight', label: 'Got sunlight', desc: 'Daylight on your face, ideally in the morning' },
     { id: 'journal', section: 'basics', type: 'toggle', field: 'journaled', label: 'Journaled', desc: 'Wrote something down beyond this card' },
@@ -2671,8 +2689,8 @@ customElements.define('urge-row', UrgeRow);
 
   // ─── Prefs ───
   // Defaults hide new items so "skip" in the wizard gives the pre-feature experience.
-  const DEFAULT_HIDDEN_URGES = [2, 3, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18, 19, 20];
-  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'meditate', 'social', 'cycle', 'caffeine', 'prn', 'sunlight', 'journal', 'reachedOut', 'pets', 'creative', 'learned', 'helped', 'spiritual'];
+  const DEFAULT_HIDDEN_URGES = [2, 3, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'meditate', 'social', 'cycle', 'prn', 'sunlight', 'journal', 'reachedOut', 'pets', 'creative', 'learned', 'helped', 'spiritual'];
   const MODULE_PROXY_SKILL_INDICES = [0, 7, 14, 21];
   const DEFAULT_HIDDEN_SKILLS = (function() {
     const hidden = [];
@@ -2877,7 +2895,7 @@ customElements.define('urge-row', UrgeRow);
       if (isHidden && !prefs.showHidden) return;
 
       const wrapper = document.createElement('div');
-      wrapper.className = 'emotion-row' + (isHidden ? ' hidden-visible' : '');
+      wrapper.className = 'present-unit emotion-row' + (isHidden ? ' hidden-visible' : '');
 
       const row = document.createElement('rating-row');
       row.setAttribute('label', name);
@@ -2954,8 +2972,10 @@ customElements.define('urge-row', UrgeRow);
       row.setAttribute('label', URGES[i].label);
       row.setAttribute('field', 'urge_'+i);
       row.setAttribute('action', URGES[i].action);
-      row.dataset.dyn = 'urge_'+i;
-      urgesSec.appendChild(row);
+      const unit = document.createElement('div');
+      unit.className = 'present-unit'; unit.dataset.dyn = 'urge_'+i;
+      unit.appendChild(row);
+      urgesSec.appendChild(unit);
     }));
 
     const schemaSec = document.getElementById('schema-rows');
@@ -2973,8 +2993,10 @@ customElements.define('urge-row', UrgeRow);
         const row = document.createElement('rating-row');
         row.setAttribute('label', SCHEMAS[i].label); row.setAttribute('field', 'schema_' + i);
         row.setAttribute('max', '5'); row.setAttribute('type', 'intensity'); row.setAttribute('info', '');
-        row.dataset.dyn = 'schema_' + i; row.dataset.group = g.label;
-        schemaSec.appendChild(row);
+        const unit = document.createElement('div');
+        unit.className = 'present-unit'; unit.dataset.dyn = 'schema_' + i; unit.dataset.group = g.label;
+        unit.appendChild(row);
+        schemaSec.appendChild(unit);
       });
     });
 
@@ -3225,11 +3247,17 @@ customElements.define('urge-row', UrgeRow);
     { rows: 'schema-rows', chips: 'schema-chips' },
     { rows: 'urges-section', chips: 'urge-chips' }
   ];
-  const revealedByDate = {}; // dateKey → Set of fields the user opened by tapping a chip
+  const revealedByDate = {};  // dateKey → Set of fields the user opened by tapping a chip
+  const dismissedByDate = {}; // dateKey → Set of fields the user collapsed again (overrides yesterday's carry-over)
 
   function rowUnitInfo(unit) {
-    const el = unit.matches('rating-row, urge-row') ? unit : unit.querySelector('rating-row');
+    const el = unit.querySelector('rating-row, urge-row');
     return { field: el.getAttribute('field'), action: el.getAttribute('action'), label: el.getAttribute('label') };
+  }
+
+  function dateSet(store, key) {
+    if (!store[key]) store[key] = new Set();
+    return store[key];
   }
 
   function isPresentIn(entry, info) {
@@ -3242,30 +3270,48 @@ customElements.define('urge-row', UrgeRow);
     prev.setDate(prev.getDate() - 1);
     const yesterday = entries[dateKey(prev)];
     const revealed = revealedByDate[key] || new Set();
+    const dismissed = dismissedByDate[key] || new Set();
 
     PRESENT_SECTIONS.forEach(sec => {
       const container = document.getElementById(sec.rows);
       const tray = document.getElementById(sec.chips);
       tray.innerHTML = '';
-      const units = Array.from(container.querySelectorAll(':scope > .emotion-row, :scope > rating-row, :scope > urge-row'));
+      const units = Array.from(container.querySelectorAll(':scope > .present-unit'));
       units.forEach(unit => {
         const info = rowUnitInfo(unit);
-        const expanded = revealed.has(info.field) || isPresentIn(entry, info) || isPresentIn(yesterday, info);
+        const today = isPresentIn(entry, info);
+        const expanded = today || revealed.has(info.field) || (isPresentIn(yesterday, info) && !dismissed.has(info.field));
         unit.style.display = expanded ? '' : 'none';
+
+        // An opened row with nothing in it yet can be put back; a rated row can't (clear the rating first).
+        let collapse = unit.querySelector('.present-collapse');
+        if (!collapse) {
+          collapse = document.createElement('button');
+          collapse.className = 'present-collapse';
+          collapse.textContent = '×';
+          collapse.title = 'Put back';
+          collapse.addEventListener('click', () => {
+            dateSet(dismissedByDate, key).add(info.field);
+            dateSet(revealedByDate, key).delete(info.field);
+            renderEntry();
+          });
+          unit.appendChild(collapse);
+        }
+        collapse.style.visibility = expanded && !today ? 'visible' : 'hidden';
         if (expanded) return;
+
         const chip = document.createElement('button');
         chip.className = 'present-chip' + (unit.classList.contains('hidden-visible') ? ' dim' : '');
         chip.textContent = info.label;
         chip.addEventListener('click', () => {
-          if (!revealedByDate[key]) revealedByDate[key] = new Set();
-          revealedByDate[key].add(info.field);
+          dateSet(revealedByDate, key).add(info.field);
+          dateSet(dismissedByDate, key).delete(info.field);
           renderEntry();
         });
         tray.appendChild(chip);
       });
       // Group labels fold away when none of their rows are showing.
-      container.querySelectorAll(':scope > [data-group]').forEach(lbl => {
-        if (lbl.matches('rating-row, urge-row')) return;
+      container.querySelectorAll(':scope > .skills-group-label[data-group]').forEach(lbl => {
         const any = units.some(u => u.dataset.group === lbl.dataset.group && u.style.display !== 'none');
         lbl.style.display = any ? '' : 'none';
       });
@@ -3770,7 +3816,7 @@ customElements.define('urge-row', UrgeRow);
     const hasSleep = entry.sleepHours != null || entry.sleepQuality != null;
     if (hasSleep || dailyRows.length) {
       html += '<div class="share-section-label">Daily</div>';
-      if (hasSleep) html += shareRow('Sleep', `${entry.sleepHours != null ? entry.sleepHours + ' hrs' : ''}${entry.sleepQuality != null ? ` (quality ${entry.sleepQuality}/5)` : ''}`.trim());
+      if (hasSleep) html += shareRow('Sleep (last night)', `${entry.sleepHours != null ? entry.sleepHours + ' hrs' : ''}${entry.sleepQuality != null ? ` (quality ${entry.sleepQuality}/5)` : ''}`.trim());
       dailyRows.forEach(cat => { html += catRow(cat); });
     }
 
