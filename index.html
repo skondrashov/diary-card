@@ -1131,6 +1131,19 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 .wizard-tab.active .wizard-tab-count { background: var(--accent); color: #fff; }
 .wizard-school-intro { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem; }
 .wizard-school-intro b { color: var(--text-secondary); font-weight: 500; }
+.wizard-add-row { display: flex; gap: 0.5rem; align-items: center; padding: 0.25rem 0.5rem; }
+.wizard-add-row input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: 0.45rem 0.6rem;
+}
+.wizard-add-row input:focus { outline: none; border-color: var(--accent); }
 .wizard-item-title { font-size: 0.85rem; color: var(--text); }
 .wizard-item-desc {
   font-size: 0.7rem;
@@ -1502,6 +1515,22 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       </div>
     </div>
 
+    <!-- IFS parts: user-named, rated for how active each was. Hidden until the first part is added. -->
+    <div class="section" id="parts-section">
+      <div class="section-header">Parts <span class="section-header-hint">how active today</span></div>
+      <div id="part-rows"></div>
+      <div class="emotion-controls">
+        <button class="emotion-add-btn" id="add-part">+ add</button>
+        <button class="emotion-show-hidden-btn" id="show-hidden-parts">show hidden (<span id="hidden-count-parts">0</span>)</button>
+      </div>
+    </div>
+
+    <!-- Schema therapy: schemas and modes, rated for how active each was. Built in buildDynamicSections(). -->
+    <div class="section" id="schemas-section">
+      <div class="section-header">Schemas &amp; modes <span class="section-header-hint">how active today</span></div>
+      <div id="schema-rows"></div>
+    </div>
+
     <div class="section" id="urges-section">
       <div class="section-header">Urges <span class="section-header-hint">0–5, and whether you acted on it</span></div>
     </div>
@@ -1682,7 +1711,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 // ─── Web Components ───
 
 class RatingRow extends HTMLElement {
-  static get observedAttributes() { return ['label','field','max','value','small']; }
+  static get observedAttributes() { return ['label','field','max','value','small','info']; }
   static GLOWS = ['rgba(74,70,64,0.3)','rgba(91,122,138,0.4)','rgba(106,154,170,0.4)','rgba(184,164,85,0.4)','rgba(196,132,90,0.4)','rgba(184,90,90,0.4)'];
 
   constructor() {
@@ -1705,6 +1734,16 @@ class RatingRow extends HTMLElement {
         detail: { field: this.getAttribute('field'), value: newVal }
       }));
     });
+    // With an `info` attribute the label is tappable and asks the app to explain this row.
+    const label = this.shadowRoot.querySelector('.label');
+    if (label && this.hasAttribute('info')) {
+      label.addEventListener('click', () => {
+        this.dispatchEvent(new CustomEvent('row-info', {
+          bubbles: true, composed: true,
+          detail: { field: this.getAttribute('field') }
+        }));
+      });
+    }
   }
 
   attributeChangedCallback(name) {
@@ -1733,6 +1772,8 @@ class RatingRow extends HTMLElement {
 :host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.5rem}
 :host([small]){padding:0;justify-content:flex-start}
 .label{font-size:0.85rem;color:var(--text-secondary);flex-shrink:0;min-width:90px}
+:host([info]) .label{cursor:pointer;text-decoration:underline dotted;text-decoration-color:var(--border-light);text-underline-offset:3px;-webkit-tap-highlight-color:transparent}
+:host([info]) .label:hover{text-decoration-color:var(--accent)}
 .pills{display:flex;gap:4px}
 .pill{width:${small?26:32}px;height:${small?24:28}px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:${small?'0.7':'0.75'}rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
 .pill:hover{border-color:var(--border-light)}
@@ -1859,7 +1900,7 @@ class SkillRow extends HTMLElement {
       this._dispatch();
     });
     this.shadowRoot.querySelector('.label').addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('skill-info', {
+      this.dispatchEvent(new CustomEvent('row-info', {
         bubbles: true, composed: true,
         detail: { field: this.getAttribute('field') }
       }));
@@ -2499,6 +2540,55 @@ customElements.define('urge-row', UrgeRow);
   const KNOWN_CATEGORY_IDS_V1 = ['sleep', 'exercise', 'meals', 'medications', 'nap', 'shower', 'teeth', 'meditate', 'water', 'outside', 'social'];
   const BASICS_INFO = { id: 'basics', label: 'Basics', name: 'Basics', desc: 'Everyday things you did for yourself. Not therapy skills, but they are the ground the skills stand on.' };
 
+  // Schema therapy: Young's 18 early maladaptive schemas and the common modes. Rated 0-5 for how
+  // active each was today, stored as schema_<index>. Append-only.
+  const SCHEMAS = [
+    // Disconnection & rejection (0-4)
+    { label: 'Abandonment', desc: 'The expectation that people you rely on will leave, die, or prefer someone else. Clinginess and pre-emptive withdrawal both grow from it.' },
+    { label: 'Mistrust / abuse', desc: 'The expectation that others will hurt, humiliate, cheat, or take advantage of you if given the chance.' },
+    { label: 'Emotional deprivation', desc: 'The sense that the care, empathy, or protection you need will not be there, so there is no point asking.' },
+    { label: 'Defectiveness / shame', desc: 'The belief that you are fundamentally flawed, bad, or unlovable, and that anyone who sees the real you will reject you.' },
+    { label: 'Social isolation', desc: 'Feeling different from everyone, not part of any group or community, on the outside looking in.' },
+    // Impaired autonomy (5-8)
+    { label: 'Dependence / incompetence', desc: 'The belief that you cannot handle daily responsibilities on your own without a lot of help.' },
+    { label: 'Vulnerability to harm', desc: 'Exaggerated fear that catastrophe (medical, emotional, financial) is about to strike and you will not be able to prevent it.' },
+    { label: 'Enmeshment', desc: 'Being so involved with a parent or partner that you lose your own identity and direction.' },
+    { label: 'Failure', desc: 'The belief that you have failed, will fail, or are fundamentally inadequate compared to your peers.' },
+    // Impaired limits (9-10)
+    { label: 'Entitlement', desc: 'The sense that you are special and should be able to do or have whatever you want, regardless of others or of what is realistic.' },
+    { label: 'Insufficient self-control', desc: 'Difficulty tolerating frustration or restraining impulses long enough to reach goals.' },
+    // Other-directedness (11-13)
+    { label: 'Subjugation', desc: 'Surrendering control to others to avoid anger, retaliation, or abandonment, usually with a buried resentment.' },
+    { label: 'Self-sacrifice', desc: 'Voluntarily meeting others\' needs at your own expense, often to avoid guilt or to feel connected.' },
+    { label: 'Approval-seeking', desc: 'Placing your sense of worth in others\' reactions rather than in your own values.' },
+    // Overvigilance & inhibition (14-17)
+    { label: 'Negativity / pessimism', desc: 'A pervasive focus on what could go wrong, with the good minimized and the bad expected.' },
+    { label: 'Emotional inhibition', desc: 'Holding back spontaneous feelings and impulses to avoid disapproval, shame, or losing control.' },
+    { label: 'Unrelenting standards', desc: 'The belief that you must meet very high internal standards, usually to avoid criticism, at the cost of pleasure and rest.' },
+    { label: 'Punitiveness', desc: 'The belief that people (including you) should be harshly punished for mistakes. Difficulty forgiving.' },
+    // Modes (18-27)
+    { label: 'Vulnerable child', desc: 'The mode that feels the schema pain directly: lonely, scared, sad, ashamed, small.' },
+    { label: 'Angry child', desc: 'The mode that rages at unmet needs or unfairness, often out of proportion to the trigger.' },
+    { label: 'Impulsive / undisciplined child', desc: 'The mode that acts on wants and impulses without regard to consequences, or cannot push through boring tasks.' },
+    { label: 'Happy child', desc: 'The mode that feels loved, safe, content, and playful. The one the work is for.' },
+    { label: 'Compliant surrenderer', desc: 'A coping mode: giving in to the schema, going along with others, acting passive and dependent.' },
+    { label: 'Detached protector', desc: 'A coping mode: cutting off from feelings and people. Numb, bored, distracted, substance-using, "fine".' },
+    { label: 'Overcompensator', desc: 'A coping mode: fighting the schema by acting the opposite. Perfectionism, control, aggression, status-seeking.' },
+    { label: 'Punitive parent', desc: 'The internalized critical voice that attacks you for mistakes, feelings, or needs.' },
+    { label: 'Demanding parent', desc: 'The internalized voice that insists you must do more, be better, never rest.' },
+    { label: 'Healthy adult', desc: 'The mode that nurtures the child, sets limits on the critic, and takes care of business. The goal state.' }
+  ];
+  const SCHEMA_GROUPS = [
+    { label: 'Disconnection & rejection', indices: [0, 1, 2, 3, 4] },
+    { label: 'Impaired autonomy', indices: [5, 6, 7, 8] },
+    { label: 'Impaired limits', indices: [9, 10] },
+    { label: 'Other-directedness', indices: [11, 12, 13] },
+    { label: 'Overvigilance & inhibition', indices: [14, 15, 16, 17] },
+    { label: 'Modes', indices: [18, 19, 20, 21, 22, 23, 24, 25, 26, 27] }
+  ];
+  const SCHEMA_META = SCHEMAS.map(() => null);
+  SCHEMA_GROUPS.forEach(g => g.indices.forEach(i => { SCHEMA_META[i] = g; }));
+
   const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
   const DAYNAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2520,6 +2610,9 @@ customElements.define('urge-row', UrgeRow);
     return {
       emotions: [...DEFAULT_EMOTIONS],
       hiddenEmotions: [...DEFAULT_HIDDEN_EMOTIONS],
+      parts: [],                                   // IFS parts, user-named; stored as part_<index>
+      hiddenParts: [],
+      hiddenSchemas: SCHEMAS.map((_, i) => i),     // all hidden until chosen
       hiddenUrges: [...DEFAULT_HIDDEN_URGES],
       hiddenCategories: [...DEFAULT_HIDDEN_CATEGORIES],
       hiddenSkills: [...DEFAULT_HIDDEN_SKILLS],
@@ -2542,6 +2635,9 @@ customElements.define('urge-row', UrgeRow);
         prefs = {
           emotions: saved.emotions || defaults.emotions,
           hiddenEmotions: saved.hiddenEmotions || defaults.hiddenEmotions,
+          parts: Array.isArray(saved.parts) ? saved.parts : [],
+          hiddenParts: saved.hiddenParts || [],
+          hiddenSchemas: saved.hiddenSchemas || defaults.hiddenSchemas,
           hiddenUrges: saved.hiddenUrges || defaults.hiddenUrges,
           hiddenCategories: saved.hiddenCategories || defaults.hiddenCategories,
           hiddenSkills: saved.hiddenSkills || defaults.hiddenSkills,
@@ -2560,6 +2656,10 @@ customElements.define('urge-row', UrgeRow);
         const knownUrges = typeof saved.knownUrgeCount === 'number' ? saved.knownUrgeCount : 12;
         for (let i = knownUrges; i < URGES.length; i++) {
           if (!prefs.hiddenUrges.includes(i)) prefs.hiddenUrges.push(i);
+        }
+        const knownSchemas = typeof saved.knownSchemaCount === 'number' ? saved.knownSchemaCount : 0;
+        for (let i = knownSchemas; i < SCHEMAS.length; i++) {
+          if (!prefs.hiddenSchemas.includes(i)) prefs.hiddenSchemas.push(i);
         }
         const knownCats = Array.isArray(saved.knownCategories) ? saved.knownCategories : KNOWN_CATEGORY_IDS_V1;
         CATEGORIES.forEach(c => {
@@ -2580,6 +2680,10 @@ customElements.define('urge-row', UrgeRow);
       const enc = await encryptString(JSON.stringify({
         emotions: prefs.emotions,
         hiddenEmotions: prefs.hiddenEmotions,
+        parts: prefs.parts,
+        hiddenParts: prefs.hiddenParts,
+        hiddenSchemas: prefs.hiddenSchemas,
+        knownSchemaCount: SCHEMAS.length,
         hiddenUrges: prefs.hiddenUrges,
         hiddenCategories: prefs.hiddenCategories,
         hiddenSkills: prefs.hiddenSkills,
@@ -2663,53 +2767,60 @@ customElements.define('urge-row', UrgeRow);
 
   // ─── Build UI ───
 
-  function get7DayAvg(emotionIndex) {
+  function get7DayAvg(field) {
     let sum = 0, count = 0;
     const d = new Date(currentDate);
     for (let i = 0; i < 7; i++) {
       const k = dateKey(d);
-      const v = (entries[k] || {})['emotion_' + emotionIndex];
+      const v = (entries[k] || {})[field];
       if (v != null) { sum += v; count++; }
       d.setDate(d.getDate() - 1);
     }
     return count > 0 ? (sum / count).toFixed(1) : null;
   }
 
-  function renderEmotions() {
-    const container = document.getElementById('emotion-rows');
+  // User-named rated lists. Names live in prefs[listKey] (append-only: entries store
+  // <prefix><index into that list>), hidden names in prefs[hiddenKey].
+  const CUSTOM_LISTS = {
+    emotions: { listKey: 'emotions', hiddenKey: 'hiddenEmotions', prefix: 'emotion_', rows: 'emotion-rows', showHidden: 'show-hidden', count: 'hidden-count', order: emotionDisplayOrder, noun: 'emotion' },
+    parts: { listKey: 'parts', hiddenKey: 'hiddenParts', prefix: 'part_', rows: 'part-rows', showHidden: 'show-hidden-parts', count: 'hidden-count-parts', order: list => list.map((_, i) => i), noun: 'part', section: 'parts-section' }
+  };
+
+  function renderCustomList(cfg) {
+    const list = prefs[cfg.listKey];
+    const hiddenList = prefs[cfg.hiddenKey];
+    if (cfg.section) document.getElementById(cfg.section).style.display = list.length ? '' : 'none';
+    const container = document.getElementById(cfg.rows);
     container.innerHTML = '';
-    emotionDisplayOrder(prefs.emotions).forEach(i => {
-      const em = prefs.emotions[i];
-      const isHidden = prefs.hiddenEmotions.includes(em);
+    cfg.order(list).forEach(i => {
+      const name = list[i];
+      const isHidden = hiddenList.includes(name);
       if (isHidden && !prefs.showHidden) return;
 
       const wrapper = document.createElement('div');
       wrapper.className = 'emotion-row' + (isHidden ? ' hidden-visible' : '');
 
       const row = document.createElement('rating-row');
-      row.setAttribute('label', em);
-      row.setAttribute('field', 'emotion_' + i);
+      row.setAttribute('label', name);
+      row.setAttribute('field', cfg.prefix + i);
       row.setAttribute('max', '5');
       row.setAttribute('type', 'intensity');
       wrapper.appendChild(row);
 
       const avg = document.createElement('div');
       avg.className = 'emotion-avg';
-      avg.dataset.emotionIndex = i;
+      avg.dataset.field = cfg.prefix + i;
       wrapper.appendChild(avg);
 
       const hideBtn = document.createElement('button');
       hideBtn.className = 'emotion-hide';
       hideBtn.textContent = isHidden ? '◉' : '○';
-      hideBtn.title = isHidden ? 'Show this emotion' : 'Hide this emotion';
+      hideBtn.title = isHidden ? `Show this ${cfg.noun}` : `Hide this ${cfg.noun}`;
       hideBtn.addEventListener('click', () => {
-        if (isHidden) {
-          prefs.hiddenEmotions = prefs.hiddenEmotions.filter(e => e !== em);
-        } else {
-          prefs.hiddenEmotions.push(em);
-        }
+        if (isHidden) prefs[cfg.hiddenKey] = hiddenList.filter(e => e !== name);
+        else hiddenList.push(name);
         savePrefs();
-        renderEmotions();
+        renderCustomLists();
         renderEntry();
       });
       wrapper.appendChild(hideBtn);
@@ -2717,10 +2828,25 @@ customElements.define('urge-row', UrgeRow);
       container.appendChild(wrapper);
     });
 
-    document.getElementById('hidden-count').textContent = prefs.hiddenEmotions.length;
-    const showBtn = document.getElementById('show-hidden');
-    showBtn.style.display = prefs.hiddenEmotions.length ? '' : 'none';
+    document.getElementById(cfg.count).textContent = hiddenList.length;
+    const showBtn = document.getElementById(cfg.showHidden);
+    showBtn.style.display = hiddenList.length ? '' : 'none';
     showBtn.classList.toggle('active', prefs.showHidden);
+  }
+
+  function renderCustomLists() {
+    renderCustomList(CUSTOM_LISTS.emotions);
+    renderCustomList(CUSTOM_LISTS.parts);
+  }
+
+  function addCustomItem(cfg) {
+    const name = prompt(`New ${cfg.noun} name:`);
+    if (!name || !name.trim()) return;
+    const trimmed = name.trim();
+    if (prefs[cfg.listKey].includes(trimmed)) { alert('Already exists.'); return; }
+    prefs[cfg.listKey].push(trimmed);
+    savePrefs();
+    renderCustomLists();
   }
 
   const DYNAMIC_KEYS = {
@@ -2751,6 +2877,26 @@ customElements.define('urge-row', UrgeRow);
       row.dataset.dyn = 'urge_'+i;
       urgesSec.appendChild(row);
     }));
+
+    const schemaSec = document.getElementById('schema-rows');
+    schemaSec.innerHTML = '';
+    const schemaVisible = i => !prefs.hiddenSchemas.includes(i);
+    const activeSchemaGroups = SCHEMA_GROUPS.filter(g => g.indices.some(schemaVisible));
+    document.getElementById('schemas-section').style.display = activeSchemaGroups.length ? '' : 'none';
+    activeSchemaGroups.forEach(g => {
+      if (activeSchemaGroups.length > 1) {
+        const gl = document.createElement('div');
+        gl.className = 'skills-group-label'; gl.textContent = g.label;
+        schemaSec.appendChild(gl);
+      }
+      g.indices.filter(schemaVisible).forEach(i => {
+        const row = document.createElement('rating-row');
+        row.setAttribute('label', SCHEMAS[i].label); row.setAttribute('field', 'schema_' + i);
+        row.setAttribute('max', '5'); row.setAttribute('type', 'intensity'); row.setAttribute('info', '');
+        row.dataset.dyn = 'schema_' + i;
+        schemaSec.appendChild(row);
+      });
+    });
 
     const dailySec = document.getElementById(DYNAMIC_KEYS.daily);
     dailySec.innerHTML = '';
@@ -2844,25 +2990,20 @@ customElements.define('urge-row', UrgeRow);
       if (inputs.length) inputs[inputs.length - 1].focus();
     });
 
-    document.getElementById('add-emotion').addEventListener('click', () => {
-      const name = prompt('New emotion name:');
-      if (!name || !name.trim()) return;
-      const trimmed = name.trim();
-      if (prefs.emotions.includes(trimmed)) { alert('Already exists.'); return; }
-      prefs.emotions.push(trimmed);
-      savePrefs();
-      renderEmotions();
+    document.getElementById('add-emotion').addEventListener('click', () => addCustomItem(CUSTOM_LISTS.emotions));
+    document.getElementById('add-part').addEventListener('click', () => addCustomItem(CUSTOM_LISTS.parts));
+    ['show-hidden', 'show-hidden-parts'].forEach(id => {
+      document.getElementById(id).addEventListener('click', () => {
+        prefs.showHidden = !prefs.showHidden;
+        renderCustomLists();
+        renderEntry();
+      });
     });
 
-    document.getElementById('show-hidden').addEventListener('click', () => {
-      prefs.showHidden = !prefs.showHidden;
-      renderEmotions();
-      renderEntry();
-    });
-
-    document.addEventListener('skill-info', e => {
-      const idx = parseInt(String(e.detail.field).replace('skill_', ''));
-      if (!isNaN(idx)) showSkillInfo(idx);
+    document.addEventListener('row-info', e => {
+      const f = String(e.detail.field);
+      if (f.startsWith('skill_')) showSkillInfo(parseInt(f.slice(6)));
+      else if (f.startsWith('schema_')) showSchemaInfo(parseInt(f.slice(7)));
     });
     document.getElementById('skill-info-overlay').addEventListener('click', e => {
       if (e.target.id === 'skill-info-overlay') hideSkillInfo();
@@ -2875,6 +3016,12 @@ customElements.define('urge-row', UrgeRow);
     if (!s) return;
     const meta = SKILL_META[idx];
     showInfoCard(meta.school ? `${meta.school.label} \u00b7 ${meta.group.label}` : '', s.label, s.desc, s.similar);
+  }
+
+  function showSchemaInfo(idx) {
+    const s = SCHEMAS[idx];
+    if (!s) return;
+    showInfoCard(`Schema therapy \u00b7 ${SCHEMA_META[idx].label}`, s.label, s.desc);
   }
 
   // The info popover: a kicker line (school · group), title, description, and optional similar skills.
@@ -2906,7 +3053,7 @@ customElements.define('urge-row', UrgeRow);
     initStaticHandlers();
     buildDynamicSections();
     applyCategoryVisibility();
-    renderEmotions();
+    renderCustomLists();
   }
 
   // ─── Render ───
@@ -2942,8 +3089,7 @@ customElements.define('urge-row', UrgeRow);
     });
 
     document.querySelectorAll('.emotion-avg').forEach(el => {
-      const i = parseInt(el.dataset.emotionIndex);
-      const avg = get7DayAvg(i);
+      const avg = get7DayAvg(el.dataset.field);
       el.textContent = avg !== null ? avg : '';
       el.classList.toggle('has-data', avg !== null);
     });
@@ -3278,20 +3424,23 @@ customElements.define('urge-row', UrgeRow);
     if (prefs.hiddenSkills.length) hidden.skills = prefs.hiddenSkills;
     if (prefs.hiddenCategories.length) hidden.categories = prefs.hiddenCategories;
     if (prefs.hiddenEmotions.length) hidden.emotions = prefs.hiddenEmotions;
-    return { entries: shareEntries, hidden, emotions: prefs.emotions };
+    if (prefs.hiddenParts.length) hidden.parts = prefs.hiddenParts;
+    if (prefs.hiddenSchemas.length) hidden.schemas = prefs.hiddenSchemas;
+    return { entries: shareEntries, hidden, emotions: prefs.emotions, parts: prefs.parts };
   }
 
   function parseSharePayload(parsed) {
     if (parsed.entries && typeof parsed.entries === 'object' && !Array.isArray(parsed.entries)) {
-      return { entries: parsed.entries, hidden: parsed.hidden || {}, emotions: Array.isArray(parsed.emotions) ? parsed.emotions : DEFAULT_EMOTIONS.slice(0, 13) };
+      return { entries: parsed.entries, hidden: parsed.hidden || {}, emotions: Array.isArray(parsed.emotions) ? parsed.emotions : DEFAULT_EMOTIONS.slice(0, 13), parts: Array.isArray(parsed.parts) ? parsed.parts : [] };
     }
-    return { entries: parsed, hidden: {}, emotions: DEFAULT_EMOTIONS.slice(0, 13) };
+    return { entries: parsed, hidden: {}, emotions: DEFAULT_EMOTIONS.slice(0, 13), parts: [] };
   }
 
   // ─── Share View (read-only) ───
   let _shareEntries = null;
   let _shareHidden = {};
   let _shareEmotions = DEFAULT_EMOTIONS; // the sharing vault's emotion list (index = storage index)
+  let _shareParts = [];
   let _shareHiddenEmotions = new Set();
   let _shareMode = 'calendar';
   let _shareSelectedDay = null;
@@ -3320,6 +3469,25 @@ customElements.define('urge-row', UrgeRow);
       emotionOrder.forEach(i => {
         const v = entry['emotion_' + i];
         html += shareRatingRow(_shareEmotions[i], v, 5, '--c' + v);
+      });
+    }
+
+    const hiddenParts = _shareHidden.parts || [];
+    const partRows = _shareParts.map((_, i) => i).filter(i => entry['part_' + i] != null && !hiddenParts.includes(_shareParts[i]));
+    if (partRows.length) {
+      html += '<div class="share-section-label">Parts</div>';
+      partRows.forEach(i => { html += shareRatingRow(_shareParts[i], entry['part_' + i], 5, '--c' + entry['part_' + i]); });
+    }
+
+    const hiddenSchemas = _shareHidden.schemas || [];
+    const schemaShown = i => !hiddenSchemas.includes(i) && entry['schema_' + i] != null;
+    if (SCHEMAS.some((s, i) => schemaShown(i))) {
+      html += '<div class="share-section-label">Schemas &amp; modes</div>';
+      SCHEMA_GROUPS.forEach(g => {
+        const rows = g.indices.filter(schemaShown);
+        if (!rows.length) return;
+        html += `<div class="share-sub-label">${g.label}</div>`;
+        rows.forEach(i => { html += shareRatingRow(SCHEMAS[i].label, entry['schema_' + i], 5, '--c' + entry['schema_' + i]); });
       });
     }
 
@@ -3529,6 +3697,8 @@ customElements.define('urge-row', UrgeRow);
   const WIZARD_STEPS = [
     { id: 'welcome', nav: 'Welcome', title: 'Welcome', subtitle: null, render: renderWizardWelcome, showInEdit: false },
     { id: 'emotions', nav: 'Emotions', title: 'Emotions', subtitle: 'Check the ones you want to track. You can change this any time with the pencil button at the top.', render: renderWizardEmotions, showInEdit: true },
+    { id: 'parts', nav: 'Parts', title: 'Parts', subtitle: 'For IFS: name your parts and rate how active each one was. Skip this if parts work isn\'t something you do.', render: renderWizardParts, showInEdit: true },
+    { id: 'schemas', nav: 'Schemas', title: 'Schemas & modes', subtitle: 'For schema therapy: pick the schemas and modes you\'re working with and rate how active each was. Tap ? for what one means.', render: renderWizardSchemas, showInEdit: true },
     { id: 'urges', nav: 'Urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Each one is rated 0\u20135, and you can note whether you acted on it. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
     { id: 'categories', nav: 'Daily', title: 'Daily', subtitle: 'How today was: sleep, energy, pain, and so on. Things that happened to you rather than things you did \u2014 those are under Skills.', render: renderWizardCategories, showInEdit: true },
     { id: 'skills', nav: 'Skills', title: 'Skills', subtitle: 'Browse by school of therapy and check the skills you\'re actively working on. Tap ? to see what a skill means.', render: renderWizardSkills, showInEdit: true },
@@ -3546,6 +3716,9 @@ customElements.define('urge-row', UrgeRow);
     wizardConfirming = false;
     wizardDraft = {
       hiddenEmotions: [...prefs.hiddenEmotions],
+      parts: [...prefs.parts],
+      hiddenParts: [...prefs.hiddenParts],
+      hiddenSchemas: [...prefs.hiddenSchemas],
       hiddenUrges: [...prefs.hiddenUrges],
       hiddenCategories: [...prefs.hiddenCategories],
       hiddenSkills: [...prefs.hiddenSkills]
@@ -3613,6 +3786,9 @@ customElements.define('urge-row', UrgeRow);
   const catLabel = id => (CATEGORIES.find(c => c.id === id) || { label: id }).label;
   const WIZARD_DIFF_SECTIONS = [
     { key: 'hiddenEmotions', label: 'Emotions', name: id => id },
+    { key: 'parts', label: 'Parts', name: id => id, additions: true },
+    { key: 'hiddenParts', label: 'Parts', name: id => id },
+    { key: 'hiddenSchemas', label: 'Schemas & modes', name: i => SCHEMAS[i].label },
     { key: 'hiddenUrges', label: 'Urges', name: i => URGES[i].label },
     { key: 'hiddenCategories', label: 'Daily', only: id => catSection(id) === 'daily', name: catLabel },
     { key: 'hiddenCategories', label: 'Basics', only: id => catSection(id) === 'basics', name: catLabel },
@@ -3623,6 +3799,8 @@ customElements.define('urge-row', UrgeRow);
     return WIZARD_DIFF_SECTIONS.map(sec => {
       const only = sec.only || (() => true);
       const before = prefs[sec.key].filter(only), after = wizardDraft[sec.key].filter(only);
+      // `additions` sections list things added to a list (shown), not hidden-set changes.
+      if (sec.additions) return { label: sec.label, shown: after.filter(x => !before.includes(x)).map(sec.name), hidden: [] };
       return {
         label: sec.label,
         shown: before.filter(x => !after.includes(x)).map(sec.name),
@@ -3709,6 +3887,76 @@ customElements.define('urge-row', UrgeRow);
       group.appendChild(wizardMakeItem(em, null, checked, (on) => toggleWizardDraft('hiddenEmotions', em, on)));
     });
     body.appendChild(group);
+  }
+
+  function renderWizardParts(body) {
+    body.className = 'wizard-body';
+    const group = document.createElement('div');
+    group.className = 'wizard-group';
+    wizardDraft.parts.forEach(name => {
+      const checked = !wizardDraft.hiddenParts.includes(name);
+      group.appendChild(wizardMakeItem(name, null, checked, (on) => toggleWizardDraft('hiddenParts', name, on)));
+    });
+    body.appendChild(group);
+
+    const add = document.createElement('div');
+    add.className = 'wizard-add-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = wizardDraft.parts.length ? 'Add another part' : 'Name a part, e.g. "The Critic"';
+    input.maxLength = 40;
+    const btn = document.createElement('button');
+    btn.className = 'wizard-quick-btn';
+    btn.textContent = '+ add';
+    const commit = () => {
+      const name = input.value.trim();
+      if (!name || wizardDraft.parts.includes(name)) return;
+      wizardDraft.parts.push(name);
+      renderWizardStep();
+      document.querySelector('.wizard-add-row input')?.focus();
+    };
+    btn.addEventListener('click', commit);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+    add.appendChild(input);
+    add.appendChild(btn);
+    body.appendChild(add);
+  }
+
+  function renderWizardSchemas(body) {
+    body.className = 'wizard-body';
+    const all = SCHEMAS.map((_, i) => i);
+    const qa = document.createElement('div');
+    qa.className = 'wizard-quick-actions';
+    const quick = (text, fn) => {
+      const b = document.createElement('button');
+      b.className = 'wizard-quick-btn';
+      b.textContent = text;
+      b.addEventListener('click', () => { fn(); renderWizardStep(); });
+      qa.appendChild(b);
+    };
+    quick('All', () => { wizardDraft.hiddenSchemas = []; });
+    quick('None', () => { wizardDraft.hiddenSchemas = [...all]; });
+    body.appendChild(qa);
+
+    SCHEMA_GROUPS.forEach(g => {
+      const section = document.createElement('div');
+      section.className = 'wizard-group';
+      const lbl = document.createElement('div');
+      lbl.className = 'wizard-group-label';
+      lbl.textContent = g.label;
+      section.appendChild(lbl);
+      g.indices.forEach(idx => {
+        const item = wizardMakeItem(SCHEMAS[idx].label, null, !wizardDraft.hiddenSchemas.includes(idx), (on) => toggleWizardDraft('hiddenSchemas', idx, on));
+        const info = document.createElement('button');
+        info.className = 'wizard-item-info';
+        info.textContent = '?';
+        info.title = 'What is this?';
+        info.addEventListener('click', e => { e.stopPropagation(); showSchemaInfo(idx); });
+        item.appendChild(info);
+        section.appendChild(item);
+      });
+      body.appendChild(section);
+    });
   }
 
   function renderWizardUrges(body) {
@@ -3845,6 +4093,8 @@ customElements.define('urge-row', UrgeRow);
     body.className = 'wizard-body wizard-welcome-body';
     const hiddenCounts = {
       emotions: wizardDraft.hiddenEmotions.length,
+      parts: wizardDraft.hiddenParts.length,
+      schemas: wizardDraft.hiddenSchemas.length,
       urges: wizardDraft.hiddenUrges.length,
       daily: wizardDraft.hiddenCategories.filter(id => catSection(id) === 'daily').length,
       basics: wizardDraft.hiddenCategories.filter(id => catSection(id) === 'basics').length,
@@ -3860,6 +4110,8 @@ customElements.define('urge-row', UrgeRow);
       '<p>Ready to save. Your daily entry form will show:</p>' +
       '<div class="wizard-summary">' +
         line('Emotions', prefs.emotions.length, hiddenCounts.emotions) +
+        (wizardDraft.parts.length ? line('Parts', wizardDraft.parts.length, hiddenCounts.parts) : '') +
+        line('Schemas & modes', SCHEMAS.length, hiddenCounts.schemas) +
         line('Urges', URGES.length, hiddenCounts.urges) +
         line('Daily', dailyTotal, hiddenCounts.daily) +
         line('Basics', basicsTotal, hiddenCounts.basics) +
@@ -3873,6 +4125,9 @@ customElements.define('urge-row', UrgeRow);
   async function wizardFinish() {
     // Copy draft into prefs
     prefs.hiddenEmotions = wizardDraft.hiddenEmotions;
+    prefs.parts = wizardDraft.parts;
+    prefs.hiddenParts = wizardDraft.hiddenParts;
+    prefs.hiddenSchemas = wizardDraft.hiddenSchemas;
     prefs.hiddenUrges = wizardDraft.hiddenUrges;
     prefs.hiddenCategories = wizardDraft.hiddenCategories;
     prefs.hiddenSkills = wizardDraft.hiddenSkills;
@@ -3889,6 +4144,7 @@ customElements.define('urge-row', UrgeRow);
     // Rebuild dynamic sections + apply visibility
     buildDynamicSections();
     applyCategoryVisibility();
+    renderCustomLists();
     renderEntry();
   }
 
@@ -3919,9 +4175,11 @@ customElements.define('urge-row', UrgeRow);
     if (wizardStepIdx > 0) { wizardStepIdx--; renderWizardStep(); }
   });
   document.getElementById('wizard-skip').addEventListener('click', async () => {
-    // Skip in firstRun means: accept the defaults (nothing hidden), mark onboarded, close.
+    // Skip in firstRun means: take the default visibility for everything, mark onboarded, close.
+    const d = makeDefaultPrefs();
     wizardDraft = {
-      hiddenEmotions: [], hiddenUrges: [], hiddenCategories: [], hiddenSkills: []
+      hiddenEmotions: d.hiddenEmotions, parts: [...prefs.parts], hiddenParts: [], hiddenSchemas: d.hiddenSchemas,
+      hiddenUrges: d.hiddenUrges, hiddenCategories: d.hiddenCategories, hiddenSkills: d.hiddenSkills
     };
     await wizardFinish();
   });
@@ -3939,7 +4197,7 @@ customElements.define('urge-row', UrgeRow);
     initSections();
     await loadSessionDate();
     renderSessionBar();
-    renderEmotions();
+    renderCustomLists();
     renderEntry();
     if (!prefs.onboarded) {
       // Existing user who hasn't seen the wizard — open in firstRun mode on top of the entry view.
@@ -4107,7 +4365,7 @@ customElements.define('urge-row', UrgeRow);
     initSections();
     await loadSessionDate();
     renderSessionBar();
-    renderEmotions();
+    renderCustomLists();
     renderEntry();
   });
 
@@ -4136,6 +4394,7 @@ customElements.define('urge-row', UrgeRow);
         document.getElementById('share-view').classList.add('active', 'view-fade');
         _shareHidden = payload.hidden;
         _shareEmotions = payload.emotions;
+        _shareParts = payload.parts;
         renderShareView(payload.entries);
       } catch {
         document.getElementById('share-error').textContent = 'Wrong passphrase.';

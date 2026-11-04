@@ -6,12 +6,12 @@ Live at [dbt.thisminute.org](https://dbt.thisminute.org).
 
 ## What it tracks
 
-- Emotions (user-defined, 0-5 intensity, with 7-day rolling averages)
-- Urges (0-5 intensity)
-- Actions (yes/no)
-- Skills used (engagement level + whether it helped), chosen from a catalog spanning DBT, ACT, CBT, IFS, schema therapy, CAMS, CFT and somatic approaches
-- Sleep, exercise, meals, notes
-- Custom toggle categories
+- Emotions (user-defined, 0-5 intensity, with 7-day rolling averages; ordered by emotion family, most pleasant first)
+- Parts (IFS; user-named, 0-5 how active) and schemas & modes (schema therapy; fixed list with definitions, 0-5 how active)
+- Urges (0-5 intensity, plus whether you acted on each)
+- Daily: sleep, energy, pain, overall day, therapy session, cycle, caffeine
+- Skills: everyday basics (meals, exercise, meds, water, sunlight, reaching out...) plus a catalog spanning DBT, ACT, CBT, IFS, schema therapy, CAMS, CFT and somatic approaches, each with an engagement level and whether it helped
+- Notes
 
 All fields are configurable. An onboarding wizard walks new users through hiding the ones they don't need.
 
