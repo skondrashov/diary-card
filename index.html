@@ -179,6 +179,14 @@ header {
 .section {
   margin-bottom: 1.5rem;
 }
+.section-header-hint {
+  float: right;
+  font-size: 0.6rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.6;
+}
 .section-header {
   font-size: 0.7rem;
   font-weight: 600;
@@ -191,7 +199,7 @@ header {
 }
 
 /* ─── Components ─── */
-rating-row, toggle-row, skill-row, .emotion-row { margin: 5px 0; }
+rating-row, toggle-row, skill-row, urge-row, .emotion-row { margin: 5px 0; }
 
 /* ─── Skills section headers (school › group) ─── */
 .skills-school-label {
@@ -375,33 +383,12 @@ body.light-mode .skill-info-card { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   background: var(--accent-dim);
   color: var(--accent);
 }
-.cal-legend {
-  display: flex;
-  justify-content: center;
-  gap: 1.25rem;
-  padding: 0.75rem 0 0.25rem;
-  font-size: 0.65rem;
-  color: var(--text-muted);
-}
-.cal-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.cal-legend-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.cal-dots {
-  display: flex;
-  gap: 2px;
-}
 .cal-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.7;
 }
 
 /* ─── Footer ─── */
@@ -766,6 +753,17 @@ body.light-mode .skill-info-card { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 }
 .share-row-value { color: var(--text); font-weight: 500; white-space: nowrap; flex-shrink: 0; margin-left: auto; }
 .share-row-value.on { color: var(--accent); }
+.share-acted {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+  margin-left: 0.4rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.share-acted.on { color: var(--accent); border-color: var(--accent); }
 .share-section-label {
   font-size: 0.65rem;
   font-weight: 600;
@@ -993,18 +991,36 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 }
 .wizard-steps {
   display: flex;
-  gap: 0.35rem;
-  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0 0.9rem;
+  margin-bottom: 0.6rem;
 }
-.wizard-step-dot {
-  flex: 1;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--border);
-  transition: background var(--transition);
+.wizard-nav-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.25rem 0 0.35rem;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  -webkit-tap-highlight-color: transparent;
 }
-.wizard-step-dot.active { background: var(--accent); }
-.wizard-step-dot.done { background: var(--accent); opacity: 0.5; }
+.wizard-nav-tab:hover { color: var(--text-secondary); }
+.wizard-nav-tab.done { color: var(--text-secondary); }
+.wizard-nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.wizard-diff {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.wizard-diff.hide { color: var(--text-muted); }
+.wizard-diff-sign { flex-shrink: 0; width: 1em; font-weight: 700; }
+.wizard-diff.show .wizard-diff-sign { color: var(--accent); }
 .wizard-title {
   font-family: var(--font-display);
   font-size: 1.25rem;
@@ -1287,21 +1303,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   margin-bottom: 0.5rem;
 }
 
-/* ─── Info panel customize button ─── */
-.info-panel .customize-btn {
-  display: block;
-  margin: 0.75rem auto 0;
-  background: var(--accent-dim);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-pill);
-  color: var(--accent);
-  font-size: 0.8rem;
-  font-family: var(--font-body);
-  padding: 0.4rem 1.25rem;
-  cursor: pointer;
-  transition: all var(--transition);
-}
-.info-panel .customize-btn:hover { background: var(--accent-glow); }
 
 /* ─── Share-result modal ─── */
 .share-result-url {
@@ -1464,6 +1465,9 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   <header>
     <div class="logo">diary <button class="info-btn" id="info-btn" aria-label="Privacy info">privacy info</button></div>
     <div class="header-actions">
+      <button class="icon-btn" id="edit-btn" title="Edit fields">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.146a.5.5 0 01.708 0l3 3a.5.5 0 010 .708l-10 10a.5.5 0 01-.168.11l-5 2a.5.5 0 01-.65-.65l2-5a.5.5 0 01.11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 01.5.5v.5h.5a.5.5 0 01.5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 015 12.5V12h-.5a.5.5 0 01-.5-.5V11h-.5a.5.5 0 01-.468-.325z"/></svg>
+      </button>
       <button class="icon-btn" id="cal-btn" title="Calendar">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 1a.5.5 0 01.5.5V2h6v-.5a.5.5 0 011 0V2h1.5A1.5 1.5 0 0115 3.5v10a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 13.5v-10A1.5 1.5 0 012.5 2H4v-.5a.5.5 0 01.5-.5zM2 5v8.5a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V5H2z"/></svg>
       </button>
@@ -1499,11 +1503,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     </div>
 
     <div class="section" id="urges-section">
-      <div class="section-header">Urges</div>
-    </div>
-
-    <div class="section" id="actions-section">
-      <div class="section-header">Actions</div>
+      <div class="section-header">Urges <span class="section-header-hint">0–5, and whether you acted on it</span></div>
     </div>
 
     <div class="section" id="body-section">
@@ -1543,9 +1543,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     <div class="section" id="skills-section">
       <div class="section-header">Skills Used</div>
       <div id="skill-rows"></div>
-      <div class="emotion-controls">
-        <button class="emotion-add-btn" id="choose-skills">+ choose skills</button>
-      </div>
     </div>
 
     <div class="section">
@@ -1562,10 +1559,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <button id="next-month">&#9654;</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
-    <div class="cal-legend">
-      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#b8a455"></div> emotions/urges</div>
-      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#5a9d5a"></div> skill use</div>
-    </div>
   </div>
 
   <!-- ─── Share (read-only) View ─── -->
@@ -1628,7 +1621,6 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <h3>Technical details</h3>
       <p style="font-size:0.75rem">AES-256-GCM encryption. Key derived via PBKDF2 with 200,000 iterations and a random 128-bit salt. Each save uses a fresh 96-bit IV. Share links are self-contained: salt + IV + ciphertext in base64url. No cookies, no analytics. Sharing sends encrypted data to our relay server, stored temporarily until the link expires. All cryptography uses the browser's native Web Crypto API.</p>
 
-      <button class="customize-btn" id="info-customize">Customize fields</button>
       <button class="info-close" id="info-close">got it</button>
 
       <div class="delete-vault-wrap">
@@ -1938,6 +1930,102 @@ class SkillRow extends HTMLElement {
 }
 customElements.define('skill-row', SkillRow);
 
+// Urge (0-5) plus whether the user acted on it (null / false / true). Dispatches field-change
+// separately for the `field` (urge rating) and `action` (acted boolean) attributes.
+class UrgeRow extends HTMLElement {
+  static get observedAttributes() { return ['label','field','action']; }
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this._value = null;   // urge intensity
+    this._acted = null;   // null = unanswered, false = no, true = yes
+  }
+
+  connectedCallback() {
+    this._render();
+    this.shadowRoot.querySelector('.pills').addEventListener('click', e => {
+      const pill = e.target.closest('.pill');
+      if (!pill) return;
+      const v = parseInt(pill.dataset.value);
+      this._value = this._value === v ? null : v;
+      this._update();
+      this._dispatch(this.getAttribute('field'), this._value);
+    });
+    this.shadowRoot.querySelector('.acted').addEventListener('click', e => {
+      const pill = e.target.closest('.apill');
+      if (!pill) return;
+      const v = pill.dataset.value === 'yes';
+      this._acted = this._acted === v ? null : v;
+      this._update();
+      this._dispatch(this.getAttribute('action'), this._acted);
+    });
+  }
+
+  get value() { return this._value; }
+  set value(v) { this._value = v == null ? null : parseInt(v); this._update(); }
+  get acted() { return this._acted; }
+  set acted(v) { this._acted = v == null ? null : !!v; this._update(); }
+
+  _dispatch(field, value) {
+    this.dispatchEvent(new CustomEvent('field-change', {
+      bubbles: true, composed: true,
+      detail: { field, value }
+    }));
+  }
+
+  _render() {
+    const label = this.getAttribute('label') || '';
+    let colorCss = '';
+    for (let i = 0; i <= 5; i++) colorCss += `.pill.selected.i${i}{background:var(--c${i});${i===0?'color:var(--text-secondary);':''}${i===3?'color:#1a1a1a;':''}}`;
+
+    this.shadowRoot.innerHTML = `<style>
+:host{display:block;padding:0.5rem 0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
+.label{font-size:0.85rem;color:var(--text-secondary);flex-shrink:0;min-width:90px}
+.pills{display:flex;gap:4px}
+.pill{width:32px;height:28px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
+.pill:hover{border-color:var(--border-light)}
+.pill.selected{color:#fff;border-color:transparent;font-weight:600;box-shadow:0 0 8px var(--pill-glow,rgba(201,149,107,0.3));animation:pillBreath 3s ease-in-out infinite}
+${colorCss}
+.acted{display:none;align-items:center;justify-content:flex-end;gap:4px;margin-top:0.35rem}
+:host(.engaged) .acted{display:flex}
+.acted-label{font-size:0.65rem;color:var(--text-muted);margin-right:0.25rem}
+.apill{min-width:36px;padding:0 9px;height:24px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.68rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
+.apill:hover{border-color:var(--border-light)}
+.apill.selected{font-weight:600;border-color:transparent}
+.apill.selected.no{background:var(--c0);color:var(--text-secondary)}
+.apill.selected.yes{background:var(--accent);color:#fff;box-shadow:0 0 8px var(--accent-glow)}
+@keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(201,149,107,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(201,149,107,0.4))}}
+@media(max-width:400px){.pill{width:28px;height:26px;font-size:0.7rem}.label{min-width:75px;font-size:0.8rem}}
+</style>
+<div class="top"><div class="label">${label}</div>
+<div class="pills">${Array.from({length:6},(_,i)=>`<div class="pill" data-value="${i}">${i}</div>`).join('')}</div></div>
+<div class="acted"><span class="acted-label">acted on it?</span><div class="apill no" data-value="no">no</div><div class="apill yes" data-value="yes">yes</div></div>`;
+  }
+
+  _update() {
+    const root = this.shadowRoot;
+    if (!root) return;
+    root.querySelectorAll('.pill').forEach(p => {
+      const v = parseInt(p.dataset.value);
+      p.className = 'pill';
+      p.style.removeProperty('--pill-glow');
+      if (this._value === v) {
+        p.classList.add('selected', 'i' + v);
+        p.style.setProperty('--pill-glow', RatingRow.GLOWS[v] || RatingRow.GLOWS[0]);
+      }
+    });
+    root.querySelectorAll('.apill').forEach(p => {
+      const isYes = p.dataset.value === 'yes';
+      p.classList.toggle('selected', this._acted !== null && this._acted === isYes);
+    });
+    // The acted question only appears once there's something to act on (or an old answer).
+    this.classList.toggle('engaged', this._value !== null || this._acted !== null);
+  }
+}
+customElements.define('urge-row', UrgeRow);
+
 (function() {
   'use strict';
 
@@ -2129,38 +2217,74 @@ customElements.define('skill-row', SkillRow);
   }
 
   // ─── Data ───
-  const DEFAULT_EMOTIONS = ['Sadness','Anger','Shame','Fear / Anxiety','Joy','Guilt','Loneliness','Jealousy','Disgust','Numbness','Overwhelm','Hopelessness','Love / Connection'];
+  // Append-only: a vault's prefs.emotions starts as a copy of this, and entries store emotion_<index
+  // into that list>. Share links made before the list travelled with the payload map through the
+  // first 13 here, so those must never move.
+  const DEFAULT_EMOTIONS = [
+    'Sadness','Anger','Shame','Fear / Anxiety','Joy','Guilt','Loneliness','Jealousy','Disgust','Numbness','Overwhelm','Hopelessness','Love / Connection',
+    // Added 2026-11
+    'Envy','Contentment / Calm','Interest / Curiosity','Irritability','Resentment','Hurt','Emptiness'
+  ];
+  const DEFAULT_HIDDEN_EMOTIONS = ['Interest / Curiosity','Irritability','Resentment','Hurt','Emptiness'];
+  // Emotion families, after Linehan's Emotion Regulation handouts. Never shown as labels: they only
+  // order the list (most pleasant first) so related feelings sit together. Custom emotions go last.
+  const EMOTION_FAMILIES = ['love','happiness','sadness','fear','anger','shame','guilt','disgust','envy','jealousy','other'];
+  const EMOTION_FAMILY = {
+    'Love / Connection': 'love',
+    'Joy': 'happiness', 'Contentment / Calm': 'happiness', 'Interest / Curiosity': 'happiness',
+    'Sadness': 'sadness', 'Hurt': 'sadness', 'Loneliness': 'sadness', 'Hopelessness': 'sadness', 'Emptiness': 'sadness',
+    'Fear / Anxiety': 'fear', 'Overwhelm': 'fear',
+    'Irritability': 'anger', 'Anger': 'anger', 'Resentment': 'anger',
+    'Shame': 'shame', 'Guilt': 'guilt', 'Disgust': 'disgust', 'Envy': 'envy', 'Jealousy': 'jealousy',
+    'Numbness': 'other'
+  };
+  const EMOTION_FAMILY_ORDER = Object.keys(EMOTION_FAMILY);
+  // Indices into `list` in display order. Storage order (the index) never changes.
+  function emotionDisplayOrder(list) {
+    const rank = em => {
+      const f = EMOTION_FAMILY[em];
+      return f ? [EMOTION_FAMILIES.indexOf(f), EMOTION_FAMILY_ORDER.indexOf(em)] : [EMOTION_FAMILIES.length, 0];
+    };
+    return list.map((_, i) => i).sort((a, b) => {
+      const ra = rank(list[a]), rb = rank(list[b]);
+      return (ra[0] - rb[0]) || (ra[1] - rb[1]) || (a - b);
+    });
+  }
   const CURRENT_SCHEMA_VERSION = 2;
-
-  const EMOTIONS = DEFAULT_EMOTIONS; // reference for share view
-  // Append-only: new urges must go at the end so stored indices remain stable forever.
-  const URGES = ['Self-harm','Suicide','Cannabis','Other substances','Quit therapy','Alcohol','Nicotine','Binge eat','Restrict eating','Purge','Isolate','Lash out'];
+  // Append-only: new urges go at the end so stored indices stay stable. Each urge stores its 0-5
+  // rating as urge_<index> and whether the user acted on it as the boolean named by `action`
+  // (legacy action ids kept as-is; they were once a separate "Actions" section).
+  const URGES = [
+    { label: 'Self-harm', action: 'selfHarmed' },
+    { label: 'Suicide', action: 'suicidalAction' },
+    { label: 'Cannabis', action: 'usedWeed' },
+    { label: 'Other substances', action: 'usedOtherSubstances' },
+    { label: 'Quit therapy', action: 'quitTherapy' },
+    { label: 'Alcohol', action: 'drankAlcohol' },
+    { label: 'Nicotine', action: 'usedNicotine' },
+    { label: 'Binge eat', action: 'binged' },
+    { label: 'Restrict eating', action: 'restricted' },
+    { label: 'Purge', action: 'purged' },
+    { label: 'Isolate', action: 'isolated' },
+    { label: 'Lash out', action: 'lashedOut' },
+    // Added 2026-11 (12+)
+    { label: 'Avoid / procrastinate', action: 'avoided' },
+    { label: 'Seek reassurance', action: 'soughtReassurance' },
+    { label: 'Contact someone I shouldn\'t', action: 'contactedSomeone' },
+    { label: 'Cut someone off', action: 'cutOff' },
+    { label: 'Overspend', action: 'overspent' },
+    { label: 'Doomscroll', action: 'doomscrolled' },
+    { label: 'Zone out / dissociate', action: 'dissociated' },
+    { label: 'Gamble', action: 'gambled' },
+    { label: 'Sexual compulsion', action: 'sexualCompulsion' }
+  ];
   const URGE_GROUPS = [
     { label: 'Self-harm', indices: [0, 1] },
-    { label: 'Substance use', indices: [2, 3, 5, 6] },
+    { label: 'Substances', indices: [2, 3, 5, 6] },
     { label: 'Eating', indices: [7, 8, 9] },
-    { label: 'Behavioral', indices: [4, 10, 11] }
-  ];
-  // Append-only: new actions must go at the end. tookMedications was moved to CATEGORIES,
-  // but we leave existing stored boolean data alone — the field id is unchanged.
-  const ACTIONS = [
-    { id: 'selfHarmed', label: 'Self-harmed' },
-    { id: 'suicidalAction', label: 'Suicidal action' },
-    { id: 'usedWeed', label: 'Used cannabis' },
-    { id: 'usedOtherSubstances', label: 'Used other substances' },
-    { id: 'drankAlcohol', label: 'Drank alcohol' },
-    { id: 'usedNicotine', label: 'Used nicotine' },
-    { id: 'binged', label: 'Binge ate' },
-    { id: 'restricted', label: 'Restricted eating' },
-    { id: 'purged', label: 'Purged' },
-    { id: 'isolated', label: 'Isolated' },
-    { id: 'lashedOut', label: 'Lashed out' }
-  ];
-  const ACTION_GROUPS = [
-    { label: 'Self-harm', ids: ['selfHarmed', 'suicidalAction'] },
-    { label: 'Substance use', ids: ['usedWeed', 'usedOtherSubstances', 'drankAlcohol', 'usedNicotine'] },
-    { label: 'Eating', ids: ['binged', 'restricted', 'purged'] },
-    { label: 'Behavioral', ids: ['isolated', 'lashedOut'] }
+    { label: 'Withdrawal', indices: [10, 12, 18, 17, 4] },
+    { label: 'Relationships', indices: [11, 13, 14, 15] },
+    { label: 'Money & compulsion', indices: [16, 19, 20] }
   ];
   // Schema v2: individual DBT skills (was 4 modules). Migration in migrateEntriesV1toV2() moves
   // old skill_0..3 into entry.legacySkills so they're not misinterpreted as individual skills.
@@ -2354,8 +2478,7 @@ customElements.define('skill-row', SkillRow);
 
   // ─── Prefs ───
   // Defaults hide new items so "skip" in the wizard gives the pre-feature experience.
-  const DEFAULT_HIDDEN_URGES = [2, 3, 5, 6, 7, 8, 9];
-  const DEFAULT_HIDDEN_ACTIONS = ['usedWeed', 'usedOtherSubstances', 'drankAlcohol', 'usedNicotine', 'binged', 'restricted', 'purged'];
+  const DEFAULT_HIDDEN_URGES = [2, 3, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18, 19, 20];
   const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'meditate', 'social'];
   const MODULE_PROXY_SKILL_INDICES = [0, 7, 14, 21];
   const DEFAULT_HIDDEN_SKILLS = (function() {
@@ -2369,9 +2492,8 @@ customElements.define('skill-row', SkillRow);
   function makeDefaultPrefs() {
     return {
       emotions: [...DEFAULT_EMOTIONS],
-      hiddenEmotions: [],
+      hiddenEmotions: [...DEFAULT_HIDDEN_EMOTIONS],
       hiddenUrges: [...DEFAULT_HIDDEN_URGES],
-      hiddenActions: [...DEFAULT_HIDDEN_ACTIONS],
       hiddenCategories: [...DEFAULT_HIDDEN_CATEGORIES],
       hiddenSkills: [...DEFAULT_HIDDEN_SKILLS],
       showHidden: false,
@@ -2394,7 +2516,6 @@ customElements.define('skill-row', SkillRow);
           emotions: saved.emotions || defaults.emotions,
           hiddenEmotions: saved.hiddenEmotions || defaults.hiddenEmotions,
           hiddenUrges: saved.hiddenUrges || defaults.hiddenUrges,
-          hiddenActions: saved.hiddenActions || defaults.hiddenActions,
           hiddenCategories: saved.hiddenCategories || defaults.hiddenCategories,
           hiddenSkills: saved.hiddenSkills || defaults.hiddenSkills,
           showHidden: false, // always reset — transient UI state
@@ -2403,12 +2524,22 @@ customElements.define('skill-row', SkillRow);
           // schemaVersion missing from old prefs → treat as v1 so migration runs.
           schemaVersion: typeof saved.schemaVersion === 'number' ? saved.schemaVersion : 1
         };
-        // Skills appended since these prefs were last saved start hidden, same as for a new vault.
-        // Prefs saved before this field existed knew the original 26 DBT skills.
-        const known = typeof saved.knownSkillCount === 'number' ? saved.knownSkillCount : 26;
-        for (let i = known; i < SKILLS.length; i++) {
+        // Vocabulary appended since these prefs were last saved starts hidden, same as for a new
+        // vault. Prefs saved before the known* fields existed knew 26 skills, 12 urges, 13 emotions.
+        const knownSkills = typeof saved.knownSkillCount === 'number' ? saved.knownSkillCount : 26;
+        for (let i = knownSkills; i < SKILLS.length; i++) {
           if (!prefs.hiddenSkills.includes(i)) prefs.hiddenSkills.push(i);
         }
+        const knownUrges = typeof saved.knownUrgeCount === 'number' ? saved.knownUrgeCount : 12;
+        for (let i = knownUrges; i < URGES.length; i++) {
+          if (!prefs.hiddenUrges.includes(i)) prefs.hiddenUrges.push(i);
+        }
+        // New default emotions are appended to the vault's list (never reordered) and start hidden.
+        DEFAULT_EMOTIONS.forEach(em => {
+          if (prefs.emotions.includes(em)) return;
+          prefs.emotions.push(em);
+          if (!prefs.hiddenEmotions.includes(em)) prefs.hiddenEmotions.push(em);
+        });
       }
     } catch {}
   }
@@ -2419,10 +2550,10 @@ customElements.define('skill-row', SkillRow);
         emotions: prefs.emotions,
         hiddenEmotions: prefs.hiddenEmotions,
         hiddenUrges: prefs.hiddenUrges,
-        hiddenActions: prefs.hiddenActions,
         hiddenCategories: prefs.hiddenCategories,
         hiddenSkills: prefs.hiddenSkills,
         knownSkillCount: SKILLS.length,
+        knownUrgeCount: URGES.length,
         onboarded: prefs.onboarded,
         shareTTL: prefs.shareTTL,
         schemaVersion: prefs.schemaVersion
@@ -2515,7 +2646,8 @@ customElements.define('skill-row', SkillRow);
   function renderEmotions() {
     const container = document.getElementById('emotion-rows');
     container.innerHTML = '';
-    prefs.emotions.forEach((em, i) => {
+    emotionDisplayOrder(prefs.emotions).forEach(i => {
+      const em = prefs.emotions[i];
       const isHidden = prefs.hiddenEmotions.includes(em);
       if (isHidden && !prefs.showHidden) return;
 
@@ -2561,7 +2693,6 @@ customElements.define('skill-row', SkillRow);
 
   const DYNAMIC_KEYS = {
     urges: 'urges-section',
-    actions: 'actions-section',
     skills: 'skill-rows',
     toggleCategories: 'toggle-categories'
   };
@@ -2569,24 +2700,15 @@ customElements.define('skill-row', SkillRow);
   function buildDynamicSections() {
     const urgesSec = document.getElementById(DYNAMIC_KEYS.urges);
     urgesSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
-    URGES.forEach((u, i) => {
+    URGE_GROUPS.forEach(g => g.indices.forEach(i => {
       if (prefs.hiddenUrges.includes(i)) return;
-      const row = document.createElement('rating-row');
-      row.setAttribute('label', u); row.setAttribute('field', 'urge_'+i);
-      row.setAttribute('max', '5'); row.setAttribute('type', 'intensity');
+      const row = document.createElement('urge-row');
+      row.setAttribute('label', URGES[i].label);
+      row.setAttribute('field', 'urge_'+i);
+      row.setAttribute('action', URGES[i].action);
       row.dataset.dyn = 'urge_'+i;
       urgesSec.appendChild(row);
-    });
-
-    const actionsSec = document.getElementById(DYNAMIC_KEYS.actions);
-    actionsSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
-    ACTIONS.forEach(a => {
-      if (prefs.hiddenActions.includes(a.id)) return;
-      const row = document.createElement('toggle-row');
-      row.setAttribute('label', a.label); row.setAttribute('field', a.id);
-      row.dataset.dyn = 'action_'+a.id;
-      actionsSec.appendChild(row);
-    });
+    }));
 
     const skillsSec = document.getElementById(DYNAMIC_KEYS.skills);
     skillsSec.innerHTML = '';
@@ -2687,8 +2809,6 @@ customElements.define('skill-row', SkillRow);
       renderEntry();
     });
 
-    document.getElementById('choose-skills').addEventListener('click', () => openWizard('edit', 'skills'));
-
     document.addEventListener('skill-info', e => {
       const idx = parseInt(String(e.detail.field).replace('skill_', ''));
       if (!isNaN(idx)) showSkillInfo(idx);
@@ -2760,6 +2880,10 @@ customElements.define('skill-row', SkillRow);
     document.querySelectorAll('toggle-row').forEach(row => {
       row.value = entry[row.getAttribute('field')];
     });
+    document.querySelectorAll('urge-row').forEach(row => {
+      row.value = entry[row.getAttribute('field')];
+      row.acted = entry[row.getAttribute('action')];
+    });
 
     document.querySelectorAll('.emotion-avg').forEach(el => {
       const i = parseInt(el.dataset.emotionIndex);
@@ -2809,44 +2933,6 @@ customElements.define('skill-row', SkillRow);
   }
 
   // ─── Calendar ───
-  function avgIntensity(entry) {
-    if (!entry) return null;
-    let sum = 0, count = 0;
-    for (let i = 0; i < (prefs.emotions || DEFAULT_EMOTIONS).length; i++) {
-      const v = entry['emotion_'+i];
-      if (v !== null && v !== undefined) { sum += v; count++; }
-    }
-    for (let i = 0; i < URGES.length; i++) {
-      const v = entry['urge_'+i];
-      if (v !== null && v !== undefined) { sum += v; count++; }
-    }
-    return count > 0 ? sum / count : null;
-  }
-
-  function avgSkills(entry) {
-    if (!entry) return null;
-    let sum = 0, count = 0;
-    for (let i = 0; i < SKILLS.length; i++) {
-      const v = entry['skill_'+i];
-      if (v !== null && v !== undefined) { sum += v; count++; }
-    }
-    return count > 0 ? sum / count : null;
-  }
-
-  function intensityColor(avg) {
-    if (avg === null) return 'var(--text-muted)';
-    const colors = ['#4a4640','#5b7a8a','#6a9aaa','#b8a455','#c4845a','#b85a5a'];
-    const i = Math.min(5, Math.round(avg));
-    return colors[i];
-  }
-
-  function skillColor(avg) {
-    if (avg === null) return 'var(--text-muted)';
-    const colors = ['#4a4640','#4a5e4a','#4d6d4d','#507d50','#558d55','#5a9d5a','#5fad5f','#64bd64'];
-    const i = Math.min(7, Math.round(avg));
-    return colors[i];
-  }
-
   function renderCalendar() {
     const grid = document.getElementById('cal-grid');
     grid.innerHTML = '';
@@ -2885,28 +2971,12 @@ customElements.define('skill-row', SkillRow);
       num.textContent = d;
       el.appendChild(num);
 
+      // Days are marked, not scored: there are too many things one might want to rank a day by.
       if (entry && Object.keys(entry).length > 0) {
         el.classList.add('has-entry');
-        const dots = document.createElement('div');
-        dots.className = 'cal-dots';
-
-        const ai = avgIntensity(entry);
-        if (ai !== null) {
-          const dot = document.createElement('div');
-          dot.className = 'cal-dot';
-          dot.style.background = intensityColor(ai);
-          dots.appendChild(dot);
-        }
-
-        const as = avgSkills(entry);
-        if (as !== null) {
-          const dot = document.createElement('div');
-          dot.className = 'cal-dot';
-          dot.style.background = skillColor(as);
-          dots.appendChild(dot);
-        }
-
-        el.appendChild(dots);
+        const dot = document.createElement('div');
+        dot.className = 'cal-dot';
+        el.appendChild(dot);
       }
 
       el.addEventListener('click', () => {
@@ -3144,26 +3214,28 @@ customElements.define('skill-row', SkillRow);
   }
 
   // ─── Share Payload ───
+  // v3: always wrapped, and carries the vault's emotion list so emotion_<i> resolves to the right
+  // name (older payloads lacked it and are mapped through the first 13 DEFAULT_EMOTIONS).
   function buildSharePayload(shareEntries) {
     const hidden = {};
     if (prefs.hiddenUrges.length) hidden.urges = prefs.hiddenUrges;
-    if (prefs.hiddenActions.length) hidden.actions = prefs.hiddenActions;
     if (prefs.hiddenSkills.length) hidden.skills = prefs.hiddenSkills;
     if (prefs.hiddenCategories.length) hidden.categories = prefs.hiddenCategories;
     if (prefs.hiddenEmotions.length) hidden.emotions = prefs.hiddenEmotions;
-    return Object.keys(hidden).length ? { entries: shareEntries, hidden } : shareEntries;
+    return { entries: shareEntries, hidden, emotions: prefs.emotions };
   }
 
   function parseSharePayload(parsed) {
     if (parsed.entries && typeof parsed.entries === 'object' && !Array.isArray(parsed.entries)) {
-      return { entries: parsed.entries, hidden: parsed.hidden || {} };
+      return { entries: parsed.entries, hidden: parsed.hidden || {}, emotions: Array.isArray(parsed.emotions) ? parsed.emotions : DEFAULT_EMOTIONS.slice(0, 13) };
     }
-    return { entries: parsed, hidden: {} };
+    return { entries: parsed, hidden: {}, emotions: DEFAULT_EMOTIONS.slice(0, 13) };
   }
 
   // ─── Share View (read-only) ───
   let _shareEntries = null;
   let _shareHidden = {};
+  let _shareEmotions = DEFAULT_EMOTIONS; // the sharing vault's emotion list (index = storage index)
   let _shareHiddenEmotions = new Set();
   let _shareMode = 'calendar';
   let _shareSelectedDay = null;
@@ -3185,33 +3257,30 @@ customElements.define('skill-row', SkillRow);
     let html = `<div class="share-day-card"><div class="share-day-date">${DAYNAMES[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}</div>`;
 
     const hiddenEmotions = _shareHidden.emotions || [];
-    const hasEmotions = EMOTIONS.some((em, i) => entry['emotion_' + i] != null && !hiddenEmotions.includes(em) && !_shareHiddenEmotions.has(em));
-    if (hasEmotions) {
+    const emotionShown = i => entry['emotion_' + i] != null && !hiddenEmotions.includes(_shareEmotions[i]) && !_shareHiddenEmotions.has(_shareEmotions[i]);
+    const emotionOrder = emotionDisplayOrder(_shareEmotions).filter(emotionShown);
+    if (emotionOrder.length) {
       html += '<div class="share-section-label">Emotions</div>';
-      EMOTIONS.forEach((em, i) => {
-        if (hiddenEmotions.includes(em) || _shareHiddenEmotions.has(em)) return;
+      emotionOrder.forEach(i => {
         const v = entry['emotion_' + i];
-        if (v != null) html += shareRatingRow(em, v, 5, '--c' + v);
+        html += shareRatingRow(_shareEmotions[i], v, 5, '--c' + v);
       });
     }
 
+    // An urge row appears if it was rated or the acted question was answered. Unanswered toggles
+    // (null/undefined) are omitted everywhere: "no" means the user actually said no.
     const hiddenUrges = _shareHidden.urges || [];
-    const hasUrges = URGES.some((u, i) => entry['urge_' + i] != null && !hiddenUrges.includes(i));
-    if (hasUrges) {
+    const urgeShown = i => !hiddenUrges.includes(i) && (entry['urge_' + i] != null || entry[URGES[i].action] != null);
+    const urgeOrder = URGE_GROUPS.flatMap(g => g.indices).filter(urgeShown);
+    if (urgeOrder.length) {
       html += '<div class="share-section-label">Urges</div>';
-      URGES.forEach((u, i) => {
-        if (hiddenUrges.includes(i)) return;
-        const v = entry['urge_' + i];
-        if (v != null) html += shareRatingRow(u, v, 5, '--c' + v);
+      urgeOrder.forEach(i => {
+        const v = entry['urge_' + i], acted = entry[URGES[i].action];
+        const tag = acted == null ? '' : `<span class="share-acted${acted ? ' on' : ''}">${acted ? 'acted' : 'didn\u2019t act'}</span>`;
+        html += v != null
+          ? `<div class="share-row"><span class="share-row-label">${URGES[i].label}</span>${ratingBar(v, 5, '--c' + v)}<span class="share-row-value">${v}/5</span>${tag}</div>`
+          : `<div class="share-row"><span class="share-row-label">${URGES[i].label}</span><span class="share-row-value">${tag}</span></div>`;
       });
-    }
-
-    // Unanswered toggles (null/undefined) are omitted: "no" means the user actually said no.
-    const hiddenActions = _shareHidden.actions || [];
-    const answeredActions = ACTIONS.filter(a => !hiddenActions.includes(a.id) && entry[a.id] != null);
-    if (answeredActions.length) {
-      html += '<div class="share-section-label">Actions</div>';
-      answeredActions.forEach(a => { html += shareToggleRow(a.label, entry[a.id]); });
     }
 
     const hiddenCats = _shareHidden.categories || [];
@@ -3298,7 +3367,9 @@ customElements.define('skill-row', SkillRow);
   function renderShareEmotionToggles() {
     let html = '<div style="padding:0.25rem 0 0.5rem;display:flex;flex-wrap:wrap;gap:0.25rem 0.5rem;align-items:center">';
     html += '<span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600">Filter emotions:</span>';
-    EMOTIONS.forEach(em => {
+    emotionDisplayOrder(_shareEmotions).forEach(i => {
+      const em = _shareEmotions[i];
+      if ((_shareHidden.emotions || []).includes(em)) return;
       const hidden = _shareHiddenEmotions.has(em);
       html += '<button class="share-emotion-toggle' + (hidden ? ' hidden' : '') + '" data-share-emotion="' + em + '">' +
         (hidden ? '○' : '●') + ' ' + em + '</button>';
@@ -3374,10 +3445,7 @@ customElements.define('skill-row', SkillRow);
   document.getElementById('info-overlay').addEventListener('click', e => {
     if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
   });
-  document.getElementById('info-customize').addEventListener('click', () => {
-    document.getElementById('info-overlay').classList.remove('visible');
-    openWizard('edit');
-  });
+  document.getElementById('edit-btn').addEventListener('click', () => openWizard('edit'));
 
   // ─── Wizard ───
   // wizardMode: 'newUser' (no vault yet, draft held in memory until passphrase is set)
@@ -3385,17 +3453,19 @@ customElements.define('skill-row', SkillRow);
   //           | 'edit' (user reopened from info panel to tweak visibility)
   let wizardMode = 'firstRun';
   let wizardStepIdx = 0;
-  // A draft of the "hidden*" sets, mutated as the user clicks. Applied to prefs on Done.
+  // Edit mode only: true while the "review changes" view is showing (Done pressed, Save not yet).
+  let wizardConfirming = false;
+  // A draft of the "hidden*" sets, mutated as the user clicks. Applied to prefs on Done/Save.
   let wizardDraft = null;
 
   const WIZARD_STEPS = [
-    { id: 'welcome', title: 'Welcome', subtitle: null, render: renderWizardWelcome, showInEdit: false },
-    { id: 'emotions', title: 'Emotions', subtitle: 'Check the ones you want to track. You can change this any time from the info menu.', render: renderWizardEmotions, showInEdit: true },
-    { id: 'urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
-    { id: 'actions', title: 'Actions', subtitle: 'Actions track whether you acted on an urge. "Quit therapy" isn\'t here because it isn\'t a daily thing.', render: renderWizardActions, showInEdit: true },
-    { id: 'categories', title: 'Daily check-ins', subtitle: 'Everything you might want to log about your day outside of feelings.', render: renderWizardCategories, showInEdit: true },
-    { id: 'skills', title: 'Skills', subtitle: 'Browse by school of therapy and check the skills you\'re actively working on. Tap ? to see what a skill means.', render: renderWizardSkills, showInEdit: true },
-    { id: 'done', title: 'All set', subtitle: null, render: renderWizardDone, showInEdit: true }
+    { id: 'welcome', nav: 'Welcome', title: 'Welcome', subtitle: null, render: renderWizardWelcome, showInEdit: false },
+    { id: 'emotions', nav: 'Emotions', title: 'Emotions', subtitle: 'Check the ones you want to track. You can change this any time with the pencil button at the top.', render: renderWizardEmotions, showInEdit: true },
+    { id: 'urges', nav: 'Urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Each one is rated 0\u20135, and you can note whether you acted on it. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
+    { id: 'categories', nav: 'Daily', title: 'Daily check-ins', subtitle: 'Everything you might want to log about your day outside of feelings.', render: renderWizardCategories, showInEdit: true },
+    { id: 'skills', nav: 'Skills', title: 'Skills', subtitle: 'Browse by school of therapy and check the skills you\'re actively working on. Tap ? to see what a skill means.', render: renderWizardSkills, showInEdit: true },
+    // First-run summary. Edit mode has its own review step (renderWizardDiff) instead.
+    { id: 'done', nav: 'Finish', title: 'All set', subtitle: null, render: renderWizardDone, showInEdit: false }
   ];
 
   function activeWizardSteps() {
@@ -3405,10 +3475,10 @@ customElements.define('skill-row', SkillRow);
   function openWizard(mode, startStepId) {
     wizardMode = mode;
     wizardStepIdx = 0;
+    wizardConfirming = false;
     wizardDraft = {
       hiddenEmotions: [...prefs.hiddenEmotions],
       hiddenUrges: [...prefs.hiddenUrges],
-      hiddenActions: [...prefs.hiddenActions],
       hiddenCategories: [...prefs.hiddenCategories],
       hiddenSkills: [...prefs.hiddenSkills]
     };
@@ -3424,30 +3494,95 @@ customElements.define('skill-row', SkillRow);
   function renderWizardStep() {
     const steps = activeWizardSteps();
     const step = steps[wizardStepIdx];
+    const isEdit = wizardMode === 'edit';
 
-    // Step indicator dots
-    const dotsEl = document.getElementById('wizard-steps');
-    dotsEl.innerHTML = '';
-    steps.forEach((_, i) => {
-      const d = document.createElement('div');
-      d.className = 'wizard-step-dot' + (i === wizardStepIdx ? ' active' : (i < wizardStepIdx ? ' done' : ''));
-      dotsEl.appendChild(d);
+    // Section tabs — clickable in every mode, so nobody has to page through with Next.
+    const tabsEl = document.getElementById('wizard-steps');
+    tabsEl.innerHTML = '';
+    steps.forEach((s, i) => {
+      const t = document.createElement('button');
+      const state = wizardConfirming ? '' : (i === wizardStepIdx ? ' active' : (!isEdit && i < wizardStepIdx ? ' done' : ''));
+      t.className = 'wizard-nav-tab' + state;
+      t.textContent = s.nav;
+      t.addEventListener('click', () => { wizardConfirming = false; wizardStepIdx = i; renderWizardStep(); });
+      tabsEl.appendChild(t);
     });
 
-    document.getElementById('wizard-title').textContent = step.title;
-    document.getElementById('wizard-subtitle').textContent = step.subtitle || '';
-    document.getElementById('wizard-subtitle').style.display = step.subtitle ? '' : 'none';
-
+    const titleEl = document.getElementById('wizard-title');
+    const subEl = document.getElementById('wizard-subtitle');
     const body = document.getElementById('wizard-body');
     body.innerHTML = '';
-    step.render(body);
+    if (wizardConfirming) {
+      titleEl.textContent = 'Review changes';
+      subEl.textContent = 'This is what will change on your daily card.';
+      subEl.style.display = '';
+      renderWizardDiff(body);
+    } else {
+      titleEl.textContent = step.title;
+      subEl.textContent = step.subtitle || '';
+      subEl.style.display = step.subtitle ? '' : 'none';
+      step.render(body);
+    }
 
-    // Back button: hidden on first step
-    document.getElementById('wizard-back').style.visibility = wizardStepIdx > 0 ? 'visible' : 'hidden';
-    // Skip button: shown except in 'edit' mode (where the user is deliberately tweaking).
-    document.getElementById('wizard-skip').style.display = wizardMode === 'edit' ? 'none' : '';
-    const isLast = wizardStepIdx === steps.length - 1;
-    document.getElementById('wizard-next').textContent = isLast ? 'Done' : 'Next';
+    const back = document.getElementById('wizard-back');
+    const skip = document.getElementById('wizard-skip');
+    const next = document.getElementById('wizard-next');
+    if (isEdit) {
+      back.style.visibility = 'visible';
+      back.textContent = wizardConfirming ? 'Back' : 'Cancel';
+      skip.style.display = 'none';
+      next.textContent = wizardConfirming ? 'Save' : 'Done';
+    } else {
+      back.textContent = 'Back';
+      back.style.visibility = wizardStepIdx > 0 ? 'visible' : 'hidden';
+      skip.style.display = '';
+      next.textContent = wizardStepIdx === steps.length - 1 ? 'Done' : 'Next';
+    }
+  }
+
+  // What the draft would change relative to saved prefs, per section, as display names.
+  const WIZARD_DIFF_SECTIONS = [
+    { key: 'hiddenEmotions', label: 'Emotions', name: id => id },
+    { key: 'hiddenUrges', label: 'Urges', name: i => URGES[i].label },
+    { key: 'hiddenCategories', label: 'Daily check-ins', name: id => (CATEGORIES.find(c => c.id === id) || { label: id }).label },
+    { key: 'hiddenSkills', label: 'Skills', name: i => SKILLS[i] ? `${SKILLS[i].label}${SKILL_META[i].school ? ` (${SKILL_META[i].school.label})` : ''}` : String(i) }
+  ];
+
+  function wizardDiff() {
+    return WIZARD_DIFF_SECTIONS.map(sec => {
+      const before = prefs[sec.key], after = wizardDraft[sec.key];
+      return {
+        label: sec.label,
+        shown: before.filter(x => !after.includes(x)).map(sec.name),
+        hidden: after.filter(x => !before.includes(x)).map(sec.name)
+      };
+    }).filter(d => d.shown.length || d.hidden.length);
+  }
+
+  function renderWizardDiff(body) {
+    body.className = 'wizard-body';
+    wizardDiff().forEach(d => {
+      const sec = document.createElement('div');
+      sec.className = 'wizard-group';
+      const lbl = document.createElement('div');
+      lbl.className = 'wizard-group-label';
+      lbl.textContent = d.label;
+      sec.appendChild(lbl);
+      const line = (cls, sign, items) => {
+        if (!items.length) return;
+        const el = document.createElement('div');
+        el.className = 'wizard-diff ' + cls;
+        const s = document.createElement('span');
+        s.className = 'wizard-diff-sign';
+        s.textContent = sign;
+        el.appendChild(s);
+        el.appendChild(document.createTextNode(items.join(', ')));
+        sec.appendChild(el);
+      };
+      line('show', '+', d.shown);
+      line('hide', '−', d.hidden);
+      body.appendChild(sec);
+    });
   }
 
   function toggleWizardDraft(key, id, on) {
@@ -3486,8 +3621,8 @@ customElements.define('skill-row', SkillRow);
     body.className = 'wizard-body wizard-welcome-body';
     const note = wizardMode === 'newUser' ? '' : '<p class="wizard-note">(This is a one-time setup — we bumped how skills are tracked, so existing entries have been preserved under "legacy skills" and today you\'ll see individual DBT skills instead of the four modules.)</p>';
     body.innerHTML =
-      '<p>This diary shows every emotion, urge, skill, and daily check-in by default. That\'s a lot — most people only track a subset.</p>' +
-      '<p>This quick walkthrough lets you pick which items are visible. You can change your mind any time from the <strong>?</strong> menu in the top corner.</p>' +
+      '<p>This diary can track a lot of emotions, urges, skills, and daily check-ins. Most people only want a subset.</p>' +
+      '<p>This quick walkthrough lets you pick which items are visible. You can change your mind any time with the pencil button at the top.</p>' +
       '<p><strong>Nothing is permanent.</strong> Hiding an item just takes it off your daily form — it doesn\'t delete any existing data, and you can un-hide later.</p>' +
       note;
   }
@@ -3496,7 +3631,8 @@ customElements.define('skill-row', SkillRow);
     body.className = 'wizard-body';
     const group = document.createElement('div');
     group.className = 'wizard-group';
-    DEFAULT_EMOTIONS.forEach(em => {
+    emotionDisplayOrder(prefs.emotions).forEach(i => {
+      const em = prefs.emotions[i];
       const checked = !wizardDraft.hiddenEmotions.includes(em);
       group.appendChild(wizardMakeItem(em, null, checked, (on) => toggleWizardDraft('hiddenEmotions', em, on)));
     });
@@ -3514,26 +3650,7 @@ customElements.define('skill-row', SkillRow);
       section.appendChild(lbl);
       g.indices.forEach(idx => {
         const checked = !wizardDraft.hiddenUrges.includes(idx);
-        section.appendChild(wizardMakeItem(URGES[idx], null, checked, (on) => toggleWizardDraft('hiddenUrges', idx, on)));
-      });
-      body.appendChild(section);
-    });
-  }
-
-  function renderWizardActions(body) {
-    body.className = 'wizard-body';
-    ACTION_GROUPS.forEach(g => {
-      const section = document.createElement('div');
-      section.className = 'wizard-group';
-      const lbl = document.createElement('div');
-      lbl.className = 'wizard-group-label';
-      lbl.textContent = g.label;
-      section.appendChild(lbl);
-      g.ids.forEach(id => {
-        const action = ACTIONS.find(a => a.id === id);
-        if (!action) return;
-        const checked = !wizardDraft.hiddenActions.includes(id);
-        section.appendChild(wizardMakeItem(action.label, null, checked, (on) => toggleWizardDraft('hiddenActions', id, on)));
+        section.appendChild(wizardMakeItem(URGES[idx].label, null, checked, (on) => toggleWizardDraft('hiddenUrges', idx, on)));
       });
       body.appendChild(section);
     });
@@ -3634,7 +3751,6 @@ customElements.define('skill-row', SkillRow);
     const hiddenCounts = {
       emotions: wizardDraft.hiddenEmotions.length,
       urges: wizardDraft.hiddenUrges.length,
-      actions: wizardDraft.hiddenActions.length,
       categories: wizardDraft.hiddenCategories.length,
       skills: wizardDraft.hiddenSkills.length
     };
@@ -3645,22 +3761,20 @@ customElements.define('skill-row', SkillRow);
     body.innerHTML =
       '<p>Ready to save. Your daily entry form will show:</p>' +
       '<div class="wizard-summary">' +
-        line('Emotions', DEFAULT_EMOTIONS.length, hiddenCounts.emotions) +
+        line('Emotions', prefs.emotions.length, hiddenCounts.emotions) +
         line('Urges', URGES.length, hiddenCounts.urges) +
-        line('Actions', ACTIONS.length, hiddenCounts.actions) +
         line('Daily check-ins', CATEGORIES.length, hiddenCounts.categories) +
         line('Skills', SKILLS.length, hiddenCounts.skills) +
       '</div>' +
       (wizardMode === 'newUser'
         ? '<p style="margin-top:0.85rem">Next: you\'ll set a passphrase to encrypt your diary. There is no recovery if you forget it, so write it down somewhere safe.</p>'
-        : '<p style="margin-top:0.85rem" class="wizard-note">Click Done to apply these changes. You can always open this wizard again from the <strong>?</strong> menu.</p>');
+        : '<p style="margin-top:0.85rem" class="wizard-note">Click Done to apply these changes. You can change any of this later with the pencil button at the top.</p>');
   }
 
   async function wizardFinish() {
     // Copy draft into prefs
     prefs.hiddenEmotions = wizardDraft.hiddenEmotions;
     prefs.hiddenUrges = wizardDraft.hiddenUrges;
-    prefs.hiddenActions = wizardDraft.hiddenActions;
     prefs.hiddenCategories = wizardDraft.hiddenCategories;
     prefs.hiddenSkills = wizardDraft.hiddenSkills;
     prefs.onboarded = true;
@@ -3680,6 +3794,14 @@ customElements.define('skill-row', SkillRow);
   }
 
   document.getElementById('wizard-next').addEventListener('click', async () => {
+    if (wizardMode === 'edit') {
+      // Done → review (or just close if nothing changed); Save → apply.
+      if (wizardConfirming) { await wizardFinish(); return; }
+      if (!wizardDiff().length) { closeWizard(); return; }
+      wizardConfirming = true;
+      renderWizardStep();
+      return;
+    }
     const steps = activeWizardSteps();
     if (wizardStepIdx >= steps.length - 1) {
       await wizardFinish();
@@ -3689,12 +3811,18 @@ customElements.define('skill-row', SkillRow);
     renderWizardStep();
   });
   document.getElementById('wizard-back').addEventListener('click', () => {
+    if (wizardMode === 'edit') {
+      // Cancel discards the draft; Back from review returns to the sections.
+      if (wizardConfirming) { wizardConfirming = false; renderWizardStep(); }
+      else closeWizard();
+      return;
+    }
     if (wizardStepIdx > 0) { wizardStepIdx--; renderWizardStep(); }
   });
   document.getElementById('wizard-skip').addEventListener('click', async () => {
     // Skip in firstRun means: accept the defaults (nothing hidden), mark onboarded, close.
     wizardDraft = {
-      hiddenEmotions: [], hiddenUrges: [], hiddenActions: [], hiddenCategories: [], hiddenSkills: []
+      hiddenEmotions: [], hiddenUrges: [], hiddenCategories: [], hiddenSkills: []
     };
     await wizardFinish();
   });
@@ -3905,8 +4033,10 @@ customElements.define('skill-row', SkillRow);
         document.getElementById('entry-view').classList.remove('active');
         document.getElementById('session-bar').style.display = 'none';
         document.getElementById('cal-btn').style.display = 'none';
+        document.getElementById('edit-btn').style.display = 'none';
         document.getElementById('share-view').classList.add('active', 'view-fade');
         _shareHidden = payload.hidden;
+        _shareEmotions = payload.emotions;
         renderShareView(payload.entries);
       } catch {
         document.getElementById('share-error').textContent = 'Wrong passphrase.';

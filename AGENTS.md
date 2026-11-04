@@ -62,7 +62,8 @@ Share payload format (v2): `{ entries: {...}, hidden: {...} }` when items are hi
 ## Key Functions
 
 - `buildDynamicSections()`: Creates web component elements for urges/actions/skills/toggle-categories based on vocabulary arrays minus hidden items
-- `renderWizardSkills()`: Tabbed skills chooser (one tab per school in `SKILL_CATALOG`); also opened directly from the Skills section via `openWizard('edit', 'skills')`
+- `openWizard(mode)`: The field-visibility dialog. `firstRun`/`newUser` walk through steps with Next/Back/Skip and a summary; `edit` (pencil button in the header, the only entry point) shows Cancel/Done, and Done renders a +/− review of the draft vs. saved prefs (`wizardDiff()`) before Save. Section tabs in the header are clickable in every mode.
+- `renderWizardSkills()`: Tabbed skills chooser (one tab per school in `SKILL_CATALOG`)
 - `showSkillInfo(idx)`: Info popover for a skill (desc + similar skills), triggered by tapping a skill-row label (`skill-info` event) or the ? button in the chooser
 - `renderEmotions()`: Builds emotion rows (rating-row inside .emotion-row wrappers with 7-day avg + hide button)
 - `renderEntry()`: Pushes current date's entry values into all web components and static inputs
