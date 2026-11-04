@@ -17,7 +17,7 @@ All fields are configurable. An onboarding wizard walks new users through hiding
 
 ## Sharing with a therapist
 
-You can share a range of entries (from a checkpoint date to today) as an encrypted link. The recipient enters a share passphrase you give them separately to decrypt and view the entries in a read-only calendar/list view.
+You can share a range of entries (from a checkpoint date to today) as an encrypted link. The recipient enters a share passphrase you give them separately to decrypt and view the entries in a read-only calendar/list view. Sharing again updates the same short link in place, so the recipient can keep using the link and passphrase they already have; the passphrase can be changed at any time.
 
 Short links go through a relay service that stores the encrypted payload temporarily (1 day to 3 months, your choice) and then deletes it. The relay cannot read the entries. A permanent full-length link is also available that works without any server.
 

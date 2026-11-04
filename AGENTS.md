@@ -45,7 +45,7 @@ Attach event listeners once in `connectedCallback()` after `_render()` — never
 Two formats coexist:
 
 - **`#share=PAYLOAD`**: Self-contained. Encrypted payload encoded directly in the URL fragment. Works forever, no server dependency. Can be very long (2K–30K+ chars).
-- **`#relay=TOKEN`**: Short link (5-char token). App fetches the encrypted payload from `/api/relay/TOKEN`. Expires after a user-chosen TTL (1 day to 3 months, default 30 days).
+- **`#relay=TOKEN`**: Short link (5-char token). App fetches the encrypted payload from `/api/relay/TOKEN`. Expires after a user-chosen TTL (1 day to 3 months, default 30 days). The vault remembers its live link in `prefs.activeShare = { token, editKey, passphrase, expiresAt }` (inside the encrypted prefs) so the next share can update the same link in place via PUT; the share-setup dialog offers "Update the existing link" vs "Make a new link", with the passphrase prefilled and changeable. Changing the TTL in the result dialog also updates in place rather than minting a new token.
 
 Entries between checkpoint and today are serialized to JSON, DEFLATE-compressed, AES-GCM encrypted with a share passphrase, and base64url-encoded.
 
@@ -58,7 +58,8 @@ Share payload format (v3): `{ entries, hidden, emotions, parts }` — the vault'
 **Token scheme**: 26 letter prefixes (a–z), each active for 1 week, cycling every 26 weeks. Token = prefix + 4 random alphanumeric chars. When a prefix cycles back, all its old tokens are guaranteed expired. Cleanup runs on each POST.
 
 **Endpoints**:
-- `POST /api/relay` — store payload, return token + expiry
+- `POST /api/relay` — store payload, return token + `edit_key` + expiry. Only the key's SHA-256 is stored.
+- `PUT /api/relay/{token}` — replace the payload in place and restart the TTL; requires the `edit_key` (403 otherwise, 404 if expired/unknown). Links created before edit keys existed can't be updated, only replaced.
 - `GET /api/relay/{token}` — retrieve payload or 404 if expired
 - `GET /api/relay/health` — status check
 

@@ -1314,6 +1314,36 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 }
 
 /* ─── Share result expiry selector ─── */
+.share-setup-range { font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 0.85rem; }
+.share-setup-modes { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.85rem; }
+.share-setup-mode {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+}
+.share-setup-mode:has(input:checked) { border-color: var(--accent); background: var(--accent-dim); }
+.share-setup-mode input { margin: 3px 0 0; accent-color: var(--accent); }
+.share-setup-mode small { display: block; font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; word-break: break-all; }
+.share-setup-pass-row { display: flex; gap: 0.5rem; align-items: center; }
+.share-setup-pass-row .lock-input { flex: 1; min-width: 0; margin: 0; }
+.share-setup-eye {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.share-setup-eye:hover { border-color: var(--accent); color: var(--accent); }
 .share-result-expiry {
   display: flex;
   align-items: center;
@@ -1627,9 +1657,29 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
   <div class="share-toast" id="share-toast">Link copied to clipboard</div>
 
+  <div class="info-overlay" id="share-setup-overlay">
+    <div class="info-panel">
+      <h2>Share since checkpoint</h2>
+      <p class="share-setup-range" id="share-setup-range"></p>
+      <div class="share-setup-modes" id="share-setup-modes">
+        <label class="share-setup-mode"><input type="radio" name="share-mode" value="update" checked><span>Update the existing link<small id="share-setup-existing"></small></span></label>
+        <label class="share-setup-mode"><input type="radio" name="share-mode" value="new"><span>Make a new link</span></label>
+      </div>
+      <div class="share-setup-pass-row">
+        <input type="password" id="share-setup-pass" class="lock-input" placeholder="share passphrase" autocomplete="off">
+        <button type="button" class="share-setup-eye" id="share-setup-eye" title="Show passphrase">show</button>
+      </div>
+      <p class="caveat" id="share-setup-hint">Your therapist needs this passphrase to open the link. If you change it on an existing link, they will need the new one.</p>
+      <div class="share-result-actions">
+        <button class="share-result-btn" id="share-setup-cancel">cancel</button>
+        <button class="share-result-btn primary" id="share-setup-go">Share</button>
+      </div>
+    </div>
+  </div>
+
   <div class="info-overlay" id="share-result-overlay">
     <div class="info-panel">
-      <h2>Your share link is ready</h2>
+      <h2 id="share-result-title">Your share link is ready</h2>
       <div class="share-result-url" id="share-result-url"></div>
       <div class="share-result-expiry" id="share-result-expiry">
         <span id="share-result-expiry-text"></span>
@@ -2645,6 +2695,7 @@ customElements.define('urge-row', UrgeRow);
       showHidden: false,
       onboarded: false,        // true after the user completes/skips the wizard
       shareTTL: 2592000,       // relay link TTL in seconds (default 30 days)
+      activeShare: null,       // { token, editKey, passphrase, expiresAt } for the link that can be updated in place
       schemaVersion: CURRENT_SCHEMA_VERSION
     };
   }
@@ -2670,6 +2721,7 @@ customElements.define('urge-row', UrgeRow);
           showHidden: false, // always reset — transient UI state
           onboarded: !!saved.onboarded,
           shareTTL: typeof saved.shareTTL === 'number' ? saved.shareTTL : defaults.shareTTL,
+          activeShare: saved.activeShare && typeof saved.activeShare.token === 'string' ? saved.activeShare : null,
           // schemaVersion missing from old prefs → treat as v1 so migration runs.
           schemaVersion: typeof saved.schemaVersion === 'number' ? saved.schemaVersion : 1
         };
@@ -2718,6 +2770,7 @@ customElements.define('urge-row', UrgeRow);
         knownCategories: CATEGORIES.map(c => c.id),
         onboarded: prefs.onboarded,
         shareTTL: prefs.shareTTL,
+        activeShare: prefs.activeShare,
         schemaVersion: prefs.schemaVersion
       }));
       localStorage.setItem(prefsKey(activeVaultId), enc);
@@ -3380,7 +3433,9 @@ customElements.define('urge-row', UrgeRow);
     renderSessionBar();
   });
 
-  const shareState = { url: '', longUrl: '', payload: '' };
+  // The link currently shown in the result dialog. `token` is set when it's an updatable relay link.
+  const shareState = { url: '', longUrl: '', payload: '', token: null };
+  let _pendingShare = null; // { entries } waiting for the setup dialog
 
   async function copyToClipboard(text) {
     try {
@@ -3405,8 +3460,29 @@ customElements.define('urge-row', UrgeRow);
     return resp.json();
   }
 
-  function showShareResult(shortUrl, longUrl, expiresAt) {
+  // Replace an existing link's payload in place. Throws with .status 404 (gone) or 403 (bad key).
+  async function putToRelay(token, payload, ttl, editKey) {
+    const resp = await fetch('/api/relay/' + encodeURIComponent(token), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload, ttl, edit_key: editKey })
+    });
+    if (!resp.ok) { const err = new Error('HTTP ' + resp.status); err.status = resp.status; throw err; }
+    return resp.json();
+  }
+
+  function relayUrl(token) {
+    return location.origin + location.pathname + '#relay=' + token;
+  }
+
+  function activeShareIsLive() {
+    const a = prefs.activeShare;
+    return !!(a && a.token && a.editKey && (!a.expiresAt || new Date(a.expiresAt) > new Date()));
+  }
+
+  function showShareResult(shortUrl, longUrl, expiresAt, title, note) {
     shareState.longUrl = longUrl;
+    document.getElementById('share-result-title').textContent = title || 'Your share link is ready';
     const ttlSelect = document.getElementById('share-result-ttl');
     ttlSelect.value = String(prefs.shareTTL || 2592000);
     if (shortUrl) {
@@ -3415,7 +3491,7 @@ customElements.define('urge-row', UrgeRow);
       const exp = new Date(expiresAt);
       document.getElementById('share-result-expiry-text').textContent = 'Expires ' + exp.toLocaleDateString();
       document.getElementById('share-result-expiry').style.display = '';
-      document.getElementById('share-result-status').textContent = '';
+      document.getElementById('share-result-status').textContent = note || '';
       document.getElementById('share-result-long-wrap').style.display = '';
       document.getElementById('share-result-long-url').textContent = longUrl;
     } else {
@@ -3428,13 +3504,11 @@ customElements.define('urge-row', UrgeRow);
     document.getElementById('share-result-overlay').classList.add('visible');
   }
 
-  document.getElementById('share-btn').addEventListener('click', async () => {
+  document.getElementById('share-btn').addEventListener('click', () => {
     if (!sessionDate) {
       alert('Set your last session date first.');
       return;
     }
-    const sharePass = prompt('Enter a passphrase to encrypt this share link.\nYour therapist will need this passphrase to open it.');
-    if (!sharePass) return;
     const today = dateKey(new Date());
     const shareEntries = {};
     const d = new Date(sessionDate + 'T00:00:00');
@@ -3444,21 +3518,108 @@ customElements.define('urge-row', UrgeRow);
       if (entries[k]) shareEntries[k] = entries[k];
       d.setDate(d.getDate() + 1);
     }
-    if (Object.keys(shareEntries).length === 0) {
+    const n = Object.keys(shareEntries).length;
+    if (n === 0) {
       alert('No entries between session date and today.');
       return;
     }
-    const json = JSON.stringify(buildSharePayload(shareEntries));
-    const encrypted = await encryptWithPassphrase(json, sharePass);
-    shareState.payload = encrypted;
-    const longUrl = location.origin + location.pathname + '#share=' + encrypted;
-    const ttl = prefs.shareTTL || 2592000;
+    _pendingShare = { entries: shareEntries };
+
+    // Setup dialog: update the live link (default) or make a new one; passphrase prefilled for updates.
+    const live = activeShareIsLive();
+    const from = new Date(sessionDate + 'T00:00:00');
+    document.getElementById('share-setup-range').textContent = `${n} day${n === 1 ? '' : 's'} from ${MONTHS[from.getMonth()]} ${from.getDate()} to today.`;
+    document.getElementById('share-setup-modes').style.display = live ? '' : 'none';
+    if (live) {
+      const exp = prefs.activeShare.expiresAt ? ` · expires ${new Date(prefs.activeShare.expiresAt).toLocaleDateString()}` : '';
+      document.getElementById('share-setup-existing').textContent = relayUrl(prefs.activeShare.token).replace(/^https?:\/\//, '') + exp;
+      document.querySelector('input[name="share-mode"][value="update"]').checked = true;
+    }
+    const passInput = document.getElementById('share-setup-pass');
+    passInput.type = 'password';
+    document.getElementById('share-setup-eye').textContent = 'show';
+    passInput.value = live && prefs.activeShare.passphrase ? prefs.activeShare.passphrase : '';
+    updateShareSetupUI();
+    document.getElementById('share-setup-overlay').classList.add('visible');
+    if (!passInput.value) passInput.focus();
+  });
+
+  function shareSetupMode() {
+    const live = activeShareIsLive();
+    const sel = document.querySelector('input[name="share-mode"]:checked');
+    return live && sel && sel.value === 'update' ? 'update' : 'new';
+  }
+
+  function updateShareSetupUI() {
+    const mode = shareSetupMode();
+    document.getElementById('share-setup-go').textContent = mode === 'update' ? 'Update link' : 'Share';
+    const pass = document.getElementById('share-setup-pass');
+    if (mode === 'update' && prefs.activeShare && prefs.activeShare.passphrase && !pass.value) pass.value = prefs.activeShare.passphrase;
+  }
+
+  document.querySelectorAll('input[name="share-mode"]').forEach(r => r.addEventListener('change', updateShareSetupUI));
+  document.getElementById('share-setup-eye').addEventListener('click', function() {
+    const pass = document.getElementById('share-setup-pass');
+    const show = pass.type === 'password';
+    pass.type = show ? 'text' : 'password';
+    this.textContent = show ? 'hide' : 'show';
+  });
+  document.getElementById('share-setup-cancel').addEventListener('click', () => {
+    document.getElementById('share-setup-overlay').classList.remove('visible');
+    _pendingShare = null;
+  });
+  document.getElementById('share-setup-pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('share-setup-go').click();
+  });
+
+  document.getElementById('share-setup-go').addEventListener('click', async () => {
+    if (!_pendingShare) return;
+    const sharePass = document.getElementById('share-setup-pass').value;
+    if (!sharePass) { document.getElementById('share-setup-pass').focus(); return; }
+    const mode = shareSetupMode();
+    const goBtn = document.getElementById('share-setup-go');
+    goBtn.disabled = true;
     try {
-      const data = await postToRelay(encrypted, ttl);
-      const shortUrl = location.origin + location.pathname + '#relay=' + data.token;
-      showShareResult(shortUrl, longUrl, data.expires_at);
-    } catch {
-      showShareResult(null, longUrl, null);
+      const json = JSON.stringify(buildSharePayload(_pendingShare.entries));
+      const encrypted = await encryptWithPassphrase(json, sharePass);
+      shareState.payload = encrypted;
+      const longUrl = location.origin + location.pathname + '#share=' + encrypted;
+      const ttl = prefs.shareTTL || 2592000;
+      let note = '';
+
+      if (mode === 'update') {
+        try {
+          const data = await putToRelay(prefs.activeShare.token, encrypted, ttl, prefs.activeShare.editKey);
+          const passChanged = prefs.activeShare.passphrase !== sharePass;
+          prefs.activeShare = { ...prefs.activeShare, passphrase: sharePass, expiresAt: data.expires_at };
+          await savePrefs();
+          shareState.token = data.token;
+          document.getElementById('share-setup-overlay').classList.remove('visible');
+          showShareResult(relayUrl(data.token), longUrl, data.expires_at, 'Link updated',
+            passChanged ? 'Same link as before, new passphrase — your therapist will need it. Expiry restarted from today.'
+                        : 'Same link and passphrase as before. Expiry restarted from today.');
+          return;
+        } catch (err) {
+          // Gone or unupdatable (pre-edit-key link): fall through and make a fresh one.
+          if (err.status !== 404 && err.status !== 403) throw err;
+          note = 'The old link had expired, so this is a new one — send it again.';
+        }
+      }
+
+      try {
+        const data = await postToRelay(encrypted, ttl);
+        prefs.activeShare = { token: data.token, editKey: data.edit_key, passphrase: sharePass, expiresAt: data.expires_at };
+        await savePrefs();
+        shareState.token = data.token;
+        document.getElementById('share-setup-overlay').classList.remove('visible');
+        showShareResult(relayUrl(data.token), longUrl, data.expires_at, 'Your share link is ready', note);
+      } catch {
+        shareState.token = null;
+        document.getElementById('share-setup-overlay').classList.remove('visible');
+        showShareResult(null, longUrl, null);
+      }
+    } finally {
+      goBtn.disabled = false;
     }
   });
 
@@ -3476,8 +3637,16 @@ customElements.define('urge-row', UrgeRow);
     if (!shareState.payload) return;
     document.getElementById('share-result-status').textContent = 'Updating\u2026';
     try {
-      const data = await postToRelay(shareState.payload, ttl);
-      const shortUrl = location.origin + location.pathname + '#relay=' + data.token;
+      const canUpdate = shareState.token && prefs.activeShare && prefs.activeShare.token === shareState.token && prefs.activeShare.editKey;
+      const data = canUpdate
+        ? await putToRelay(shareState.token, shareState.payload, ttl, prefs.activeShare.editKey)
+        : await postToRelay(shareState.payload, ttl);
+      if (prefs.activeShare && (canUpdate || !shareState.token)) {
+        prefs.activeShare = { ...prefs.activeShare, token: data.token, editKey: data.edit_key || prefs.activeShare.editKey, expiresAt: data.expires_at };
+        await savePrefs();
+      }
+      shareState.token = data.token;
+      const shortUrl = relayUrl(data.token);
       shareState.url = shortUrl;
       document.getElementById('share-result-url').textContent = shortUrl;
       const exp = new Date(data.expires_at);
