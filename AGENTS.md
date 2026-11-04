@@ -22,7 +22,7 @@ You are the maintainer of dbt.thisminute.org — an encrypted, single-file DBT (
 Three custom elements with Shadow DOM, defined before the IIFE:
 
 - **`<rating-row>`**: Numeric pill selector (0–N). Used for emotions and urges. Attributes: `label`, `field`, `max`, `type`, `small`
-- **`<toggle-row>`**: On/off switch. Used for actions and daily toggle categories. Attributes: `label`, `field`
+- **`<toggle-row>`**: Tri-state no/yes pills (`null` = unanswered, `false`, `true`). Tapping the selected pill clears it. Unanswered toggles are omitted from the share view. Used for actions and daily toggle categories. Attributes: `label`, `field`
 - **`<skill-row>`**: 4 text pills (aware/tried/used/auto) + "helped" toggle. Used for DBT skills. Attributes: `label`, `field`
 
 All three dispatch `field-change` CustomEvents (bubbles, composed) caught by a single centralized listener in `initStaticHandlers()`. State is pushed down via the `.value` property setter.
@@ -34,7 +34,7 @@ Attach event listeners once in `connectedCallback()` after `_render()` — never
 - **Emotions**: User-defined list in `prefs.emotions`. Stored as `emotion_0`, `emotion_1`, etc. (0–5 intensity)
 - **Urges**: Fixed vocabulary in `URGES` array. Stored as `urge_0`, `urge_1`, etc. (0–5 intensity)
 - **Actions**: Fixed vocabulary in `ACTIONS` array. Stored by action ID string (boolean)
-- **Skills**: Fixed vocabulary in `SKILLS` array (26 items). Stored as `skill_0`–`skill_25`. Value encodes engagement × 2 + helped (0–7)
+- **Skills**: Fixed vocabulary in `SKILLS` array of `{ label, desc, similar }` objects (95 items: DBT 0–30, ACT 31–44, CBT 45–57, IFS 58–67, Schema 68–76, CAMS 77–83, CFT 84–88, Somatic 89–94). Stored as `skill_N`. Value encodes engagement × 2 + helped (0–7). `SKILL_CATALOG` is the browsable tree (school → groups → indices) used by the chooser, the daily-card headers, and the share view; `SKILL_META` is the index → school/group back-reference. `similar` links are cross-school and made symmetric at load; they surface only in the info popover, never inside a school's tab. Prefs carry `knownSkillCount` so skills appended later start hidden for existing vaults.
 - **Daily**: Sleep (hours + quality), exercise (mins + type), meals (string array), toggle categories (boolean)
 
 ## Share Links
@@ -62,6 +62,8 @@ Share payload format (v2): `{ entries: {...}, hidden: {...} }` when items are hi
 ## Key Functions
 
 - `buildDynamicSections()`: Creates web component elements for urges/actions/skills/toggle-categories based on vocabulary arrays minus hidden items
+- `renderWizardSkills()`: Tabbed skills chooser (one tab per school in `SKILL_CATALOG`); also opened directly from the Skills section via `openWizard('edit', 'skills')`
+- `showSkillInfo(idx)`: Info popover for a skill (desc + similar skills), triggered by tapping a skill-row label (`skill-info` event) or the ? button in the chooser
 - `renderEmotions()`: Builds emotion rows (rating-row inside .emotion-row wrappers with 7-day avg + hide button)
 - `renderEntry()`: Pushes current date's entry values into all web components and static inputs
 - `renderShareDayCard()`: Generates HTML string for one day's read-only share view

@@ -192,6 +192,77 @@ header {
 
 /* ─── Components ─── */
 rating-row, toggle-row, skill-row, .emotion-row { margin: 5px 0; }
+
+/* ─── Skills section headers (school › group) ─── */
+.skills-school-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin: 1.1rem 0 0.1rem;
+}
+.skills-school-label:first-child { margin-top: 0; }
+.skills-group-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 0.7rem 0 0.1rem;
+}
+.skills-group-label:first-child { margin-top: 0; }
+
+/* ─── Skill info popover ─── */
+.skill-info-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 350;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+}
+.skill-info-overlay.visible { display: flex; }
+body.light-mode .skill-info-overlay { background: rgba(0,0,0,0.25); }
+@media (min-width: 600px) { .skill-info-overlay { align-items: center; } }
+.skill-info-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  max-width: 440px;
+  width: 100%;
+  padding: 1.1rem 1.25rem 1.25rem;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  animation: fadeUp 0.2s ease;
+}
+body.light-mode .skill-info-card { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+.skill-info-school {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+.skill-info-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.skill-info-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; }
+.skill-info-similar {
+  margin-top: 0.85rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.skill-info-similar:empty { display: none; }
+.skill-info-similar b { color: var(--text-secondary); font-weight: 500; }
 .emotion-row rating-row { flex: 1; min-width: 0; margin: 0; }
 
 /* ─── Notes ─── */
@@ -703,6 +774,13 @@ rating-row, toggle-row, skill-row, .emotion-row { margin: 5px 0; }
   color: var(--text-muted);
   padding: 0.5rem 0 0.2rem;
 }
+.share-sub-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+  letter-spacing: 0.04em;
+  padding: 0.35rem 0 0.1rem;
+}
 .share-notes {
   font-size: 0.8rem;
   color: var(--text-secondary);
@@ -990,6 +1068,53 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   line-height: 1;
 }
 .wizard-item-label { flex: 1; min-width: 0; }
+.wizard-item-info {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin-top: 1px;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  line-height: 1;
+  font-family: var(--font-body);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+.wizard-item-info:hover { border-color: var(--accent); color: var(--accent); }
+.wizard-tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.85rem; }
+.wizard-tab {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-family: var(--font-body);
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.wizard-tab:hover { border-color: var(--border-light); color: var(--text-secondary); }
+.wizard-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.wizard-tab-count {
+  font-size: 0.6rem;
+  font-weight: 600;
+  background: var(--border-light);
+  color: var(--text-secondary);
+  border-radius: 10px;
+  padding: 0 5px;
+  line-height: 1.5;
+}
+.wizard-tab.active .wizard-tab-count { background: var(--accent); color: #fff; }
+.wizard-school-intro { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem; }
+.wizard-school-intro b { color: var(--text-secondary); font-weight: 500; }
 .wizard-item-title { font-size: 0.85rem; color: var(--text); }
 .wizard-item-desc {
   font-size: 0.7rem;
@@ -1417,6 +1542,10 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
     <div class="section" id="skills-section">
       <div class="section-header">Skills Used</div>
+      <div id="skill-rows"></div>
+      <div class="emotion-controls">
+        <button class="emotion-add-btn" id="choose-skills">+ choose skills</button>
+      </div>
     </div>
 
     <div class="section">
@@ -1525,6 +1654,16 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 </div>
 
 <!-- Overlays live outside .app so they render even while the app shell is hidden (e.g., during the new-user wizard flow). -->
+<!-- ─── Skill info popover (what a skill is + similar skills in other schools) ─── -->
+<div class="skill-info-overlay" id="skill-info-overlay">
+  <div class="skill-info-card" role="dialog" aria-labelledby="skill-info-title">
+    <div class="skill-info-school" id="skill-info-school"></div>
+    <div class="skill-info-title" id="skill-info-title"></div>
+    <div class="skill-info-desc" id="skill-info-desc"></div>
+    <div class="skill-info-similar" id="skill-info-similar"></div>
+  </div>
+</div>
+
 <div class="wizard-overlay" id="wizard-overlay">
   <div class="wizard-panel">
     <div class="wizard-header">
@@ -1632,14 +1771,18 @@ class ToggleRow extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this._value = false;
+    // null = not answered (omitted from share view), false = no, true = yes
+    this._value = null;
   }
 
   connectedCallback() {
     this._render();
-    this.shadowRoot.querySelector('.toggle').addEventListener('click', () => {
-      this._value = !this._value;
-      this._updateToggle();
+    this.shadowRoot.querySelector('.pills').addEventListener('click', e => {
+      const pill = e.target.closest('.pill');
+      if (!pill) return;
+      const v = pill.dataset.value === 'yes';
+      this._value = this._value === v ? null : v;
+      this._updatePills();
       this.dispatchEvent(new CustomEvent('field-change', {
         bubbles: true, composed: true,
         detail: { field: this.getAttribute('field'), value: this._value }
@@ -1649,35 +1792,43 @@ class ToggleRow extends HTMLElement {
 
   attributeChangedCallback(name) {
     if (name === 'value') {
-      this._value = this.getAttribute('value') === 'true';
-      this._updateToggle();
+      const a = this.getAttribute('value');
+      this._value = a === 'true' ? true : a === 'false' ? false : null;
+      this._updatePills();
     }
   }
 
   get value() { return this._value; }
   set value(v) {
-    this._value = !!v;
-    this._updateToggle();
+    this._value = v == null ? null : !!v;
+    this._updatePills();
   }
 
   _render() {
     const label = this.getAttribute('label') || '';
 
     this.shadowRoot.innerHTML = `<style>
-:host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0}
+:host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.5rem}
 .label{font-size:0.85rem;color:var(--text-secondary)}
-.toggle{width:44px;height:24px;border-radius:12px;background:var(--bg-input);border:1px solid var(--border);cursor:pointer;position:relative;transition:all var(--transition,0.2s ease);-webkit-tap-highlight-color:transparent;flex-shrink:0}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--text-muted);transition:all var(--transition,0.2s ease)}
-.toggle.on{background:var(--accent-dim);border-color:var(--accent)}
-.toggle.on::after{transform:translateX(20px);background:var(--accent)}
+.pills{display:flex;gap:4px;flex-shrink:0}
+.pill{min-width:40px;padding:0 10px;height:28px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
+.pill:hover{border-color:var(--border-light)}
+.pill.selected{font-weight:600;border-color:transparent}
+.pill.selected.no{background:var(--c0);color:var(--text-secondary)}
+.pill.selected.yes{background:var(--accent);color:#fff;box-shadow:0 0 8px var(--accent-glow)}
+@media(max-width:400px){.pill{min-width:36px;height:26px;font-size:0.7rem}.label{font-size:0.8rem}}
 </style>
 <div class="label">${label}</div>
-<div class="toggle"></div>`;
+<div class="pills"><div class="pill no" data-value="no">no</div><div class="pill yes" data-value="yes">yes</div></div>`;
   }
 
-  _updateToggle() {
-    const t = this.shadowRoot?.querySelector('.toggle');
-    if (t) t.classList.toggle('on', this._value);
+  _updatePills() {
+    const pills = this.shadowRoot?.querySelectorAll('.pill');
+    if (!pills) return;
+    pills.forEach(p => {
+      const isYes = p.dataset.value === 'yes';
+      p.classList.toggle('selected', this._value !== null && this._value === isYes);
+    });
   }
 }
 customElements.define('toggle-row', ToggleRow);
@@ -1710,6 +1861,12 @@ class SkillRow extends HTMLElement {
       this._update();
       this._dispatch();
     });
+    this.shadowRoot.querySelector('.label').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('skill-info', {
+        bubbles: true, composed: true,
+        detail: { field: this.getAttribute('field') }
+      }));
+    });
   }
 
   attributeChangedCallback(name) {
@@ -1733,7 +1890,8 @@ class SkillRow extends HTMLElement {
     const label = this.getAttribute('label') || '';
     this.shadowRoot.innerHTML = `<style>
 :host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.4rem}
-.label{font-size:0.8rem;color:var(--text-secondary);flex-shrink:0;width:110px;line-height:1.2}
+.label{font-size:0.8rem;color:var(--text-secondary);flex-shrink:0;width:110px;line-height:1.2;cursor:pointer;text-decoration:underline dotted;text-decoration-color:var(--border-light);text-underline-offset:3px;-webkit-tap-highlight-color:transparent}
+.label:hover{text-decoration-color:var(--accent)}
 .right{display:flex;align-items:center;gap:0.4rem}
 .pills{display:flex;gap:3px}
 .pill{padding:4px 7px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.65rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);user-select:none;-webkit-tap-highlight-color:transparent;white-space:nowrap}
@@ -2006,23 +2164,173 @@ customElements.define('skill-row', SkillRow);
   ];
   // Schema v2: individual DBT skills (was 4 modules). Migration in migrateEntriesV1toV2() moves
   // old skill_0..3 into entry.legacySkills so they're not misinterpreted as individual skills.
+  // Append-only: new skills go at the end, under whichever school they belong to. Each entry is
+  // { label, desc, similar }. `similar` lists indices of comparable skills in other schools; it is
+  // made symmetric at load time so a link only needs to be written on one side.
   const SKILLS = [
+    // ── DBT (0-30) ──
     // Mindfulness (0-6)
-    'Wise Mind','Observe','Describe','Participate','Non-judgmental stance','One-mindfully','Effectiveness',
+    { label: 'Wise Mind', desc: 'The overlap of emotion mind and reasonable mind: a calm knowing that holds both feeling and fact.', similar: [66, 73] },
+    { label: 'Observe', desc: 'Notice what\'s happening inside and around you without reacting to it or putting words on it yet.', similar: [39, 91] },
+    { label: 'Describe', desc: 'Put words on what you observed, sticking to facts: "a tight chest", "the thought that I failed".', similar: [33] },
+    { label: 'Participate', desc: 'Throw yourself fully into what you\'re doing without self-consciousness or running commentary.' },
+    { label: 'Non-judgmental stance', desc: 'Drop "good/bad" and "should". Describe consequences instead of verdicts.', similar: [85] },
+    { label: 'One-mindfully', desc: 'Do one thing at a time with full attention, bringing the mind back each time it wanders.' },
+    { label: 'Effectiveness', desc: 'Do what works for the goal in front of you, rather than what feels fair or proves a point.' },
     // Distress Tolerance (7-13)
-    'TIPP','Self-soothe','IMPROVE the moment','Pros and cons','Radical acceptance','Half-smile','Turning the mind',
+    { label: 'TIPP', desc: 'Change body chemistry fast: Temperature (cold water on the face), Intense exercise, Paced breathing, Paired muscle relaxation.', similar: [92, 93, 78] },
+    { label: 'Self-soothe', desc: 'Comfort yourself through the five senses: something to see, hear, smell, taste, or touch.', similar: [84, 87] },
+    { label: 'IMPROVE the moment', desc: 'Imagery, Meaning, Prayer, Relaxation, One thing in the moment, Vacation, Encouragement.', similar: [87] },
+    { label: 'Pros and cons', desc: 'Weigh acting on the urge against not acting on it, including the long-term costs of each.' },
+    { label: 'Radical acceptance', desc: 'Fully accept reality as it is, all the way down, without approving of it. Fighting what is already true adds suffering.', similar: [31] },
+    { label: 'Half-smile', desc: 'Relax the face into a slight smile and let the body tell the mind it\'s safe to soften. Often paired with willing hands.', similar: [85] },
+    { label: 'Turning the mind', desc: 'Notice you\'ve turned away from acceptance, and choose to turn back toward it. Usually has to be repeated.', similar: [28] },
     // Emotion Regulation (14-20)
-    'PLEASE','Opposite action','Check the facts','Problem solving','Accumulate positives','Build mastery','Cope ahead',
+    { label: 'PLEASE', desc: 'Treat PhysicaL illness, balance Eating, avoid mood-Altering substances, balance Sleep, get Exercise. Reduces emotional vulnerability.' },
+    { label: 'Opposite action', desc: 'When the emotion doesn\'t fit the facts (or acting on it isn\'t effective), act opposite to its urge, all the way.', similar: [50, 75, 43] },
+    { label: 'Check the facts', desc: 'Ask: what event set this off? What am I assuming? Do the emotion and its intensity fit the actual facts?', similar: [33, 46, 47, 68] },
+    { label: 'Problem solving', desc: 'When the emotion does fit the facts, change the situation: define the problem, brainstorm, pick an option, try it.', similar: [55] },
+    { label: 'Accumulate positives', desc: 'Deliberately do pleasant things now, and build toward long-term goals that make life worth living.', similar: [51, 50] },
+    { label: 'Build mastery', desc: 'Do something a little hard that leaves you feeling competent. Daily if you can.', similar: [54] },
+    { label: 'Cope ahead', desc: 'Rehearse a difficult situation in advance: picture it, plan which skills you\'ll use, imagine it going well.', similar: [71, 77] },
     // Interpersonal Effectiveness (21-25)
-    'DEAR MAN','GIVE','FAST','Validate','Repair'
+    { label: 'DEAR MAN', desc: 'Asking for something or saying no: Describe, Express, Assert, Reinforce; stay Mindful, Appear confident, Negotiate.' },
+    { label: 'GIVE', desc: 'Keeping the relationship: be Gentle, act Interested, Validate, use an Easy manner.' },
+    { label: 'FAST', desc: 'Keeping self-respect: be Fair, no Apologies for existing, Stick to values, be Truthful.', similar: [42] },
+    { label: 'Validate', desc: 'Acknowledge that someone\'s (or your own) feelings make sense given their situation, even if you don\'t agree.', similar: [64, 74] },
+    { label: 'Repair', desc: 'After a rupture: own your part, make amends, and do something different next time.' },
+    // DBT additions (26-30)
+    { label: 'STOP', desc: 'Stop. Take a step back. Observe. Proceed mindfully. A pause between the trigger and the reaction.', similar: [37, 90] },
+    { label: 'Distract (ACCEPTS)', desc: 'Activities, Contributing, Comparisons, Emotions (opposite), Pushing away, Thoughts, Sensations. Get through the crisis without making it worse.', similar: [56, 78] },
+    { label: 'Willingness', desc: 'Do what the situation needs, willingly, instead of digging in with willfulness ("I refuse", "it shouldn\'t be like this").', similar: [31] },
+    { label: 'Mindfulness of current emotion', desc: 'Let the emotion be there and watch it like a wave: notice where it is in your body, don\'t amplify it, don\'t push it down. It passes.', similar: [32, 94] },
+    { label: 'Dialectical thinking', desc: 'Hold two things that seem contradictory as both true: "I\'m doing my best AND I need to do better." Look for the middle path.', similar: [48] },
+    // ── ACT (31-44) ──
+    { label: 'Make room', desc: 'Allow an uncomfortable feeling to be present without struggling against it. Not liking it, just dropping the fight.' },
+    { label: 'Expansion', desc: 'Breathe into the feeling. Notice its edges, let it take up space, and let yourself move around it.' },
+    { label: 'Notice the thought', desc: 'Put "I\'m having the thought that…" in front of the thought. The thought is still there; you\'re no longer inside it.' },
+    { label: 'Leaves on a stream', desc: 'Place each thought on a leaf and watch it drift by. When you get pulled in, gently come back to the bank.' },
+    { label: 'Name the story', desc: 'Spot the familiar script ("there\'s the not-good-enough story again") and name it rather than argue with it.', similar: [68, 60] },
+    { label: 'Thank your mind', desc: '"Thanks, mind." Acknowledge the thought as your mind doing its job of warning you, and carry on.', similar: [46] },
+    { label: 'Dropping anchor', desc: 'Acknowledge what\'s showing up, come back into the body (push feet into the floor, stretch), and engage with where you are.' },
+    { label: 'Notice five things', desc: 'Name five things you can see, five you can hear, five you can feel. Come back to the room.', similar: [89] },
+    { label: 'Observing self', desc: 'Notice the part of you that notices. Thoughts and feelings change; the one watching them doesn\'t.', similar: [66] },
+    { label: 'Sky and weather', desc: 'You are the sky; thoughts and feelings are the weather. Weather can be fierce, but it can\'t harm the sky.', similar: [59] },
+    { label: 'Clarify values', desc: 'Ask what you want to stand for in this area of life, as a direction (not a goal that can be finished).', similar: [83] },
+    { label: 'Values check', desc: 'Is this a toward move or an away move? Is what I\'m about to do taking me toward the person I want to be?' },
+    { label: 'Committed action', desc: 'Take one concrete step in a valued direction, however small, and keep taking them.' },
+    { label: 'Passengers on the bus', desc: 'Keep driving toward what matters while the passengers (thoughts, urges, feelings) shout from the back. They can ride; they don\'t get to steer.' },
+    // ── CBT (45-57) ──
+    { label: 'Thought record', desc: 'Write it down: situation, emotion (0–100), automatic thought, evidence for and against, balanced thought, re-rated emotion.', similar: [70] },
+    { label: 'Spot the distortion', desc: 'Name the thinking error: emotional reasoning, mind reading, catastrophizing, all-or-nothing, discounting positives, should statements, personalizing.' },
+    { label: 'Examine the evidence', desc: 'What\'s the actual evidence this thought is true? What\'s the evidence against? What would I tell a friend?' },
+    { label: 'Balanced thought', desc: 'Write a more accurate thought that accounts for all the evidence, not just the worst-case slice.', similar: [73] },
+    { label: 'Decatastrophize', desc: 'What\'s the worst that could happen? The best? The most likely? And if the worst happened, how would I cope?', similar: [62] },
+    { label: 'Behavioral activation', desc: 'Do the activity before you feel like it. Action comes first; motivation follows, especially in depression.' },
+    { label: 'Activity scheduling', desc: 'Plan specific activities into the day, especially ones with pleasure or accomplishment, and track how they actually feel.' },
+    { label: 'Behavioral experiment', desc: 'Treat a belief as a prediction and test it in the real world. What did you predict? What happened?', similar: [72, 75] },
+    { label: 'Graded exposure', desc: 'Approach what you\'ve been avoiding, starting at the easiest step on your ladder and staying until the anxiety drops.', similar: [57] },
+    { label: 'Graded task', desc: 'Break an overwhelming task into pieces small enough to actually start, and do the first one.' },
+    { label: 'Structured problem solving', desc: 'Define the problem, list every option, weigh them, pick one, plan it, do it, review how it went.' },
+    { label: 'Worry postponement', desc: 'Note the worry, set it aside for a scheduled worry time later, and return to what you were doing.' },
+    { label: 'Drop safety behaviors', desc: 'Notice the little things you do to feel safe (checking, rehearsing, escape routes) and leave one out to learn you didn\'t need it.', similar: [75] },
+    // ── IFS (58-67) ──
+    { label: 'Parts check-in', desc: 'Pause and ask: who\'s here right now? Notice which parts are active and how blended you are with them.', similar: [69] },
+    { label: 'Unblending', desc: 'Shift from "I am worthless" to "a part of me feels worthless." Create a little space between you and the part.' },
+    { label: 'Name the part', desc: 'Give the part a name or a handle so you can recognize it when it shows up again.' },
+    { label: 'Get curious about a part', desc: 'Find it, focus on it, flesh it out (where it lives in the body, what it looks like), and notice how you feel toward it.', similar: [66] },
+    { label: 'Ask what the part fears', desc: 'Ask the part what it\'s afraid would happen if it stopped doing its job. Protectors always have a reason.' },
+    { label: 'Speak for the part', desc: 'Say what the part wants to say, as its spokesperson, instead of letting it take over and say it for you.' },
+    { label: 'Reassure the part', desc: 'Let the part know you see it, appreciate what it\'s trying to do, and that you (Self) are here now. Update it on how old you are.' },
+    { label: 'Ask protectors to step back', desc: 'Ask the parts that are crowding in if they\'d be willing to give you some room so you can respond from Self.' },
+    { label: '8 C\'s check', desc: 'Am I in Self? Look for curiosity, calm, clarity, compassion, confidence, courage, creativity, connectedness. If not, a part is leading.' },
+    { label: 'Self-led response', desc: 'Having unblended, respond to the situation from Self rather than from the part that got activated.', similar: [73, 85] },
+    // ── Schema therapy (68-76) ──
+    { label: 'Schema noticing', desc: 'Name the schema that\'s running ("that\'s defectiveness talking"). The schema is a lens, not a report on reality.' },
+    { label: 'Mode awareness', desc: 'Which mode am I in? Vulnerable child, angry child, punitive or demanding parent, detached protector, or healthy adult.', similar: [88] },
+    { label: 'Trigger log', desc: 'Record what set the schema off: the situation, what the schema said, how strong it got, what you did.' },
+    { label: 'Schema flashcard', desc: 'Read the card you wrote in a calm moment: what the schema says, where it came from, the evidence against it, and what the healthy adult does instead.' },
+    { label: 'Evidence against the schema', desc: 'Collect and reread the evidence that contradicts the schema. Especially the things it discounts.' },
+    { label: 'Healthy Adult self-talk', desc: 'Respond to the activated schema the way a wise, caring adult would respond to a child who believed it.', similar: [86] },
+    { label: 'Reparent the vulnerable child', desc: 'Turn toward the hurt part with warmth: "of course you feel that way. You\'re not alone with it now."', similar: [86, 87] },
+    { label: 'Pattern breaking', desc: 'Do the behavior the schema says you can\'t (stay, ask, say no, show up) and let the outcome be data.' },
+    { label: 'Talk back to the critic', desc: 'Answer the punitive parent voice out loud or in writing. Set a limit on it. It is not the truth.', similar: [63] },
+    // ── CAMS (77-83) ──
+    { label: 'Reviewed the plan', desc: 'Read through your CAMS stabilization plan: what to do, who to contact, what to remove, when to escalate.' },
+    { label: 'Used a plan strategy', desc: 'Did one of the specific things on the plan to get through the hour or the day.' },
+    { label: 'Reduced access to means', desc: 'Put distance between yourself and the means: locked up, handed over, got rid of, or asked someone to hold it.' },
+    { label: 'Reached out to support', desc: 'Contacted one of the people named on the plan, even just to say you\'re having a hard time.' },
+    { label: 'Crisis line or clinician', desc: 'Called or texted a crisis line, or reached your therapist or clinician, as the plan says to do.' },
+    { label: 'Worked on a driver', desc: 'Did something about one of the problems that make suicide feel like an option (the drivers), not just the symptom.' },
+    { label: 'Reviewed reasons for living', desc: 'Reread your reasons for living and reasons for dying lists, and noticed what\'s shifted.' },
+    // ── CFT (84-88) ──
+    { label: 'Soothing rhythm breathing', desc: 'Slow the breath to around five seconds in, five out, and let the body settle. Builds the soothing system.' },
+    { label: 'Compassionate self', desc: 'Step into the version of you that is wise, strong, warm, and committed to helping. Posture, voice, face.' },
+    { label: 'Compassionate letter', desc: 'Write to yourself about what you\'re going through, from the compassionate self, with understanding rather than fixing.' },
+    { label: 'Compassionate imagery', desc: 'Bring to mind a safe place, or an ideal compassionate other, and let yourself receive care from it.' },
+    { label: 'Three systems check', desc: 'Which system is running: threat (anxiety, anger), drive (wanting, achieving), or soothing (safe, content)? What would bring soothing online?' },
+    // ── Somatic (89-94) ──
+    { label: '5-4-3-2-1 grounding', desc: 'Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste. Bring attention out of the loop and into the room.' },
+    { label: 'Orienting', desc: 'Slowly turn your head and let your eyes land on things in the room. Let the body register that there\'s no threat here.' },
+    { label: 'Body scan', desc: 'Move attention slowly through the body from feet to head, noticing sensation without trying to change it.' },
+    { label: 'Extended exhale', desc: 'Breathe in, then breathe out slower than you breathed in (or two short inhales, one long exhale). Signals the nervous system to settle.' },
+    { label: 'Progressive muscle relaxation', desc: 'Tense each muscle group for a few seconds, then release, working through the body.' },
+    { label: 'Pendulation', desc: 'Move attention between the distress and a place in the body that feels neutral or okay, back and forth, so the system learns it can shift.' }
   ];
   const SKILL_LEVELS = ['aware', 'tried', 'used', 'auto'];
-  const SKILL_GROUPS = [
-    { label: 'Mindfulness', indices: [0, 1, 2, 3, 4, 5, 6] },
-    { label: 'Distress Tolerance', indices: [7, 8, 9, 10, 11, 12, 13] },
-    { label: 'Emotion Regulation', indices: [14, 15, 16, 17, 18, 19, 20] },
-    { label: 'Interpersonal Effectiveness', indices: [21, 22, 23, 24, 25] }
+  // Browsable catalog: school → groups → SKILLS indices. A school never references another
+  // school; cross-school overlap lives only in SKILLS[i].similar (shown in the info popover).
+  const SKILL_CATALOG = [
+    { id: 'dbt', label: 'DBT', name: 'Dialectical Behavior Therapy', desc: 'Four modules of concrete skills for staying regulated, tolerating crises, and handling relationships.', groups: [
+      { label: 'Mindfulness', indices: [0, 1, 2, 3, 4, 5, 6] },
+      { label: 'Distress Tolerance', indices: [7, 26, 27, 8, 9, 10, 11, 12, 13, 28] },
+      { label: 'Emotion Regulation', indices: [14, 15, 16, 17, 18, 19, 20, 29] },
+      { label: 'Interpersonal Effectiveness', indices: [21, 22, 23, 24, 25, 30] }
+    ] },
+    { id: 'act', label: 'ACT', name: 'Acceptance and Commitment Therapy', desc: 'Six processes for getting unstuck from thoughts and feelings and moving toward what matters.', groups: [
+      { label: 'Acceptance', indices: [31, 32] },
+      { label: 'Defusion', indices: [33, 34, 35, 36] },
+      { label: 'Present moment', indices: [37, 38] },
+      { label: 'Self-as-context', indices: [39, 40] },
+      { label: 'Values', indices: [41, 42] },
+      { label: 'Committed action', indices: [43, 44] }
+    ] },
+    { id: 'cbt', label: 'CBT', name: 'Cognitive Behavioral Therapy', desc: 'Catching and testing unhelpful thoughts, and changing behavior to change how you feel.', groups: [
+      { label: 'Cognitive', indices: [45, 46, 47, 48, 49] },
+      { label: 'Behavioral', indices: [50, 51, 52, 53, 54, 57] },
+      { label: 'Problem solving', indices: [55, 56] }
+    ] },
+    { id: 'ifs', label: 'IFS', name: 'Internal Family Systems', desc: 'Relating to your inner parts with curiosity from Self, instead of being taken over by them.', groups: [
+      { label: 'Noticing parts', indices: [58, 59, 60] },
+      { label: 'Working with a part', indices: [61, 62, 63, 64, 65] },
+      { label: 'Self-energy', indices: [66, 67] }
+    ] },
+    { id: 'schema', label: 'Schema', name: 'Schema Therapy', desc: 'Recognizing lifelong patterns (schemas) and modes as they fire, and answering them as a healthy adult.', groups: [
+      { label: 'Noticing', indices: [68, 69, 70] },
+      { label: 'Challenging', indices: [71, 72, 73, 74] },
+      { label: 'Behavioral', indices: [75, 76] }
+    ] },
+    { id: 'cams', label: 'CAMS', name: 'Collaborative Assessment and Management of Suicidality', desc: 'A suicide-specific framework built around a stabilization plan and the drivers behind suicidal thinking.', groups: [
+      { label: 'Stabilization plan', indices: [77, 78, 79, 80, 81] },
+      { label: 'Drivers', indices: [82, 83] }
+    ] },
+    { id: 'cft', label: 'CFT', name: 'Compassion-Focused Therapy', desc: 'Deliberately building the soothing system and a compassionate stance toward yourself.', groups: [
+      { label: 'Compassionate mind', indices: [84, 85, 86, 87] },
+      { label: 'Three systems', indices: [88] }
+    ] },
+    { id: 'somatic', label: 'Somatic', name: 'Somatic and polyvagal approaches', desc: 'Working through the body and nervous system rather than through thoughts.', groups: [
+      { label: 'Grounding', indices: [89, 90] },
+      { label: 'Body awareness', indices: [91, 94] },
+      { label: 'Regulation', indices: [92, 93] }
+    ] }
   ];
+  // Back-references (index → school/group) and symmetric `similar` links.
+  const SKILL_META = SKILLS.map(() => ({ school: null, group: null }));
+  SKILL_CATALOG.forEach(sc => sc.groups.forEach(g => g.indices.forEach(i => { SKILL_META[i] = { school: sc, group: g }; })));
+  SKILLS.forEach((s, i) => (s.similar || []).forEach(j => {
+    SKILLS[j].similar = SKILLS[j].similar || [];
+    if (!SKILLS[j].similar.includes(i)) SKILLS[j].similar.push(i);
+  }));
   // Daily categories. 'complex' categories have their own hand-built HTML (sleep/exercise/meals);
   // 'toggle' categories are simple booleans that we build dynamically in buildDynamicSections().
   // Append-only: new category ids go at the end so share-link field names stay stable.
@@ -2095,6 +2403,12 @@ customElements.define('skill-row', SkillRow);
           // schemaVersion missing from old prefs → treat as v1 so migration runs.
           schemaVersion: typeof saved.schemaVersion === 'number' ? saved.schemaVersion : 1
         };
+        // Skills appended since these prefs were last saved start hidden, same as for a new vault.
+        // Prefs saved before this field existed knew the original 26 DBT skills.
+        const known = typeof saved.knownSkillCount === 'number' ? saved.knownSkillCount : 26;
+        for (let i = known; i < SKILLS.length; i++) {
+          if (!prefs.hiddenSkills.includes(i)) prefs.hiddenSkills.push(i);
+        }
       }
     } catch {}
   }
@@ -2108,6 +2422,7 @@ customElements.define('skill-row', SkillRow);
         hiddenActions: prefs.hiddenActions,
         hiddenCategories: prefs.hiddenCategories,
         hiddenSkills: prefs.hiddenSkills,
+        knownSkillCount: SKILLS.length,
         onboarded: prefs.onboarded,
         shareTTL: prefs.shareTTL,
         schemaVersion: prefs.schemaVersion
@@ -2247,7 +2562,7 @@ customElements.define('skill-row', SkillRow);
   const DYNAMIC_KEYS = {
     urges: 'urges-section',
     actions: 'actions-section',
-    skills: 'skills-section',
+    skills: 'skill-rows',
     toggleCategories: 'toggle-categories'
   };
 
@@ -2274,13 +2589,28 @@ customElements.define('skill-row', SkillRow);
     });
 
     const skillsSec = document.getElementById(DYNAMIC_KEYS.skills);
-    skillsSec.querySelectorAll('[data-dyn]').forEach(n => n.remove());
-    SKILLS.forEach((s, i) => {
-      if (prefs.hiddenSkills.includes(i)) return;
-      const row = document.createElement('skill-row');
-      row.setAttribute('label', s); row.setAttribute('field', 'skill_'+i);
-      row.dataset.dyn = 'skill_'+i;
-      skillsSec.appendChild(row);
+    skillsSec.innerHTML = '';
+    const isVisible = i => !prefs.hiddenSkills.includes(i);
+    const activeSchools = SKILL_CATALOG.filter(sc => sc.groups.some(g => g.indices.some(isVisible)));
+    activeSchools.forEach(sc => {
+      if (activeSchools.length > 1) {
+        const h = document.createElement('div');
+        h.className = 'skills-school-label'; h.textContent = sc.label;
+        skillsSec.appendChild(h);
+      }
+      sc.groups.forEach(g => {
+        const visible = g.indices.filter(isVisible);
+        if (!visible.length) return;
+        const gl = document.createElement('div');
+        gl.className = 'skills-group-label'; gl.textContent = g.label;
+        skillsSec.appendChild(gl);
+        visible.forEach(i => {
+          const row = document.createElement('skill-row');
+          row.setAttribute('label', SKILLS[i].label); row.setAttribute('field', 'skill_'+i);
+          row.dataset.dyn = 'skill_'+i;
+          skillsSec.appendChild(row);
+        });
+      });
     });
 
     const toggleCatSec = document.getElementById(DYNAMIC_KEYS.toggleCategories);
@@ -2356,6 +2686,44 @@ customElements.define('skill-row', SkillRow);
       renderEmotions();
       renderEntry();
     });
+
+    document.getElementById('choose-skills').addEventListener('click', () => openWizard('edit', 'skills'));
+
+    document.addEventListener('skill-info', e => {
+      const idx = parseInt(String(e.detail.field).replace('skill_', ''));
+      if (!isNaN(idx)) showSkillInfo(idx);
+    });
+    document.getElementById('skill-info-overlay').addEventListener('click', e => {
+      if (e.target.id === 'skill-info-overlay') hideSkillInfo();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') hideSkillInfo(); });
+  }
+
+  function showSkillInfo(idx) {
+    const s = SKILLS[idx];
+    if (!s) return;
+    const meta = SKILL_META[idx];
+    document.getElementById('skill-info-school').textContent = meta.school ? `${meta.school.label} \u00b7 ${meta.group.label}` : '';
+    document.getElementById('skill-info-title').textContent = s.label;
+    document.getElementById('skill-info-desc').textContent = s.desc || '';
+    const sim = document.getElementById('skill-info-similar');
+    sim.innerHTML = '';
+    if (s.similar && s.similar.length) {
+      sim.appendChild(document.createTextNode('Similar: '));
+      s.similar.forEach((j, n) => {
+        if (n) sim.appendChild(document.createTextNode(', '));
+        const b = document.createElement('b');
+        b.textContent = SKILLS[j].label;
+        sim.appendChild(b);
+        const m = SKILL_META[j];
+        if (m.school) sim.appendChild(document.createTextNode(` (${m.school.label})`));
+      });
+    }
+    document.getElementById('skill-info-overlay').classList.add('visible');
+  }
+
+  function hideSkillInfo() {
+    document.getElementById('skill-info-overlay').classList.remove('visible');
   }
 
   function initSections() {
@@ -2390,7 +2758,7 @@ customElements.define('skill-row', SkillRow);
       row.value = entry[row.getAttribute('field')];
     });
     document.querySelectorAll('toggle-row').forEach(row => {
-      row.value = !!entry[row.getAttribute('field')];
+      row.value = entry[row.getAttribute('field')];
     });
 
     document.querySelectorAll('.emotion-avg').forEach(el => {
@@ -2838,16 +3206,17 @@ customElements.define('skill-row', SkillRow);
       });
     }
 
+    // Unanswered toggles (null/undefined) are omitted: "no" means the user actually said no.
     const hiddenActions = _shareHidden.actions || [];
-    const visibleActions = ACTIONS.filter(a => !hiddenActions.includes(a.id));
-    if (visibleActions.length) {
+    const answeredActions = ACTIONS.filter(a => !hiddenActions.includes(a.id) && entry[a.id] != null);
+    if (answeredActions.length) {
       html += '<div class="share-section-label">Actions</div>';
-      visibleActions.forEach(a => { html += shareToggleRow(a.label, !!entry[a.id]); });
+      answeredActions.forEach(a => { html += shareToggleRow(a.label, entry[a.id]); });
     }
 
     const hiddenCats = _shareHidden.categories || [];
-    const visibleToggleCats = CATEGORIES.filter(c => c.type === 'toggle' && !hiddenCats.includes(c.id));
-    const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length) || visibleToggleCats.length > 0;
+    const answeredToggleCats = CATEGORIES.filter(c => c.type === 'toggle' && !hiddenCats.includes(c.id) && entry[c.field] != null);
+    const hasBody = entry.sleepHours != null || entry.sleepQuality != null || entry.exerciseMins != null || (entry.meals && entry.meals.length) || answeredToggleCats.length > 0;
     if (hasBody) {
       html += '<div class="share-section-label">Daily</div>';
       if (entry.sleepHours != null) html += shareRow('Sleep', `${entry.sleepHours} hrs${entry.sleepQuality != null ? ` (quality ${entry.sleepQuality}/5)` : ''}`);
@@ -2857,21 +3226,23 @@ customElements.define('skill-row', SkillRow);
         html += shareRow('Meals', filled.length);
         filled.forEach(m => { html += `<div class="share-meals">&bull; ${m.replace(/</g, '&lt;')}</div>`; });
       }
-      visibleToggleCats.forEach(cat => { html += shareToggleRow(cat.label, !!entry[cat.field]); });
+      answeredToggleCats.forEach(cat => { html += shareToggleRow(cat.label, entry[cat.field]); });
     }
 
     const hiddenSkills = _shareHidden.skills || [];
-    const hasSkills = SKILLS.some((s, i) => entry['skill_' + i] != null && !hiddenSkills.includes(i));
-    if (hasSkills) {
+    const skillShown = i => !hiddenSkills.includes(i) && entry['skill_' + i] != null;
+    if (SKILLS.some((s, i) => skillShown(i))) {
       html += '<div class="share-section-label">Skills</div>';
-      SKILLS.forEach((s, i) => {
-        if (hiddenSkills.includes(i)) return;
-        const v = entry['skill_' + i];
-        if (v != null) {
+      SKILL_CATALOG.forEach(sc => sc.groups.forEach(g => {
+        const rows = g.indices.filter(skillShown);
+        if (!rows.length) return;
+        html += `<div class="share-sub-label">${sc.label} \u00b7 ${g.label}</div>`;
+        rows.forEach(i => {
+          const v = entry['skill_' + i];
           const eng = Math.floor(v / 2), helped = v % 2 === 1;
-          html += shareRow(s, SKILL_LEVELS[eng] + (helped ? ', helped' : ''));
-        }
-      });
+          html += shareRow(SKILLS[i].label, SKILL_LEVELS[eng] + (helped ? ', helped' : ''));
+        });
+      }));
     }
 
     if (entry.notes) {
@@ -3023,7 +3394,7 @@ customElements.define('skill-row', SkillRow);
     { id: 'urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
     { id: 'actions', title: 'Actions', subtitle: 'Actions track whether you acted on an urge. "Quit therapy" isn\'t here because it isn\'t a daily thing.', render: renderWizardActions, showInEdit: true },
     { id: 'categories', title: 'Daily check-ins', subtitle: 'Everything you might want to log about your day outside of feelings.', render: renderWizardCategories, showInEdit: true },
-    { id: 'skills', title: 'DBT skills', subtitle: 'Which skills are you actively working on? You can start with just the four modules if you prefer.', render: renderWizardSkills, showInEdit: true },
+    { id: 'skills', title: 'Skills', subtitle: 'Browse by school of therapy and check the skills you\'re actively working on. Tap ? to see what a skill means.', render: renderWizardSkills, showInEdit: true },
     { id: 'done', title: 'All set', subtitle: null, render: renderWizardDone, showInEdit: true }
   ];
 
@@ -3031,7 +3402,7 @@ customElements.define('skill-row', SkillRow);
     return WIZARD_STEPS.filter(s => wizardMode === 'edit' ? s.showInEdit : true);
   }
 
-  function openWizard(mode) {
+  function openWizard(mode, startStepId) {
     wizardMode = mode;
     wizardStepIdx = 0;
     wizardDraft = {
@@ -3041,6 +3412,7 @@ customElements.define('skill-row', SkillRow);
       hiddenCategories: [...prefs.hiddenCategories],
       hiddenSkills: [...prefs.hiddenSkills]
     };
+    if (startStepId) wizardStepIdx = Math.max(0, activeWizardSteps().findIndex(s => s.id === startStepId));
     document.getElementById('wizard-overlay').classList.add('visible');
     renderWizardStep();
   }
@@ -3178,44 +3550,65 @@ customElements.define('skill-row', SkillRow);
     body.appendChild(group);
   }
 
+  let wizardSkillTab = null; // id of the school whose tab is open
+
   function renderWizardSkills(body) {
     body.className = 'wizard-body';
+    const isChecked = i => !wizardDraft.hiddenSkills.includes(i);
+    const countChecked = sc => sc.groups.reduce((n, g) => n + g.indices.filter(isChecked).length, 0);
+
+    if (!wizardSkillTab || !SKILL_CATALOG.some(sc => sc.id === wizardSkillTab)) {
+      const first = SKILL_CATALOG.find(sc => countChecked(sc) > 0);
+      wizardSkillTab = (first || SKILL_CATALOG[0]).id;
+    }
+    const school = SKILL_CATALOG.find(sc => sc.id === wizardSkillTab);
+    const schoolIndices = school.groups.flatMap(g => g.indices);
+
+    const tabs = document.createElement('div');
+    tabs.className = 'wizard-tabs';
+    SKILL_CATALOG.forEach(sc => {
+      const t = document.createElement('button');
+      t.className = 'wizard-tab' + (sc.id === wizardSkillTab ? ' active' : '');
+      t.appendChild(document.createTextNode(sc.label));
+      const n = countChecked(sc);
+      if (n) {
+        const c = document.createElement('span');
+        c.className = 'wizard-tab-count'; c.textContent = n;
+        t.appendChild(c);
+      }
+      t.addEventListener('click', () => { wizardSkillTab = sc.id; renderWizardStep(); });
+      tabs.appendChild(t);
+    });
+    body.appendChild(tabs);
+
+    const intro = document.createElement('div');
+    intro.className = 'wizard-school-intro';
+    const b = document.createElement('b'); b.textContent = school.name;
+    intro.appendChild(b);
+    intro.appendChild(document.createTextNode(' — ' + school.desc));
+    body.appendChild(intro);
 
     const qa = document.createElement('div');
     qa.className = 'wizard-quick-actions';
-    const justModules = document.createElement('button');
-    justModules.className = 'wizard-quick-btn';
-    justModules.textContent = 'Just the four modules';
-    justModules.addEventListener('click', () => {
-      wizardDraft.hiddenSkills = [];
-      for (let i = 0; i < SKILLS.length; i++) {
-        if (!MODULE_PROXY_SKILL_INDICES.includes(i)) wizardDraft.hiddenSkills.push(i);
-      }
-      renderWizardStep();
-    });
-    qa.appendChild(justModules);
-
-    const all = document.createElement('button');
-    all.className = 'wizard-quick-btn';
-    all.textContent = 'All skills';
-    all.addEventListener('click', () => {
-      wizardDraft.hiddenSkills = [];
-      renderWizardStep();
-    });
-    qa.appendChild(all);
-
-    const none = document.createElement('button');
-    none.className = 'wizard-quick-btn';
-    none.textContent = 'None';
-    none.addEventListener('click', () => {
-      wizardDraft.hiddenSkills = SKILLS.map((_, i) => i);
-      renderWizardStep();
-    });
-    qa.appendChild(none);
-
+    const quick = (text, fn) => {
+      const btn = document.createElement('button');
+      btn.className = 'wizard-quick-btn';
+      btn.textContent = text;
+      btn.addEventListener('click', () => { fn(); renderWizardStep(); });
+      qa.appendChild(btn);
+    };
+    const hideAll = () => schoolIndices.forEach(i => { if (!wizardDraft.hiddenSkills.includes(i)) wizardDraft.hiddenSkills.push(i); });
+    if (school.id === 'dbt') {
+      quick('Just the four modules', () => {
+        hideAll();
+        wizardDraft.hiddenSkills = wizardDraft.hiddenSkills.filter(i => !MODULE_PROXY_SKILL_INDICES.includes(i));
+      });
+    }
+    quick(`All ${school.label}`, () => { wizardDraft.hiddenSkills = wizardDraft.hiddenSkills.filter(i => !schoolIndices.includes(i)); });
+    quick('None', hideAll);
     body.appendChild(qa);
 
-    SKILL_GROUPS.forEach(g => {
+    school.groups.forEach(g => {
       const section = document.createElement('div');
       section.className = 'wizard-group';
       const lbl = document.createElement('div');
@@ -3223,8 +3616,14 @@ customElements.define('skill-row', SkillRow);
       lbl.textContent = g.label;
       section.appendChild(lbl);
       g.indices.forEach(idx => {
-        const checked = !wizardDraft.hiddenSkills.includes(idx);
-        section.appendChild(wizardMakeItem(SKILLS[idx], null, checked, (on) => toggleWizardDraft('hiddenSkills', idx, on)));
+        const item = wizardMakeItem(SKILLS[idx].label, null, isChecked(idx), (on) => toggleWizardDraft('hiddenSkills', idx, on));
+        const info = document.createElement('button');
+        info.className = 'wizard-item-info';
+        info.textContent = '?';
+        info.title = 'What is this?';
+        info.addEventListener('click', e => { e.stopPropagation(); showSkillInfo(idx); });
+        item.appendChild(info);
+        section.appendChild(item);
       });
       body.appendChild(section);
     });

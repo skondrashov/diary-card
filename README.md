@@ -9,7 +9,7 @@ Live at [dbt.thisminute.org](https://dbt.thisminute.org).
 - Emotions (user-defined, 0-5 intensity, with 7-day rolling averages)
 - Urges (0-5 intensity)
 - Actions (yes/no)
-- DBT skills used (engagement level + whether it helped)
+- Skills used (engagement level + whether it helped), chosen from a catalog spanning DBT, ACT, CBT, IFS, schema therapy, CAMS, CFT and somatic approaches
 - Sleep, exercise, meals, notes
 - Custom toggle categories
 
