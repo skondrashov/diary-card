@@ -1803,6 +1803,14 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 <script>
 // ─── Web Components ───
 
+// Label text with a trailing ? glued to its last word so the dot never wraps onto its own line.
+function labelWithInfoDot(label) {
+  const i = label.lastIndexOf(' ');
+  const head = i === -1 ? '' : label.slice(0, i + 1);
+  const tail = i === -1 ? label : label.slice(i + 1);
+  return `${head}<span class="nowrap">${tail}<span class="info-dot">?</span></span>`;
+}
+
 class RatingRow extends HTMLElement {
   static get observedAttributes() { return ['label','field','max','value','small','info']; }
   static GLOWS = ['rgba(74,70,64,0.3)','rgba(91,122,138,0.4)','rgba(106,154,170,0.4)','rgba(184,164,85,0.4)','rgba(196,132,90,0.4)','rgba(184,90,90,0.4)'];
@@ -1866,6 +1874,7 @@ class RatingRow extends HTMLElement {
 :host([small]){padding:0;justify-content:flex-start}
 .label{font-size:0.85rem;color:var(--text-secondary);flex-shrink:0;min-width:90px}
 :host([info]) .label{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nowrap{white-space:nowrap}
 .info-dot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border-light);font-size:0.55rem;line-height:1;color:var(--text-muted);flex-shrink:0;margin-left:5px;vertical-align:1px}
 .label:hover .info-dot{border-color:var(--accent);color:var(--accent)}
 .pills{display:flex;gap:4px}
@@ -1876,7 +1885,7 @@ ${colorCss}
 @keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(201,149,107,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(201,149,107,0.4))}}
 @media(max-width:400px){.pill{width:${small?22:28}px;height:${small?22:26}px;font-size:0.7rem}.label{min-width:75px;font-size:0.8rem}}
 </style>
-${label ? `<div class="label">${label}${this.hasAttribute('info') ? '<span class="info-dot">?</span>' : ''}</div>` : ''}
+${label ? `<div class="label">${this.hasAttribute('info') ? labelWithInfoDot(label) : label}</div>` : ''}
 <div class="pills">${Array.from({length:max+1},(_,i)=>`<div class="pill" data-value="${i}">${i}</div>`).join('')}</div>`;
   }
 
@@ -1951,6 +1960,7 @@ class ToggleRow extends HTMLElement {
 :host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.5rem}
 .label{font-size:0.85rem;color:var(--text-secondary)}
 :host([info]) .label{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nowrap{white-space:nowrap}
 .info-dot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border-light);font-size:0.55rem;line-height:1;color:var(--text-muted);flex-shrink:0;margin-left:5px;vertical-align:1px}
 .label:hover .info-dot{border-color:var(--accent);color:var(--accent)}
 .pills{display:flex;gap:4px;flex-shrink:0}
@@ -1961,7 +1971,7 @@ class ToggleRow extends HTMLElement {
 .pill.selected.yes{background:var(--accent);color:#fff;box-shadow:0 0 8px var(--accent-glow)}
 @media(max-width:400px){.pill{min-width:36px;height:26px;font-size:0.7rem}.label{font-size:0.8rem}}
 </style>
-<div class="label">${label}${this.hasAttribute('info') ? '<span class="info-dot">?</span>' : ''}</div>
+<div class="label">${this.hasAttribute('info') ? labelWithInfoDot(label) : label}</div>
 <div class="pills"><div class="pill no" data-value="no">no</div><div class="pill yes" data-value="yes">yes</div></div>`;
   }
 
@@ -2034,6 +2044,7 @@ class SkillRow extends HTMLElement {
     this.shadowRoot.innerHTML = `<style>
 :host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.4rem}
 .label{font-size:0.8rem;color:var(--text-secondary);flex-shrink:0;width:110px;line-height:1.2;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nowrap{white-space:nowrap}
 .info-dot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border-light);font-size:0.55rem;line-height:1;color:var(--text-muted);flex-shrink:0;margin-left:5px;vertical-align:1px}
 .label:hover .info-dot{border-color:var(--accent);color:var(--accent)}
 .right{display:flex;align-items:center;gap:0.4rem}
@@ -2052,7 +2063,7 @@ class SkillRow extends HTMLElement {
 @keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(90,157,90,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(90,157,90,0.4))}}
 @media(max-width:400px){.label{width:85px;font-size:0.75rem}.pill{padding:3px 5px;font-size:0.6rem}.helped{padding:3px 5px;font-size:0.55rem}}
 </style>
-<div class="label">${label}<span class="info-dot">?</span></div>
+<div class="label">${labelWithInfoDot(label)}</div>
 <div class="right"><button class="helped">helped</button><div class="pills">${SkillRow.LEVELS.map((l,i)=>`<div class="pill" data-level="${i}">${l}</div>`).join('')}</div></div>`;
   }
 
