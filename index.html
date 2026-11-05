@@ -3269,7 +3269,7 @@ customElements.define('urge-row', UrgeRow);
         if (expanded) return;
 
         const chip = document.createElement('button');
-        chip.className = 'present-chip' + (unit.classList.contains('hidden-visible') ? ' dim' : '');
+        chip.className = 'present-chip';
         chip.textContent = info.label;
         chip.addEventListener('click', () => {
           dateSet(revealedByDate, key).add(info.field);
