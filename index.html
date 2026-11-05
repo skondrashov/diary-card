@@ -2439,13 +2439,14 @@ customElements.define('urge-row', UrgeRow);
     { label: 'Zone out / dissociate', action: 'dissociated' },
     { label: 'Gamble', action: 'gambled' },
     { label: 'Sexual compulsion', action: 'sexualCompulsion' },
-    { label: 'Caffeine', action: 'hadCaffeine' }
+    { label: 'Caffeine', action: 'hadCaffeine' },
+    { label: 'Rumination out loud', action: 'ruminatedOutLoud' }
   ];
   const URGE_GROUPS = [
     { label: 'Self-harm', indices: [0, 1] },
     { label: 'Substances', indices: [2, 3, 5, 6, 21] },
     { label: 'Eating', indices: [7, 8, 9] },
-    { label: 'Withdrawal', indices: [10, 12, 18, 17, 4] },
+    { label: 'Withdrawal', indices: [10, 12, 18, 17, 4, 22] },
     { label: 'Relationships', indices: [11, 13, 14, 15] },
     { label: 'Money & compulsion', indices: [16, 19, 20] }
   ];
@@ -2643,6 +2644,7 @@ customElements.define('urge-row', UrgeRow);
     { id: 'overall', section: 'daily', type: 'rating', field: 'overallDay', label: 'Overall day', desc: 'The day as a whole, 0–5' },
     { id: 'therapy', section: 'daily', type: 'toggle', field: 'therapySession', label: 'Therapy session', desc: 'Had a session today? Useful for seeing before/after patterns.' },
     { id: 'cycle', section: 'daily', type: 'toggle', field: 'menstruating', label: 'Menstruating', desc: 'On your period today? Mood tracks the cycle more than people expect.' },
+    { id: 'rumination', section: 'daily', type: 'rating', field: 'rumination', label: 'Rumination', desc: 'How much of the day your mind spent going in circles, 0–5. The state, not what you did with it — saying it out loud is an urge.' },
     { id: 'prn', section: 'basics', type: 'toggle', field: 'tookPrn', label: 'Took as-needed medication', desc: 'Something you take when needed rather than on a schedule (a PRN), separate from your regular meds' },
     { id: 'sunlight', section: 'basics', type: 'toggle', field: 'gotSunlight', label: 'Got sunlight', desc: 'Daylight on your face, ideally in the morning' },
     { id: 'journal', section: 'basics', type: 'toggle', field: 'journaled', label: 'Journaled', desc: 'Wrote something down beyond this card' },
@@ -2742,8 +2744,8 @@ customElements.define('urge-row', UrgeRow);
 
   // ─── Prefs ───
   // Defaults hide new items so "skip" in the wizard gives the pre-feature experience.
-  const DEFAULT_HIDDEN_URGES = [2, 3, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'meditate', 'social', 'cycle', 'prn', 'sunlight', 'journal', 'reachedOut', 'pets', 'creative', 'learned', 'helped', 'spiritual'];
+  const DEFAULT_HIDDEN_URGES = [2, 3, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+  const DEFAULT_HIDDEN_CATEGORIES = ['nap', 'meditate', 'social', 'cycle', 'rumination', 'prn', 'sunlight', 'journal', 'reachedOut', 'pets', 'creative', 'learned', 'helped', 'spiritual'];
   const MODULE_PROXY_SKILL_INDICES = [0, 7, 14, 21];
   const DEFAULT_HIDDEN_SKILLS = (function() {
     const hidden = [];
