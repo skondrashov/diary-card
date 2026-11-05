@@ -1153,6 +1153,31 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 .wizard-tab.active .wizard-tab-count { background: var(--accent); color: #fff; }
 .wizard-school-intro { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem; }
 .wizard-school-intro b { color: var(--text-secondary); font-weight: 500; }
+.wizard-order-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.5rem 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.wizard-order-name { flex: 1; }
+.wizard-order-btn {
+  background: none;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-size: 0.6rem;
+  width: 30px;
+  height: 26px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.wizard-order-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.wizard-order-btn:disabled { opacity: 0.25; cursor: default; }
 .wizard-add-row { display: flex; gap: 0.5rem; align-items: center; padding: 0.25rem 0.5rem; }
 .wizard-add-row input {
   flex: 1;
@@ -1627,8 +1652,8 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <div id="skill-rows"></div>
     </div>
 
-    <div class="section">
-      <div class="section-header">Notes</div>
+    <div class="section" id="notes-section">
+      <div class="section-header">Notes <button class="section-edit" data-wizard-step="layout">edit</button></div>
       <textarea class="notes-area" id="notes" placeholder="What happened today? What skills did you practice?"></textarea>
     </div>
   </div>
@@ -2681,6 +2706,23 @@ customElements.define('urge-row', UrgeRow);
   const SCHEMA_META = SCHEMAS.map(() => null);
   SCHEMA_GROUPS.forEach(g => g.indices.forEach(i => { SCHEMA_META[i] = g; }));
 
+  // Card sections in their default order. prefs.sectionOrder holds the user's order of these ids;
+  // ids missing from a saved order (new sections) go on the end.
+  const SECTIONS = [
+    { id: 'emotions', el: 'emotions-section', label: 'Emotions' },
+    { id: 'parts', el: 'parts-section', label: 'Parts' },
+    { id: 'schemas', el: 'schemas-section', label: 'Schemas & modes' },
+    { id: 'urges', el: 'urges-section', label: 'Urges' },
+    { id: 'daily', el: 'body-section', label: 'Daily' },
+    { id: 'skills', el: 'skills-section', label: 'Skills' },
+    { id: 'notes', el: 'notes-section', label: 'Notes' }
+  ];
+  function normalizeSectionOrder(order) {
+    const known = SECTIONS.map(s => s.id);
+    const kept = Array.isArray(order) ? order.filter(id => known.includes(id)) : [];
+    return kept.concat(known.filter(id => !kept.includes(id)));
+  }
+
   const WEEKDAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
   const DAYNAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2708,6 +2750,7 @@ customElements.define('urge-row', UrgeRow);
       hiddenUrges: [...DEFAULT_HIDDEN_URGES],
       hiddenCategories: [...DEFAULT_HIDDEN_CATEGORIES],
       hiddenSkills: [...DEFAULT_HIDDEN_SKILLS],
+      sectionOrder: SECTIONS.map(s => s.id),
       onboarded: false,        // true after the user completes/skips the wizard
       shareTTL: 2592000,       // relay link TTL in seconds (default 30 days)
       activeShare: null,       // { token, editKey, passphrase, expiresAt } for the link that can be updated in place
@@ -2733,6 +2776,7 @@ customElements.define('urge-row', UrgeRow);
           hiddenUrges: saved.hiddenUrges || defaults.hiddenUrges,
           hiddenCategories: saved.hiddenCategories || defaults.hiddenCategories,
           hiddenSkills: saved.hiddenSkills || defaults.hiddenSkills,
+          sectionOrder: normalizeSectionOrder(saved.sectionOrder),
           onboarded: !!saved.onboarded,
           shareTTL: typeof saved.shareTTL === 'number' ? saved.shareTTL : defaults.shareTTL,
           activeShare: saved.activeShare && typeof saved.activeShare.token === 'string' ? saved.activeShare : null,
@@ -2782,6 +2826,7 @@ customElements.define('urge-row', UrgeRow);
         knownSkillCount: SKILLS.length,
         knownUrgeCount: URGES.length,
         knownCategories: CATEGORIES.map(c => c.id),
+        sectionOrder: prefs.sectionOrder,
         onboarded: prefs.onboarded,
         shareTTL: prefs.shareTTL,
         activeShare: prefs.activeShare,
@@ -3014,6 +3059,15 @@ customElements.define('urge-row', UrgeRow);
 
   }
 
+  function applySectionOrder() {
+    const view = document.getElementById('entry-view');
+    normalizeSectionOrder(prefs.sectionOrder).forEach(id => {
+      const sec = SECTIONS.find(s => s.id === id);
+      const el = document.getElementById(sec.el);
+      if (el) view.appendChild(el); // appending in order moves each section to the end in turn
+    });
+  }
+
   function applyCategoryVisibility() {
     CATEGORIES.forEach(cat => {
       if (cat.type !== 'complex') return;
@@ -3122,6 +3176,7 @@ customElements.define('urge-row', UrgeRow);
     initStaticHandlers();
     buildDynamicSections();
     applyCategoryVisibility();
+    applySectionOrder();
     renderCustomLists();
   }
 
@@ -3969,12 +4024,13 @@ customElements.define('urge-row', UrgeRow);
     { id: 'urges', nav: 'Urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Each one is rated 0\u20135, and you can note whether you acted on it. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
     { id: 'categories', nav: 'Daily', title: 'Daily', subtitle: 'How today was: sleep, energy, pain, and so on. Things that happened to you rather than things you did \u2014 those are under Skills.', render: renderWizardCategories, showInEdit: true },
     { id: 'skills', nav: 'Skills', title: 'Skills', subtitle: 'Browse by school of therapy and check the skills you\'re actively working on. Tap ? to see what a skill means.', render: renderWizardSkills, showInEdit: true },
+    { id: 'layout', nav: 'Layout', title: 'Section order', subtitle: 'Arrange the card the way you fill it in. Notes at the top, if that\'s how you think.', render: renderWizardLayout, showInEdit: true, editOnly: true },
     // First-run summary. Edit mode has its own review step (renderWizardDiff) instead.
     { id: 'done', nav: 'Finish', title: 'All set', subtitle: null, render: renderWizardDone, showInEdit: false }
   ];
 
   function activeWizardSteps() {
-    return WIZARD_STEPS.filter(s => wizardMode === 'edit' ? s.showInEdit : true);
+    return WIZARD_STEPS.filter(s => wizardMode === 'edit' ? s.showInEdit : !s.editOnly);
   }
 
   function openWizard(mode, startStepId) {
@@ -3989,7 +4045,8 @@ customElements.define('urge-row', UrgeRow);
       hiddenSchemas: [...prefs.hiddenSchemas],
       hiddenUrges: [...prefs.hiddenUrges],
       hiddenCategories: [...prefs.hiddenCategories],
-      hiddenSkills: [...prefs.hiddenSkills]
+      hiddenSkills: [...prefs.hiddenSkills],
+      sectionOrder: [...prefs.sectionOrder]
     };
     if (startStepId) wizardStepIdx = Math.max(0, activeWizardSteps().findIndex(s => s.id === startStepId));
     document.getElementById('wizard-overlay').classList.add('visible');
@@ -4075,7 +4132,14 @@ customElements.define('urge-row', UrgeRow);
         shown: before.filter(x => !after.includes(x)).map(sec.name),
         hidden: after.filter(x => !before.includes(x)).map(sec.name)
       };
-    }).filter(d => d.shown.length || d.hidden.length);
+    }).filter(d => d.shown.length || d.hidden.length).concat(sectionOrderDiff());
+  }
+
+  function sectionOrderDiff() {
+    const before = prefs.sectionOrder.join(), after = wizardDraft.sectionOrder.join();
+    if (before === after) return [];
+    const names = wizardDraft.sectionOrder.map(id => SECTIONS.find(s => s.id === id).label);
+    return [{ label: 'Section order', shown: [names.join(' \u203a ')], hidden: [] }];
   }
 
   function renderWizardDiff(body) {
@@ -4236,6 +4300,38 @@ customElements.define('urge-row', UrgeRow);
         section.appendChild(item);
       });
       body.appendChild(section);
+    });
+  }
+
+  function renderWizardLayout(body) {
+    body.className = 'wizard-body';
+    const order = wizardDraft.sectionOrder;
+    const move = (i, delta) => {
+      const j = i + delta;
+      if (j < 0 || j >= order.length) return;
+      [order[i], order[j]] = [order[j], order[i]];
+      renderWizardStep();
+    };
+    order.forEach((id, i) => {
+      const sec = SECTIONS.find(s => s.id === id);
+      const row = document.createElement('div');
+      row.className = 'wizard-order-row';
+      const name = document.createElement('span');
+      name.className = 'wizard-order-name';
+      name.textContent = sec.label;
+      row.appendChild(name);
+      const mk = (glyph, delta, disabled, title) => {
+        const b = document.createElement('button');
+        b.className = 'wizard-order-btn';
+        b.textContent = glyph;
+        b.title = title;
+        b.disabled = disabled;
+        b.addEventListener('click', () => move(i, delta));
+        row.appendChild(b);
+      };
+      mk('\u25b2', -1, i === 0, 'Move up');
+      mk('\u25bc', 1, i === order.length - 1, 'Move down');
+      body.appendChild(row);
     });
   }
 
@@ -4414,6 +4510,7 @@ customElements.define('urge-row', UrgeRow);
     prefs.hiddenUrges = wizardDraft.hiddenUrges;
     prefs.hiddenCategories = wizardDraft.hiddenCategories;
     prefs.hiddenSkills = wizardDraft.hiddenSkills;
+    prefs.sectionOrder = wizardDraft.sectionOrder;
     prefs.onboarded = true;
 
     if (wizardMode === 'newUser') {
@@ -4427,6 +4524,7 @@ customElements.define('urge-row', UrgeRow);
     // Rebuild dynamic sections + apply visibility
     buildDynamicSections();
     applyCategoryVisibility();
+    applySectionOrder();
     renderCustomLists();
     renderEntry();
   }
@@ -4462,7 +4560,8 @@ customElements.define('urge-row', UrgeRow);
     const d = makeDefaultPrefs();
     wizardDraft = {
       emotions: [...prefs.emotions], hiddenEmotions: d.hiddenEmotions, parts: [...prefs.parts], hiddenParts: [], hiddenSchemas: d.hiddenSchemas,
-      hiddenUrges: d.hiddenUrges, hiddenCategories: d.hiddenCategories, hiddenSkills: d.hiddenSkills
+      hiddenUrges: d.hiddenUrges, hiddenCategories: d.hiddenCategories, hiddenSkills: d.hiddenSkills,
+      sectionOrder: [...prefs.sectionOrder]
     };
     await wizardFinish();
   });
