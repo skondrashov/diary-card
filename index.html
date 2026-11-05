@@ -2719,6 +2719,18 @@ customElements.define('urge-row', UrgeRow);
     { id: 'skills', el: 'skills-section', label: 'Skills' },
     { id: 'notes', el: 'notes-section', label: 'Notes' }
   ];
+  // Whether a section has anything to show under a prefs-shaped object (prefs or the wizard draft).
+  function sectionHasContent(id, p) {
+    switch (id) {
+      case 'emotions': return p.emotions.some(em => !p.hiddenEmotions.includes(em));
+      case 'parts': return p.parts.some(pt => !p.hiddenParts.includes(pt));
+      case 'schemas': return SCHEMAS.some((_, i) => !p.hiddenSchemas.includes(i));
+      case 'urges': return URGES.some((_, i) => !p.hiddenUrges.includes(i));
+      case 'daily': return CATEGORIES.some(c => c.section === 'daily' && !p.hiddenCategories.includes(c.id));
+      case 'skills': return CATEGORIES.some(c => c.section === 'basics' && !p.hiddenCategories.includes(c.id)) || SKILLS.some((_, i) => !p.hiddenSkills.includes(i));
+      default: return true; // notes
+    }
+  }
   function normalizeSectionOrder(order) {
     const known = SECTIONS.map(s => s.id);
     const kept = Array.isArray(order) ? order.filter(id => known.includes(id)) : [];
@@ -2930,7 +2942,6 @@ customElements.define('urge-row', UrgeRow);
   function renderCustomList(cfg) {
     const list = prefs[cfg.listKey];
     const hiddenList = prefs[cfg.hiddenKey];
-    if (cfg.section) document.getElementById(cfg.section).style.display = list.length ? '' : 'none';
     const container = document.getElementById(cfg.rows);
     container.innerHTML = '';
     cfg.order(list).forEach(i => {
@@ -2959,6 +2970,7 @@ customElements.define('urge-row', UrgeRow);
   function renderCustomLists() {
     renderCustomList(CUSTOM_LISTS.emotions);
     renderCustomList(CUSTOM_LISTS.parts);
+    applySectionOrder();
   }
 
   const DYNAMIC_KEYS = {
@@ -2997,7 +3009,6 @@ customElements.define('urge-row', UrgeRow);
     schemaSec.innerHTML = '';
     const schemaVisible = i => !prefs.hiddenSchemas.includes(i);
     const activeSchemaGroups = SCHEMA_GROUPS.filter(g => g.indices.some(schemaVisible));
-    document.getElementById('schemas-section').style.display = activeSchemaGroups.length ? '' : 'none';
     activeSchemaGroups.forEach(g => {
       if (activeSchemaGroups.length > 1) {
         const gl = document.createElement('div');
@@ -3066,7 +3077,9 @@ customElements.define('urge-row', UrgeRow);
     normalizeSectionOrder(prefs.sectionOrder).forEach(id => {
       const sec = SECTIONS.find(s => s.id === id);
       const el = document.getElementById(sec.el);
-      if (el) view.appendChild(el); // appending in order moves each section to the end in turn
+      if (!el) return;
+      el.style.display = sectionHasContent(id, prefs) ? '' : 'none';
+      view.appendChild(el); // appending in order moves each section to the end in turn
     });
   }
 
@@ -4140,7 +4153,7 @@ customElements.define('urge-row', UrgeRow);
   function sectionOrderDiff() {
     const before = prefs.sectionOrder.join(), after = wizardDraft.sectionOrder.join();
     if (before === after) return [];
-    const names = wizardDraft.sectionOrder.map(id => SECTIONS.find(s => s.id === id).label);
+    const names = wizardDraft.sectionOrder.filter(id => sectionHasContent(id, wizardDraft)).map(id => SECTIONS.find(s => s.id === id).label);
     return [{ label: 'Section order', shown: [names.join(' \u203a ')], hidden: [] }];
   }
 
@@ -4308,14 +4321,19 @@ customElements.define('urge-row', UrgeRow);
   function renderWizardLayout(body) {
     body.className = 'wizard-body';
     const order = wizardDraft.sectionOrder;
+    // Sections with nothing in them keep their slot in the saved order but aren't listed.
+    const visible = order.filter(id => sectionHasContent(id, wizardDraft));
     const moveTo = (i, j) => {
-      j = Math.max(0, Math.min(order.length - 1, j));
+      j = Math.max(0, Math.min(visible.length - 1, j));
       if (j === i) return;
-      const [id] = order.splice(i, 1);
-      order.splice(j, 0, id);
+      const id = visible[i];
+      order.splice(order.indexOf(id), 1);
+      const rest = order.filter(x => visible.includes(x));
+      const anchor = rest[j];
+      order.splice(anchor === undefined ? order.length : order.indexOf(anchor), 0, id);
       renderWizardStep();
     };
-    order.forEach((id, i) => {
+    visible.forEach((id, i) => {
       const sec = SECTIONS.find(s => s.id === id);
       const row = document.createElement('div');
       row.className = 'wizard-order-row';
@@ -4334,8 +4352,8 @@ customElements.define('urge-row', UrgeRow);
       };
       mk('↑↑', 0, i === 0, 'Move to top');
       mk('↑', i - 1, i === 0, 'Move up');
-      mk('↓', i + 1, i === order.length - 1, 'Move down');
-      mk('↓↓', order.length - 1, i === order.length - 1, 'Move to bottom');
+      mk('↓', i + 1, i === visible.length - 1, 'Move down');
+      mk('↓↓', visible.length - 1, i === visible.length - 1, 'Move to bottom');
       body.appendChild(row);
     });
   }
