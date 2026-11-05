@@ -2045,14 +2045,14 @@ class SkillRow extends HTMLElement {
   _render() {
     const label = this.getAttribute('label') || '';
     this.shadowRoot.innerHTML = `<style>
-:host{display:flex;flex-direction:column;align-items:stretch;padding:0.5rem 0;gap:0.3rem}
-.label{font-size:0.85rem;color:var(--text-secondary);line-height:1.25;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:host{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;gap:0.5rem}
+.label{font-size:0.8rem;color:var(--text-secondary);flex:1;min-width:0;line-height:1.2;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .nowrap{white-space:nowrap}
 .info-dot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border-light);font-size:0.55rem;line-height:1;color:var(--text-muted);flex-shrink:0;margin-left:5px;vertical-align:1px}
 .label:hover .info-dot{border-color:var(--accent);color:var(--accent)}
-.right{display:flex;align-items:center;justify-content:flex-end;gap:0.4rem}
+.right{display:flex;align-items:center;gap:0.4rem;flex-shrink:0}
 .pills{display:flex;gap:3px}
-.pill{padding:4px 9px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.65rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);user-select:none;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.pill{padding:4px 7px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.65rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);user-select:none;-webkit-tap-highlight-color:transparent;white-space:nowrap}
 .pill:hover{border-color:var(--border-light)}
 .pill.selected{color:#fff;border-color:transparent;font-weight:600;box-shadow:0 0 8px var(--pill-glow,rgba(90,157,90,0.3));animation:pillBreath 3s ease-in-out infinite}
 .pill.selected.l0{background:var(--s2)}
@@ -2064,7 +2064,7 @@ class SkillRow extends HTMLElement {
 :host(.has-engagement) .helped:hover{opacity:1;border-color:var(--accent)}
 .helped.on{opacity:1!important;background:var(--accent-dim);border-color:var(--accent);border-style:solid;color:var(--accent)}
 @keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(90,157,90,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(90,157,90,0.4))}}
-@media(max-width:400px){.label{font-size:0.8rem}.pill{padding:3px 7px;font-size:0.6rem}.helped{padding:3px 6px;font-size:0.55rem}}
+@media(max-width:400px){.label{font-size:0.75rem}.pill{padding:3px 5px;font-size:0.6rem}.helped{padding:3px 5px;font-size:0.55rem}}
 </style>
 <div class="label">${labelWithInfoDot(label)}</div>
 <div class="right"><button class="helped">helped</button><div class="pills">${SkillRow.LEVELS.map((l,i)=>`<div class="pill" data-level="${i}">${l}</div>`).join('')}</div></div>`;
