@@ -179,6 +179,24 @@ header {
 .section {
   margin-bottom: 1.5rem;
 }
+.section-edit {
+  float: right;
+  margin-left: 0.6rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.section-edit:hover { color: var(--accent); opacity: 1; }
 .section-header-hint {
   float: right;
   font-size: 0.6rem;
@@ -222,7 +240,6 @@ rating-row, toggle-row, skill-row, urge-row, .emotion-row { margin: 5px 0; }
   -webkit-tap-highlight-color: transparent;
 }
 .present-chip:hover { border-color: var(--accent); color: var(--accent); }
-.present-chip.dim { opacity: 0.45; }
 .present-unit { display: flex; align-items: center; gap: 0.35rem; margin: 5px 0; }
 .present-unit > rating-row, .present-unit > urge-row { flex: 1; min-width: 0; margin: 0; }
 /* Urges are two rows each; space and a hairline keep each pair visibly together. */
@@ -452,19 +469,6 @@ body.light-mode .skill-info-card { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   align-items: center;
   gap: 0.35rem;
 }
-.emotion-hide {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 0.7rem;
-  padding: 2px;
-  opacity: 0;
-  transition: all var(--transition);
-  flex-shrink: 0;
-}
-.emotion-row:hover .emotion-hide { opacity: 0.6; }
-.emotion-hide:hover { opacity: 1 !important; color: var(--accent); }
 .emotion-avg {
   font-size: 0.6rem;
   color: var(--text-muted);
@@ -474,29 +478,6 @@ body.light-mode .skill-info-card { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   font-weight: 500;
 }
 .emotion-avg.has-data { color: var(--text-secondary); }
-.emotion-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0 0.25rem;
-}
-.emotion-add-btn, .emotion-show-hidden-btn {
-  background: none;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-pill);
-  color: var(--text-muted);
-  font-size: 0.7rem;
-  padding: 0.2rem 0.65rem;
-  cursor: pointer;
-  transition: all var(--transition);
-  font-family: var(--font-body);
-}
-.emotion-add-btn:hover, .emotion-show-hidden-btn:hover { border-color: var(--accent); color: var(--accent); }
-.emotion-show-hidden-btn.active { border-color: var(--accent); color: var(--accent); border-style: solid; }
-.emotion-row.hidden-visible {
-  opacity: 0.5;
-}
-.emotion-row.hidden-visible:hover { opacity: 0.75; }
 
 /* ─── Lock Screen ─── */
 .lock-screen {
@@ -1579,40 +1560,32 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     </div>
 
     <div class="section" id="emotions-section">
-      <div class="section-header">Emotions <span style="float:right;font-size:0.6rem;font-weight:400;text-transform:none;letter-spacing:0;opacity:0.6">7d avg</span></div>
+      <div class="section-header">Emotions <button class="section-edit" data-wizard-step="emotions">edit</button><span class="section-header-hint">7d avg</span></div>
       <div class="present-chips" id="emotion-chips"></div>
       <div id="emotion-rows"></div>
-      <div class="emotion-controls">
-        <button class="emotion-add-btn" id="add-emotion">+ add</button>
-        <button class="emotion-show-hidden-btn" id="show-hidden">show hidden (<span id="hidden-count">0</span>)</button>
-      </div>
     </div>
 
     <!-- IFS parts: user-named, rated for how active each was. Hidden until the first part is added. -->
     <div class="section" id="parts-section">
-      <div class="section-header">Parts <span class="section-header-hint">how active today</span></div>
+      <div class="section-header">Parts <button class="section-edit" data-wizard-step="parts">edit</button><span class="section-header-hint">how active today</span></div>
       <div class="present-chips" id="part-chips"></div>
       <div id="part-rows"></div>
-      <div class="emotion-controls">
-        <button class="emotion-add-btn" id="add-part">+ add</button>
-        <button class="emotion-show-hidden-btn" id="show-hidden-parts">show hidden (<span id="hidden-count-parts">0</span>)</button>
-      </div>
     </div>
 
     <!-- Schema therapy: schemas and modes, rated for how active each was. Built in buildDynamicSections(). -->
     <div class="section" id="schemas-section">
-      <div class="section-header">Schemas &amp; modes <span class="section-header-hint">how active today</span></div>
+      <div class="section-header">Schemas &amp; modes <button class="section-edit" data-wizard-step="schemas">edit</button><span class="section-header-hint">how active today</span></div>
       <div class="present-chips" id="schema-chips"></div>
       <div id="schema-rows"></div>
     </div>
 
     <div class="section" id="urges-section">
-      <div class="section-header">Urges <span class="section-header-hint">0–5, and whether you acted on it</span></div>
+      <div class="section-header">Urges <button class="section-edit" data-wizard-step="urges">edit</button><span class="section-header-hint">0–5, and whether you acted on it</span></div>
       <div class="present-chips" id="urge-chips"></div>
     </div>
 
     <div class="section" id="body-section">
-      <div class="section-header">Daily</div>
+      <div class="section-header">Daily <button class="section-edit" data-wizard-step="categories">edit</button></div>
       <div class="category-section" id="cat-sleep">
         <div class="tracking-row">
           <div class="tracking-label">Sleep<div class="tracking-sub">last night</div></div>
@@ -1628,7 +1601,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     </div>
 
     <div class="section" id="skills-section">
-      <div class="section-header">Skills</div>
+      <div class="section-header">Skills <button class="section-edit" data-wizard-step="skills">edit</button></div>
       <!-- Basics: everyday self-care, shown as the first group under Skills. -->
       <div id="basics-block">
         <div class="skills-school-label" id="basics-label">Basics</div>
@@ -2736,7 +2709,6 @@ customElements.define('urge-row', UrgeRow);
       hiddenUrges: [...DEFAULT_HIDDEN_URGES],
       hiddenCategories: [...DEFAULT_HIDDEN_CATEGORIES],
       hiddenSkills: [...DEFAULT_HIDDEN_SKILLS],
-      showHidden: false,
       onboarded: false,        // true after the user completes/skips the wizard
       shareTTL: 2592000,       // relay link TTL in seconds (default 30 days)
       activeShare: null,       // { token, editKey, passphrase, expiresAt } for the link that can be updated in place
@@ -2762,7 +2734,6 @@ customElements.define('urge-row', UrgeRow);
           hiddenUrges: saved.hiddenUrges || defaults.hiddenUrges,
           hiddenCategories: saved.hiddenCategories || defaults.hiddenCategories,
           hiddenSkills: saved.hiddenSkills || defaults.hiddenSkills,
-          showHidden: false, // always reset — transient UI state
           onboarded: !!saved.onboarded,
           shareTTL: typeof saved.shareTTL === 'number' ? saved.shareTTL : defaults.shareTTL,
           activeShare: saved.activeShare && typeof saved.activeShare.token === 'string' ? saved.activeShare : null,
@@ -2903,10 +2874,11 @@ customElements.define('urge-row', UrgeRow);
   }
 
   // User-named rated lists. Names live in prefs[listKey] (append-only: entries store
-  // <prefix><index into that list>), hidden names in prefs[hiddenKey].
+  // <prefix><index into that list>), hidden names in prefs[hiddenKey]. Adding and hiding happen
+  // in the edit dialog only, so the card has one configuration surface.
   const CUSTOM_LISTS = {
-    emotions: { listKey: 'emotions', hiddenKey: 'hiddenEmotions', prefix: 'emotion_', rows: 'emotion-rows', showHidden: 'show-hidden', count: 'hidden-count', order: emotionDisplayOrder, noun: 'emotion' },
-    parts: { listKey: 'parts', hiddenKey: 'hiddenParts', prefix: 'part_', rows: 'part-rows', showHidden: 'show-hidden-parts', count: 'hidden-count-parts', order: list => list.map((_, i) => i), noun: 'part', section: 'parts-section' }
+    emotions: { listKey: 'emotions', hiddenKey: 'hiddenEmotions', prefix: 'emotion_', rows: 'emotion-rows', order: emotionDisplayOrder },
+    parts: { listKey: 'parts', hiddenKey: 'hiddenParts', prefix: 'part_', rows: 'part-rows', order: list => list.map((_, i) => i), section: 'parts-section' }
   };
 
   function renderCustomList(cfg) {
@@ -2917,11 +2889,10 @@ customElements.define('urge-row', UrgeRow);
     container.innerHTML = '';
     cfg.order(list).forEach(i => {
       const name = list[i];
-      const isHidden = hiddenList.includes(name);
-      if (isHidden && !prefs.showHidden) return;
+      if (hiddenList.includes(name)) return;
 
       const wrapper = document.createElement('div');
-      wrapper.className = 'present-unit emotion-row' + (isHidden ? ' hidden-visible' : '');
+      wrapper.className = 'present-unit emotion-row';
 
       const row = document.createElement('rating-row');
       row.setAttribute('label', name);
@@ -2935,42 +2906,13 @@ customElements.define('urge-row', UrgeRow);
       avg.dataset.field = cfg.prefix + i;
       wrapper.appendChild(avg);
 
-      const hideBtn = document.createElement('button');
-      hideBtn.className = 'emotion-hide';
-      hideBtn.textContent = isHidden ? '◉' : '○';
-      hideBtn.title = isHidden ? `Show this ${cfg.noun}` : `Hide this ${cfg.noun}`;
-      hideBtn.addEventListener('click', () => {
-        if (isHidden) prefs[cfg.hiddenKey] = hiddenList.filter(e => e !== name);
-        else hiddenList.push(name);
-        savePrefs();
-        renderCustomLists();
-        renderEntry();
-      });
-      wrapper.appendChild(hideBtn);
-
       container.appendChild(wrapper);
     });
-
-    document.getElementById(cfg.count).textContent = hiddenList.length;
-    const showBtn = document.getElementById(cfg.showHidden);
-    showBtn.style.display = hiddenList.length ? '' : 'none';
-    showBtn.classList.toggle('active', prefs.showHidden);
   }
 
   function renderCustomLists() {
     renderCustomList(CUSTOM_LISTS.emotions);
     renderCustomList(CUSTOM_LISTS.parts);
-  }
-
-  function addCustomItem(cfg) {
-    const name = prompt(`New ${cfg.noun} name:`);
-    if (!name || !name.trim()) return;
-    const trimmed = name.trim();
-    if (prefs[cfg.listKey].includes(trimmed)) { alert('Already exists.'); return; }
-    prefs[cfg.listKey].push(trimmed);
-    savePrefs();
-    renderCustomLists();
-    renderEntry();
   }
 
   const DYNAMIC_KEYS = {
@@ -3119,14 +3061,9 @@ customElements.define('urge-row', UrgeRow);
       if (inputs.length) inputs[inputs.length - 1].focus();
     });
 
-    document.getElementById('add-emotion').addEventListener('click', () => addCustomItem(CUSTOM_LISTS.emotions));
-    document.getElementById('add-part').addEventListener('click', () => addCustomItem(CUSTOM_LISTS.parts));
-    ['show-hidden', 'show-hidden-parts'].forEach(id => {
-      document.getElementById(id).addEventListener('click', () => {
-        prefs.showHidden = !prefs.showHidden;
-        renderCustomLists();
-        renderEntry();
-      });
+    // Every section header links into the edit dialog on its own tab.
+    document.querySelectorAll('.section-edit').forEach(btn => {
+      btn.addEventListener('click', () => openWizard('edit', btn.dataset.wizardStep));
     });
 
     document.addEventListener('row-info', e => {
@@ -4027,7 +3964,7 @@ customElements.define('urge-row', UrgeRow);
 
   const WIZARD_STEPS = [
     { id: 'welcome', nav: 'Welcome', title: 'Welcome', subtitle: null, render: renderWizardWelcome, showInEdit: false },
-    { id: 'emotions', nav: 'Emotions', title: 'Emotions', subtitle: 'Check the ones you want to track. You can change this any time with the pencil button at the top.', render: renderWizardEmotions, showInEdit: true },
+    { id: 'emotions', nav: 'Emotions', title: 'Emotions', subtitle: 'Check the ones you want to track, and add any that aren\'t here. Unchecked ones keep their history and can come back any time.', render: renderWizardEmotions, showInEdit: true },
     { id: 'parts', nav: 'Parts', title: 'Parts', subtitle: 'For IFS: name your parts and rate how active each one was. Skip this if parts work isn\'t something you do.', render: renderWizardParts, showInEdit: true },
     { id: 'schemas', nav: 'Schemas', title: 'Schemas & modes', subtitle: 'For schema therapy: pick the schemas and modes you\'re working with and rate how active each was. Tap ? for what one means.', render: renderWizardSchemas, showInEdit: true },
     { id: 'urges', nav: 'Urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Each one is rated 0\u20135, and you can note whether you acted on it. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
@@ -4046,6 +3983,7 @@ customElements.define('urge-row', UrgeRow);
     wizardStepIdx = 0;
     wizardConfirming = false;
     wizardDraft = {
+      emotions: [...prefs.emotions],
       hiddenEmotions: [...prefs.hiddenEmotions],
       parts: [...prefs.parts],
       hiddenParts: [...prefs.hiddenParts],
@@ -4116,6 +4054,7 @@ customElements.define('urge-row', UrgeRow);
   const catSection = id => (CATEGORIES.find(c => c.id === id) || {}).section;
   const catLabel = id => (CATEGORIES.find(c => c.id === id) || { label: id }).label;
   const WIZARD_DIFF_SECTIONS = [
+    { key: 'emotions', label: 'Emotions', name: id => id, additions: true },
     { key: 'hiddenEmotions', label: 'Emotions', name: id => id },
     { key: 'parts', label: 'Parts', name: id => id, additions: true },
     { key: 'hiddenParts', label: 'Parts', name: id => id },
@@ -4224,17 +4163,43 @@ customElements.define('urge-row', UrgeRow);
       note;
   }
 
+  // A text field + button that appends to a draft list (emotions, parts). Applied on Save.
+  function wizardAddRow(body, listKey, placeholder) {
+    const add = document.createElement('div');
+    add.className = 'wizard-add-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = placeholder;
+    input.maxLength = 40;
+    const btn = document.createElement('button');
+    btn.className = 'wizard-quick-btn';
+    btn.textContent = '+ add';
+    const commit = () => {
+      const name = input.value.trim();
+      if (!name || wizardDraft[listKey].includes(name)) return;
+      wizardDraft[listKey].push(name);
+      renderWizardStep();
+      document.querySelector('.wizard-add-row input')?.focus();
+    };
+    btn.addEventListener('click', commit);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+    add.appendChild(input);
+    add.appendChild(btn);
+    body.appendChild(add);
+  }
+
   function renderWizardEmotions(body) {
     body.className = 'wizard-body';
-    wizardQuickAllNone(body, 'hiddenEmotions', [...prefs.emotions]);
+    wizardQuickAllNone(body, 'hiddenEmotions', [...wizardDraft.emotions]);
     const group = document.createElement('div');
     group.className = 'wizard-group';
-    emotionDisplayOrder(prefs.emotions).forEach(i => {
-      const em = prefs.emotions[i];
+    emotionDisplayOrder(wizardDraft.emotions).forEach(i => {
+      const em = wizardDraft.emotions[i];
       const checked = !wizardDraft.hiddenEmotions.includes(em);
       group.appendChild(wizardMakeItem(em, null, checked, (on) => toggleWizardDraft('hiddenEmotions', em, on)));
     });
     body.appendChild(group);
+    wizardAddRow(body, 'emotions', 'Add an emotion that isn\'t listed');
   }
 
   function renderWizardParts(body) {
@@ -4247,28 +4212,7 @@ customElements.define('urge-row', UrgeRow);
       group.appendChild(wizardMakeItem(name, null, checked, (on) => toggleWizardDraft('hiddenParts', name, on)));
     });
     body.appendChild(group);
-
-    const add = document.createElement('div');
-    add.className = 'wizard-add-row';
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = wizardDraft.parts.length ? 'Add another part' : 'Name a part, e.g. "The Critic"';
-    input.maxLength = 40;
-    const btn = document.createElement('button');
-    btn.className = 'wizard-quick-btn';
-    btn.textContent = '+ add';
-    const commit = () => {
-      const name = input.value.trim();
-      if (!name || wizardDraft.parts.includes(name)) return;
-      wizardDraft.parts.push(name);
-      renderWizardStep();
-      document.querySelector('.wizard-add-row input')?.focus();
-    };
-    btn.addEventListener('click', commit);
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
-    add.appendChild(input);
-    add.appendChild(btn);
-    body.appendChild(add);
+    wizardAddRow(body, 'parts', wizardDraft.parts.length ? 'Add another part' : 'Name a part, e.g. "The Critic"');
   }
 
   function renderWizardSchemas(body) {
@@ -4448,7 +4392,7 @@ customElements.define('urge-row', UrgeRow);
     body.innerHTML =
       '<p>Ready to save. Your daily entry form will show:</p>' +
       '<div class="wizard-summary">' +
-        line('Emotions', prefs.emotions.length, hiddenCounts.emotions) +
+        line('Emotions', wizardDraft.emotions.length, hiddenCounts.emotions) +
         (wizardDraft.parts.length ? line('Parts', wizardDraft.parts.length, hiddenCounts.parts) : '') +
         line('Schemas & modes', SCHEMAS.length, hiddenCounts.schemas) +
         line('Urges', URGES.length, hiddenCounts.urges) +
@@ -4463,6 +4407,7 @@ customElements.define('urge-row', UrgeRow);
 
   async function wizardFinish() {
     // Copy draft into prefs
+    prefs.emotions = wizardDraft.emotions;
     prefs.hiddenEmotions = wizardDraft.hiddenEmotions;
     prefs.parts = wizardDraft.parts;
     prefs.hiddenParts = wizardDraft.hiddenParts;
@@ -4517,7 +4462,7 @@ customElements.define('urge-row', UrgeRow);
     // Skip in firstRun means: take the default visibility for everything, mark onboarded, close.
     const d = makeDefaultPrefs();
     wizardDraft = {
-      hiddenEmotions: d.hiddenEmotions, parts: [...prefs.parts], hiddenParts: [], hiddenSchemas: d.hiddenSchemas,
+      emotions: [...prefs.emotions], hiddenEmotions: d.hiddenEmotions, parts: [...prefs.parts], hiddenParts: [], hiddenSchemas: d.hiddenSchemas,
       hiddenUrges: d.hiddenUrges, hiddenCategories: d.hiddenCategories, hiddenSkills: d.hiddenSkills
     };
     await wizardFinish();
