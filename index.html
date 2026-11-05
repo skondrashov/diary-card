@@ -242,9 +242,8 @@ rating-row, toggle-row, skill-row, urge-row, .emotion-row { margin: 5px 0; }
 .present-chip:hover { border-color: var(--accent); color: var(--accent); }
 .present-unit { display: flex; align-items: center; gap: 0.35rem; margin: 5px 0; }
 .present-unit > rating-row, .present-unit > urge-row { flex: 1; min-width: 0; margin: 0; }
-/* Urges are two rows each; space and a hairline keep each pair visibly together. */
-#urges-section .present-unit { margin: 0.2rem 0; padding-bottom: 0.35rem; border-bottom: 1px solid var(--border); }
-#urges-section .present-unit:last-of-type { border-bottom: none; }
+/* Urges are two rows each; a little extra space keeps each pair visibly together. */
+#urges-section .present-unit { margin: 0.55rem 0; }
 .present-collapse {
   background: none;
   border: none;
