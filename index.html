@@ -225,6 +225,9 @@ rating-row, toggle-row, skill-row, urge-row, .emotion-row { margin: 5px 0; }
 .present-chip.dim { opacity: 0.45; }
 .present-unit { display: flex; align-items: center; gap: 0.35rem; margin: 5px 0; }
 .present-unit > rating-row, .present-unit > urge-row { flex: 1; min-width: 0; margin: 0; }
+/* Urges are two rows each; space and a hairline keep each pair visibly together. */
+#urges-section .present-unit { margin: 0.2rem 0; padding-bottom: 0.35rem; border-bottom: 1px solid var(--border); }
+#urges-section .present-unit:last-of-type { border-bottom: none; }
 .present-collapse {
   background: none;
   border: none;
@@ -2143,30 +2146,29 @@ class UrgeRow extends HTMLElement {
     for (let i = 0; i <= 5; i++) colorCss += `.pill.selected.i${i}{background:var(--c${i});${i===0?'color:var(--text-secondary);':''}${i===3?'color:#1a1a1a;':''}}`;
 
     this.shadowRoot.innerHTML = `<style>
-:host{display:block;padding:0.5rem 0}
-.top,.bottom{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
-.bottom{margin-top:0.3rem;justify-content:flex-end}
-.label{font-size:0.85rem;color:var(--text-secondary);flex-shrink:0;min-width:90px}
-.urge-label{font-size:0.65rem;color:var(--text-muted);margin-right:0.25rem}
+:host{display:block;padding:0.4rem 0}
+.label{font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.3rem}
+.grid{display:grid;grid-template-columns:auto auto;gap:0.3rem 0.5rem;align-items:center;justify-content:end}
+.cap{font-size:0.65rem;color:var(--text-muted);text-align:right;white-space:nowrap}
 .pills{display:flex;gap:4px}
 .pill{width:32px;height:28px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
 .pill:hover{border-color:var(--border-light)}
 .pill.selected{color:#fff;border-color:transparent;font-weight:600;box-shadow:0 0 8px var(--pill-glow,rgba(201,149,107,0.3));animation:pillBreath 3s ease-in-out infinite}
 ${colorCss}
-.acted{display:flex;align-items:center;justify-content:flex-end;gap:4px}
-.acted-label{font-size:0.65rem;color:var(--text-muted);margin-right:0.25rem}
+.acted{display:flex;align-items:center;gap:4px}
 .apill{min-width:36px;padding:0 9px;height:24px;border-radius:var(--radius-pill,20px);border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.68rem;font-weight:500;cursor:pointer;transition:all var(--transition,0.2s ease);display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
 .apill:hover{border-color:var(--border-light)}
 .apill.selected{font-weight:600;border-color:transparent}
 .apill.selected.no{background:var(--c0);color:var(--text-secondary)}
 .apill.selected.yes{background:var(--accent);color:#fff;box-shadow:0 0 8px var(--accent-glow)}
 @keyframes pillBreath{0%,100%{box-shadow:0 0 6px var(--pill-glow,rgba(201,149,107,0.2))}50%{box-shadow:0 0 14px var(--pill-glow,rgba(201,149,107,0.4))}}
-@media(max-width:400px){.pill{width:28px;height:26px;font-size:0.7rem}.label{min-width:75px;font-size:0.8rem}}
+@media(max-width:400px){.pill{width:28px;height:26px;font-size:0.7rem}.label{font-size:0.8rem}}
 </style>
-<div class="top"><div class="label">${label}</div>
-<div class="acted"><span class="acted-label">acted on it?</span><div class="apill no" data-value="no">no</div><div class="apill yes" data-value="yes">yes</div></div></div>
-<div class="bottom"><span class="urge-label">urge</span>
-<div class="pills">${Array.from({length:6},(_,i)=>`<div class="pill" data-value="${i}">${i}</div>`).join('')}</div></div>`;
+<div class="label">${label}</div>
+<div class="grid">
+<span class="cap">urge</span><div class="pills">${Array.from({length:6},(_,i)=>`<div class="pill" data-value="${i}">${i}</div>`).join('')}</div>
+<span class="cap">acted on it?</span><div class="acted"><div class="apill no" data-value="no">no</div><div class="apill yes" data-value="yes">yes</div></div>
+</div>`;
   }
 
   _update() {
