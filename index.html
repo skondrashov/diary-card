@@ -1170,8 +1170,10 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   border: 1px solid var(--border-light);
   border-radius: var(--radius-pill);
   color: var(--text-secondary);
-  font-size: 0.6rem;
-  width: 30px;
+  font-size: 0.7rem;
+  letter-spacing: -2px;
+  padding: 0 6px 0 4px;
+  min-width: 28px;
   height: 26px;
   cursor: pointer;
   transition: all var(--transition);
@@ -4306,10 +4308,11 @@ customElements.define('urge-row', UrgeRow);
   function renderWizardLayout(body) {
     body.className = 'wizard-body';
     const order = wizardDraft.sectionOrder;
-    const move = (i, delta) => {
-      const j = i + delta;
-      if (j < 0 || j >= order.length) return;
-      [order[i], order[j]] = [order[j], order[i]];
+    const moveTo = (i, j) => {
+      j = Math.max(0, Math.min(order.length - 1, j));
+      if (j === i) return;
+      const [id] = order.splice(i, 1);
+      order.splice(j, 0, id);
       renderWizardStep();
     };
     order.forEach((id, i) => {
@@ -4320,17 +4323,19 @@ customElements.define('urge-row', UrgeRow);
       name.className = 'wizard-order-name';
       name.textContent = sec.label;
       row.appendChild(name);
-      const mk = (glyph, delta, disabled, title) => {
+      const mk = (glyph, target, disabled, title) => {
         const b = document.createElement('button');
         b.className = 'wizard-order-btn';
         b.textContent = glyph;
         b.title = title;
         b.disabled = disabled;
-        b.addEventListener('click', () => move(i, delta));
+        b.addEventListener('click', () => moveTo(i, target));
         row.appendChild(b);
       };
-      mk('\u25b2', -1, i === 0, 'Move up');
-      mk('\u25bc', 1, i === order.length - 1, 'Move down');
+      mk('↑↑', 0, i === 0, 'Move to top');
+      mk('↑', i - 1, i === 0, 'Move up');
+      mk('↓', i + 1, i === order.length - 1, 'Move down');
+      mk('↓↓', order.length - 1, i === order.length - 1, 'Move to bottom');
       body.appendChild(row);
     });
   }
