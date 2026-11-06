@@ -988,9 +988,9 @@ body.light-mode .info-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   background: rgba(0,0,0,0.7);
   z-index: 300;
   display: none;
-  align-items: center;
+  align-items: flex-start; /* pinned near the top so the tabs stay put as the content height changes */
   justify-content: center;
-  padding: 1rem;
+  padding: 5vh 1rem 1rem;
 }
 .wizard-overlay.visible { display: flex; }
 body.light-mode .wizard-overlay { background: rgba(0,0,0,0.35); }
@@ -1163,7 +1163,9 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
   margin-bottom: 0.35rem;
   font-size: 0.85rem;
   color: var(--text);
+  transition: transform 0.28s ease, border-color 0.4s ease;
 }
+.wizard-order-row.moved { border-color: var(--accent); }
 .wizard-order-name { flex: 1; }
 .wizard-order-btn {
   background: none;
@@ -1533,7 +1535,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       </form>
     </div>
 
-    <!-- Vault list (normal returning-user flow — one or more vaults) -->
+    <!-- Vault list (normal returning-user flow: one or more vaults) -->
     <div class="lock-mode" id="lock-vaults" style="display:none">
       <div class="vault-list" id="vault-list"></div>
       <div class="lock-or">or</div>
@@ -1606,7 +1608,7 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
     </div>
 
     <div class="section" id="urges-section">
-      <div class="section-header">Urges <button class="section-edit" data-wizard-step="urges">edit</button><span class="section-header-hint">0–5, and whether you acted on it</span></div>
+      <div class="section-header">Urges <button class="section-edit" data-wizard-step="urges">edit</button></div>
       <div class="present-chips" id="urge-chips"></div>
     </div>
 
@@ -1729,16 +1731,16 @@ body.light-mode .wizard-panel { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
       <h2>How your privacy works</h2>
 
       <h3>Your data is encrypted and stays on your device</h3>
-      <p>Your passphrase scrambles your diary entries before they're saved. Without it, no one can read them — not someone borrowing your computer, not your browser, not us. There is no server, no account, no name, no email, and no data ever sent over the internet.</p>
+      <p>Your passphrase scrambles your diary entries before they're saved. Without it, no one can read them: not someone borrowing your computer, not your browser, not us. There is no server, no account, no name, no email, and no data ever sent over the internet.</p>
 
       <h3>Sharing with your therapist</h3>
-      <p>When you share, you pick a share passphrase — it doesn't have to be the same as your diary passphrase. Give it to your therapist separately (in person, text, etc.). The link you send them is scrambled — it only becomes readable when they enter the passphrase. No one in between can read it.</p>
+      <p>When you share, you pick a share passphrase. It doesn't have to be the same as your diary passphrase. Give it to your therapist separately (in person, text, etc.). The link you send them is scrambled. It only becomes readable when they enter the passphrase. No one in between can read it.</p>
 
       <h3>If you forget your passphrase</h3>
-      <p>That diary is unrecoverable. There's no "forgot password" option — this is the price of not trusting a server with your information. You can start a new diary alongside it, but the old entries are inaccessible forever. Write your passphrase down somewhere safe.</p>
+      <p>That diary is unrecoverable. There's no "forgot password" option. That is the price of not trusting a server with your information. You can start a new diary alongside it, but the old entries are inaccessible forever. Write your passphrase down somewhere safe.</p>
 
       <h3>If you clear your browser data</h3>
-      <p>Every diary on this device is deleted permanently. Same reason — there's no backup anywhere.</p>
+      <p>Every diary on this device is deleted permanently. Same reason: there's no backup anywhere.</p>
 
       <h3 class="caveat">What this doesn't protect against</h3>
       <p class="caveat">Someone looking at your screen while the diary is open. A weak passphrase that's easy to guess. Malware on your device. Your browser history will show that you visited this site (though the diary content itself is encrypted).</p>
@@ -2639,14 +2641,14 @@ customElements.define('urge-row', UrgeRow);
     { id: 'outside', section: 'basics', type: 'toggle', field: 'wentOutside', label: 'Went outside', desc: 'Got some fresh air?' },
     { id: 'social', section: 'basics', type: 'toggle', field: 'socialContact', label: 'Social contact', desc: 'Interacted with someone?' },
     // Added 2026-11
-    { id: 'energy', section: 'daily', type: 'rating', field: 'energy', label: 'Energy', desc: 'How much energy you had today, 0–5' },
-    { id: 'pain', section: 'daily', type: 'rating', field: 'pain', label: 'Pain / illness', desc: 'Physical pain or feeling unwell, 0–5' },
-    { id: 'overall', section: 'daily', type: 'rating', field: 'overallDay', label: 'Overall day', desc: 'The day as a whole, 0–5' },
-    { id: 'therapy', section: 'daily', type: 'toggle', field: 'therapySession', label: 'Therapy session', desc: 'Had a session today? Useful for seeing before/after patterns.' },
-    { id: 'cycle', section: 'daily', type: 'toggle', field: 'menstruating', label: 'Menstruating', desc: 'On your period today? Mood tracks the cycle more than people expect.' },
-    { id: 'rumination', section: 'daily', type: 'rating', field: 'rumination', label: 'Rumination', desc: 'How much of the day your mind spent going in circles, 0–5. The state, not what you did with it — saying it out loud is an urge.' },
+    { id: 'energy', section: 'daily', type: 'rating', field: 'energy', label: 'Energy', desc: 'How much energy you had today' },
+    { id: 'pain', section: 'daily', type: 'rating', field: 'pain', label: 'Pain / illness', desc: 'Physical pain or feeling unwell' },
+    { id: 'overall', section: 'daily', type: 'rating', field: 'overallDay', label: 'Overall day', desc: 'The day as a whole' },
+    { id: 'therapy', section: 'daily', type: 'toggle', field: 'therapySession', label: 'Therapy session', desc: 'Had a session today?' },
+    { id: 'cycle', section: 'daily', type: 'toggle', field: 'menstruating', label: 'Menstruating', desc: 'On your period today?' },
+    { id: 'rumination', section: 'daily', type: 'rating', field: 'rumination', label: 'Rumination', desc: 'Focused on a single memory or worry about the future' },
     { id: 'prn', section: 'basics', type: 'toggle', field: 'tookPrn', label: 'Took as-needed medication', desc: 'Something you take when needed rather than on a schedule (a PRN), separate from your regular meds' },
-    { id: 'sunlight', section: 'basics', type: 'toggle', field: 'gotSunlight', label: 'Got sunlight', desc: 'Daylight on your face, ideally in the morning' },
+    { id: 'sunlight', section: 'basics', type: 'toggle', field: 'gotSunlight', label: 'Got sunlight', desc: 'Daylight on your face' },
     { id: 'journal', section: 'basics', type: 'toggle', field: 'journaled', label: 'Journaled', desc: 'Wrote something down beyond this card' },
     { id: 'reachedOut', section: 'basics', type: 'toggle', field: 'reachedOut', label: 'Reached out to someone', desc: 'Texted, called, or asked for support' },
     { id: 'pets', section: 'basics', type: 'toggle', field: 'timeWithPet', label: 'Time with a pet', desc: 'Spent time with an animal' },
@@ -2654,11 +2656,18 @@ customElements.define('urge-row', UrgeRow);
     { id: 'creative', section: 'basics', type: 'toggle', field: 'didCreative', label: 'Did something creative', desc: 'Made, played, wrote, drew, built' },
     { id: 'learned', section: 'basics', type: 'toggle', field: 'learnedSomething', label: 'Learned something', desc: 'Read, studied, or picked up something new' },
     { id: 'helped', section: 'basics', type: 'toggle', field: 'helpedSomeone', label: 'Helped someone', desc: 'Did something for somebody else' },
-    { id: 'spiritual', section: 'basics', type: 'toggle', field: 'spiritualPractice', label: 'Spiritual practice', desc: 'Prayer, ritual, service — whatever that means to you' }
+    { id: 'spiritual', section: 'basics', type: 'toggle', field: 'spiritualPractice', label: 'Spiritual practice', desc: 'Prayer, ritual, service, whatever that means to you' }
   ];
+  // Display order of the Daily section. Ids not listed here go after, in CATEGORIES order.
+  const DAILY_ORDER = ['overall', 'sleep', 'energy', 'pain', 'rumination', 'therapy', 'cycle'];
+  function dailyCategories() {
+    const daily = CATEGORIES.filter(c => c.section === 'daily');
+    return DAILY_ORDER.map(id => daily.find(c => c.id === id)).filter(Boolean)
+      .concat(daily.filter(c => !DAILY_ORDER.includes(c.id)));
+  }
   // The category ids that existed before prefs recorded which ones a vault had seen.
   const KNOWN_CATEGORY_IDS_V1 = ['sleep', 'exercise', 'meals', 'medications', 'nap', 'shower', 'teeth', 'meditate', 'water', 'outside', 'social'];
-  const BASICS_INFO = { id: 'basics', label: 'Basics', name: 'Basics', desc: 'Everyday things you did for yourself. Not therapy skills, but they are the ground the skills stand on.' };
+  const BASICS_INFO = { id: 'basics', label: 'Basics', name: 'Basics', desc: 'Everyday things you did for yourself.' };
 
   // Schema therapy: Young's 18 early maladaptive schemas and the common modes. Rated 0-5 for how
   // active each was today, stored as schema_<index>. Append-only.
@@ -3028,9 +3037,12 @@ customElements.define('urge-row', UrgeRow);
     });
 
     const dailySec = document.getElementById(DYNAMIC_KEYS.daily);
+    const sleepEl = document.getElementById('cat-sleep'); // static markup; it keeps its slot in DAILY_ORDER
+    sleepEl.remove();
     dailySec.innerHTML = '';
-    CATEGORIES.forEach(cat => {
-      if (cat.section !== 'daily' || cat.type === 'complex' || prefs.hiddenCategories.includes(cat.id)) return;
+    dailyCategories().forEach(cat => {
+      if (cat.id === 'sleep') { dailySec.appendChild(sleepEl); return; }
+      if (cat.type === 'complex' || prefs.hiddenCategories.includes(cat.id)) return;
       dailySec.appendChild(makeCategoryRow(cat));
     });
 
@@ -3582,7 +3594,7 @@ customElements.define('urge-row', UrgeRow);
       shareState.url = longUrl;
       document.getElementById('share-result-url').textContent = longUrl;
       document.getElementById('share-result-expiry').style.display = 'none';
-      document.getElementById('share-result-status').textContent = 'Relay unavailable \u2014 this permanent link works directly.';
+      document.getElementById('share-result-status').textContent = 'Relay unavailable. This permanent link works directly.';
       document.getElementById('share-result-long-wrap').style.display = 'none';
     }
     document.getElementById('share-result-overlay').classList.add('visible');
@@ -3680,13 +3692,13 @@ customElements.define('urge-row', UrgeRow);
           shareState.token = data.token;
           document.getElementById('share-setup-overlay').classList.remove('visible');
           showShareResult(relayUrl(data.token), longUrl, data.expires_at, 'Link updated',
-            passChanged ? 'Same link as before, new passphrase — your therapist will need it. Expiry restarted from today.'
+            passChanged ? 'Same link as before with a new passphrase, so your therapist will need it. Expiry restarted from today.'
                         : 'Same link and passphrase as before. Expiry restarted from today.');
           return;
         } catch (err) {
           // Gone or unupdatable (pre-edit-key link): fall through and make a fresh one.
           if (err.status !== 404 && err.status !== 403) throw err;
-          note = 'The old link had expired, so this is a new one — send it again.';
+          note = 'The old link had expired, so this is a new one. Send it again.';
         }
       }
 
@@ -3737,7 +3749,7 @@ customElements.define('urge-row', UrgeRow);
       document.getElementById('share-result-expiry-text').textContent = 'Expires ' + exp.toLocaleDateString();
       document.getElementById('share-result-status').textContent = '';
     } catch {
-      document.getElementById('share-result-status').textContent = 'Couldn\u2019t update \u2014 previous link still works.';
+      document.getElementById('share-result-status').textContent = 'Couldn\u2019t update. The previous link still works.';
     }
   });
 
@@ -3854,8 +3866,11 @@ customElements.define('urge-row', UrgeRow);
     const hasSleep = entry.sleepHours != null || entry.sleepQuality != null;
     if (hasSleep || dailyRows.length) {
       html += '<div class="share-section-label">Daily</div>';
-      if (hasSleep) html += shareRow('Sleep (last night)', `${entry.sleepHours != null ? entry.sleepHours + ' hrs' : ''}${entry.sleepQuality != null ? ` (quality ${entry.sleepQuality}/5)` : ''}`.trim());
-      dailyRows.forEach(cat => { html += catRow(cat); });
+      dailyCategories().forEach(cat => {
+        if (cat.id === 'sleep') {
+          if (hasSleep) html += shareRow('Sleep (last night)', `${entry.sleepHours != null ? entry.sleepHours + ' hrs' : ''}${entry.sleepQuality != null ? ` (quality ${entry.sleepQuality}/5)` : ''}`.trim());
+        } else if (dailyRows.includes(cat)) html += catRow(cat);
+      });
     }
 
     const basicsRows = answered('basics');
@@ -3868,7 +3883,7 @@ customElements.define('urge-row', UrgeRow);
       html += '<div class="share-section-label">Skills</div>';
       if (anyBasics) {
         html += '<div class="share-sub-label">Basics</div>';
-        if (hasExercise) html += shareRow('Exercise', `${entry.exerciseMins} min${entry.exerciseType ? ` \u2014 ${entry.exerciseType}` : ''}`);
+        if (hasExercise) html += shareRow('Exercise', `${entry.exerciseMins} min${entry.exerciseType ? `, ${entry.exerciseType}` : ''}`);
         if (hasMeals) {
           const filled = entry.meals.filter(m => m);
           html += shareRow('Meals', filled.length);
@@ -3960,7 +3975,7 @@ customElements.define('urge-row', UrgeRow);
     const from = new Date(dates[0] + 'T00:00:00');
     const to = new Date(dates[dates.length - 1] + 'T00:00:00');
 
-    let html = '<div class="share-header"><strong>' + dates.length + ' days</strong> &mdash; ' +
+    let html = '<div class="share-header"><strong>' + dates.length + ' days</strong>: ' +
       MONTHS[from.getMonth()] + ' ' + from.getDate() + ' to ' + MONTHS[to.getMonth()] + ' ' + to.getDate() + ', ' + to.getFullYear() + '</div>';
 
     html += '<div class="share-toolbar">';
@@ -4037,10 +4052,10 @@ customElements.define('urge-row', UrgeRow);
     { id: 'emotions', nav: 'Emotions', title: 'Emotions', subtitle: 'Check the ones you want to track, and add any that aren\'t here. Unchecked ones keep their history and can come back any time.', render: renderWizardEmotions, showInEdit: true },
     { id: 'parts', nav: 'Parts', title: 'Parts', subtitle: 'For IFS: name your parts and rate how active each one was. Skip this if parts work isn\'t something you do.', render: renderWizardParts, showInEdit: true },
     { id: 'schemas', nav: 'Schemas', title: 'Schemas & modes', subtitle: 'For schema therapy: pick the schemas and modes you\'re working with and rate how active each was. Tap ? for what one means.', render: renderWizardSchemas, showInEdit: true },
-    { id: 'urges', nav: 'Urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Each one is rated 0\u20135, and you can note whether you acted on it. Pick the ones you need to watch for.', render: renderWizardUrges, showInEdit: true },
-    { id: 'categories', nav: 'Daily', title: 'Daily', subtitle: 'How today was: sleep, energy, pain, and so on. Things that happened to you rather than things you did \u2014 those are under Skills.', render: renderWizardCategories, showInEdit: true },
+    { id: 'urges', nav: 'Urges', title: 'Urges', subtitle: 'Urges are pulls toward behaviors. Rate each one and note whether you acted on it. Pick the ones you want to track.', render: renderWizardUrges, showInEdit: true },
+    { id: 'categories', nav: 'Daily', title: 'Daily', subtitle: 'How today was: sleep, energy, pain, and so on. Things you did are under Skills.', render: renderWizardCategories, showInEdit: true },
     { id: 'skills', nav: 'Skills', title: 'Skills', subtitle: 'Browse by school of therapy and check the skills you\'re actively working on. Tap ? to see what a skill means.', render: renderWizardSkills, showInEdit: true },
-    { id: 'layout', nav: 'Layout', title: 'Section order', subtitle: 'Arrange the card the way you fill it in. Notes at the top, if that\'s how you think.', render: renderWizardLayout, showInEdit: true, editOnly: true },
+    { id: 'layout', nav: 'Layout', title: 'Section order', subtitle: null, render: renderWizardLayout, showInEdit: true, editOnly: true },
     // First-run summary. Edit mode has its own review step (renderWizardDiff) instead.
     { id: 'done', nav: 'Finish', title: 'All set', subtitle: null, render: renderWizardDone, showInEdit: false }
   ];
@@ -4232,13 +4247,25 @@ customElements.define('urge-row', UrgeRow);
     return item;
   }
 
+  // A wizard item with a ? button that opens the info popover instead of inline description text.
+  function wizardMakeInfoItem(label, checked, onToggle, infoFn) {
+    const item = wizardMakeItem(label, null, checked, onToggle);
+    const info = document.createElement('button');
+    info.className = 'wizard-item-info';
+    info.textContent = '?';
+    info.title = 'What is this?';
+    info.addEventListener('click', e => { e.stopPropagation(); infoFn(); });
+    item.appendChild(info);
+    return item;
+  }
+
   function renderWizardWelcome(body) {
     body.className = 'wizard-body wizard-welcome-body';
-    const note = wizardMode === 'newUser' ? '' : '<p class="wizard-note">(This is a one-time setup — we bumped how skills are tracked, so existing entries have been preserved under "legacy skills" and today you\'ll see individual DBT skills instead of the four modules.)</p>';
+    const note = wizardMode === 'newUser' ? '' : '<p class="wizard-note">(This is a one-time setup. We changed how skills are tracked, so existing entries have been preserved under "legacy skills" and today you\'ll see individual DBT skills instead of the four modules.)</p>';
     body.innerHTML =
       '<p>This diary can track a lot of emotions, urges, skills, and daily check-ins. Most people only want a subset.</p>' +
       '<p>This quick walkthrough lets you pick which items are visible. You can change your mind any time with the pencil button at the top.</p>' +
-      '<p><strong>Nothing is permanent.</strong> Hiding an item just takes it off your daily form — it doesn\'t delete any existing data, and you can un-hide later.</p>' +
+      '<p><strong>Nothing is permanent.</strong> Hiding an item just takes it off your daily form. It doesn\'t delete any existing data, and you can un-hide later.</p>' +
       note;
   }
 
@@ -4328,16 +4355,37 @@ customElements.define('urge-row', UrgeRow);
       j = Math.max(0, Math.min(visible.length - 1, j));
       if (j === i) return;
       const id = visible[i];
+      // Remember where every row is, re-render, then slide each row from its old spot to its new one.
+      const before = new Map();
+      body.querySelectorAll('.wizard-order-row').forEach(r => before.set(r.dataset.id, r.getBoundingClientRect().top));
       order.splice(order.indexOf(id), 1);
       const rest = order.filter(x => visible.includes(x));
       const anchor = rest[j];
       order.splice(anchor === undefined ? order.length : order.indexOf(anchor), 0, id);
       renderWizardStep();
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const rows = [...document.querySelectorAll('#wizard-body .wizard-order-row')];
+      rows.forEach(r => {
+        const dy = (before.get(r.dataset.id) ?? r.getBoundingClientRect().top) - r.getBoundingClientRect().top;
+        if (!dy) return;
+        r.style.transition = 'none';
+        r.style.transform = `translateY(${dy}px)`;
+      });
+      void body.offsetHeight; // commit the start positions before animating
+      rows.forEach(r => {
+        r.style.transition = '';
+        r.style.transform = '';
+        if (r.dataset.id === id) {
+          r.classList.add('moved');
+          setTimeout(() => r.classList.remove('moved'), 700);
+        }
+      });
     };
     visible.forEach((id, i) => {
       const sec = SECTIONS.find(s => s.id === id);
       const row = document.createElement('div');
       row.className = 'wizard-order-row';
+      row.dataset.id = id;
       const name = document.createElement('span');
       name.className = 'wizard-order-name';
       name.textContent = sec.label;
@@ -4379,12 +4427,13 @@ customElements.define('urge-row', UrgeRow);
 
   function renderWizardCategories(body) {
     body.className = 'wizard-body';
-    wizardQuickAllNone(body, 'hiddenCategories', CATEGORIES.filter(c => c.section === 'daily').map(c => c.id));
+    wizardQuickAllNone(body, 'hiddenCategories', dailyCategories().map(c => c.id));
     const group = document.createElement('div');
     group.className = 'wizard-group';
-    CATEGORIES.filter(cat => cat.section === 'daily').forEach(cat => {
+    dailyCategories().forEach(cat => {
       const checked = !wizardDraft.hiddenCategories.includes(cat.id);
-      group.appendChild(wizardMakeItem(cat.label, cat.desc, checked, (on) => toggleWizardDraft('hiddenCategories', cat.id, on)));
+      group.appendChild(wizardMakeInfoItem(cat.label, checked, (on) => toggleWizardDraft('hiddenCategories', cat.id, on),
+        () => showInfoCard('Daily', cat.label, cat.desc)));
     });
     body.appendChild(group);
   }
@@ -4428,7 +4477,7 @@ customElements.define('urge-row', UrgeRow);
     intro.className = 'wizard-school-intro';
     const b = document.createElement('b'); b.textContent = tab.name;
     intro.appendChild(b);
-    intro.appendChild(document.createTextNode(' — ' + tab.desc));
+    intro.appendChild(document.createTextNode(': ' + tab.desc));
     body.appendChild(intro);
 
     const qa = document.createElement('div');
@@ -4440,16 +4489,7 @@ customElements.define('urge-row', UrgeRow);
       btn.addEventListener('click', () => { fn(); renderWizardStep(); });
       qa.appendChild(btn);
     };
-    const makeItem = (label, checked, onToggle, infoFn) => {
-      const item = wizardMakeItem(label, null, checked, onToggle);
-      const info = document.createElement('button');
-      info.className = 'wizard-item-info';
-      info.textContent = '?';
-      info.title = 'What is this?';
-      info.addEventListener('click', e => { e.stopPropagation(); infoFn(); });
-      item.appendChild(info);
-      return item;
-    };
+    const makeItem = wizardMakeInfoItem;
 
     if (tab.id === 'basics') {
       quick('All basics', () => { wizardDraft.hiddenCategories = wizardDraft.hiddenCategories.filter(id => !basics.some(c => c.id === id)); });
